@@ -40,18 +40,20 @@
   shapeEcReg <- st_read(paste(pathdir,"1-Input data/ICES_ecoregions/ICES_ecoregions_20171207_erase_ESRI.shp",sep="/"))
   
   # NEAFC region
-  NEAFCReg <- subset(shapeEcReg, Ecoregion %in% c("Oceanic Northeast Atlantic"))
+  NEAFCReg <- st_read(paste(pathdir,"1-Input data/NEAFC_regions.gpkg",sep="/"))
   
   # EUVME region
   EUVME    <- subset(shapeEcReg, Ecoregion %in% c("Bay of Biscay and the Iberian Coast","Celtic Seas",
-                                                    "Greater North Sea", "Azores"))
+                                                    "Greater North Sea", "Azores","Faroes",
+                                                  "Greenland Sea","Arctic Ocean","Icelandic Waters",
+                                                  "Barents Sea","Norwegian Sea","Oceanic Northeast Atlantic" ))
   EUVME   <- st_make_valid(EUVME)
-  EUVME <- st_union(EUVME)
+  #EUVME <- st_union(EUVME)
   shapeEEZ  <- st_read(paste(pathdir,"1-Input data/EEZ_land_union_v3_202003/EEZ_Land_v3_202030.shp",sep="/"))  # get southern part of Portugal/Spain
   EEZtip    <- subset(shapeEEZ,UNION %in% c("Portugal","Spain")) 
   subMed    <- subset(shapeEcReg, Ecoregion %in% c("Western Mediterranean Sea"))   # remove Med Sea part of EEZs
   EEZtip    <- st_difference(EEZtip,st_make_valid(subMed))
-  EUVME   <- st_union(EUVME, st_union(EEZtip))  # combine the areas
+  #EUVME   <- st_union(EUVME, st_union(EEZtip))  # combine the areas
   
 mfs <- leaflet() %>%
   #addTiles() %>%  # Add default OpenStreetMap map tiles
@@ -67,10 +69,12 @@ mfs <- leaflet() %>%
   addPolygons(data = VME_low, group = "VME index - low",
               stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,fillColor =   "#FDF100") %>%
   
-  addPolygons(data = EUVME, group = "EU/UK/Nor VME area",
+  addPolygons(data = EUVME, group = "ICES Atlantic Ecoregions",
               stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-  addPolygons(data = NEAFCReg, group = "NEAFC area I",
+  addPolygons(data = EEZtip, group = "southern tip",
               stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+  addPolygons(data = NEAFCReg, group = "NEAFC areas",
+              stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
   addPolygons(data = clos_neafc, group = "NEAFC closures",
               stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
   
@@ -78,7 +82,8 @@ mfs <- leaflet() %>%
   addLayersControl(
     overlayGroups = c("Sce1-O1",
                       "VME habitat","VME index - high",
-                      "VME index - medium","VME index - low","EU/UK/Nor VME area","NEAFC area I","NEAFC closures"),
+                      "VME index - medium","VME index - low","ICES Atlantic Ecoregions","southern tip",
+                      "NEAFC areas","NEAFC closures"),
     options = layersControlOptions(collapsed = FALSE)
   )
 

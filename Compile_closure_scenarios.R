@@ -1,6 +1,6 @@
 
 ##########################################################
-###### script to run ICES EUVME advice scenarios  #######
+###### script to run VME advice scenarios  #######
 ##########################################################
 
 ## set path to folder and specify username 
@@ -10,5 +10,19 @@
 
   
 ## install libraries
-  source(paste(pathdir,"Utilities/Libraries_ICESVME.R",sep="/"))  
+  source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
+  
+## download data sharepoint 
+  options(icesSharePoint.username = ices_username)   # set ices username
+  options(icesSharePoint.site = "/xxxx/")  # set the site 
+  spdir() # put password
+  
+  # double check that password is not stored on your computer, "Element not found" is okay 
+  keyring::key_delete("icesSharePoint", ices_username)
+  
+## run the scenarios / options
+  source(paste(pathdir,"Utilities/Scenario_1_option_1.R",sep="/"))  
+  
+  
+  
   

@@ -118,35 +118,45 @@
   }
   
   ttall <- rbind(tt1,tt2,tt3,tt4)
-
-## get 0.25 c-square grid to combine all data
-  load(paste(pathdir,"1-Input data/Region_0.25_csquare_grid.RData",sep="/"))
+  rm("tt1","tt2","tt3","tt4","bargrid")
   
+## get 0.25 c-square grid to combine all data
   uni_cquare <- subset(ttall,ttall$buffer == 100 | ttall$buffer_low == 100)
   uni_cquare <- c(unique(uni_cquare$csquares),VME_high$csquares,VME_low$csquares)
   uni_cquare <- unique(uni_cquare)
   
-  # select all quarter grids that are important
-  quar_grid <- subset(quar_grid,quar_grid@data$csquares %in% uni_cquare)
+  # this file is too big - so added in a loop (warnings are okay)
+  nam <- c("south","north1","north2","north3","north4")
+
+  for (iGrid in 1:5){
+    load(paste(pathdir,paste(paste("1-Input data/Region_0.25_csquare_grid",nam[iGrid],sep="_"),".RData",sep=""),sep="/"))
   
-  # get all quarter c-sq with buffer based on longitude - latitude
-  quar_grid <- cbind(quar_grid, ttall[match(quar_grid@data$uni,ttall$coords), c("buffer","buffer_low")])
-  
-  # add all VMEs (habitat + high/medium) cells based on c-sq id
-  quar_grid <- cbind(quar_grid, VME_high[match(quar_grid@data$csquares,VME_high$csquares), c("VME_Class")])
-  colnames(quar_grid@data)[ncol(quar_grid@data)] <- "VME"
-  
-  # add all selected VME low cells based on c-sq id
-  quar_grid <- cbind(quar_grid, VME_low[match(quar_grid@data$csquares,VME_low$csquares), c("VME_Class")])
-  colnames(quar_grid@data)[ncol(quar_grid@data)]  <- "VME_low"
-  
-# now get all grid cells that should be closed
-  quar_grid@data$summing <- rowSums(quar_grid@data[,c("buffer","buffer_low","VME","VME_low")],na.rm = T) 
-  sce11 <- subset(quar_grid,quar_grid@data$summing > 0)
-  
+    # select all quarter grids that are important
+    quar_grid <- subset(quar_grid,quar_grid@data$csquares %in% uni_cquare)
+    
+    # get all quarter c-sq with buffer based on longitude - latitude
+    quar_grid <- cbind(quar_grid, ttall[match(quar_grid@data$uni,ttall$coords), c("buffer","buffer_low")])
+    
+    # add all VMEs (habitat + high/medium) cells based on c-sq id
+    quar_grid <- cbind(quar_grid, VME_high[match(quar_grid@data$csquares,VME_high$csquares), c("VME_Class")])
+    colnames(quar_grid@data)[ncol(quar_grid@data)] <- "VME"
+    
+    # add all selected VME low cells based on c-sq id
+    quar_grid <- cbind(quar_grid, VME_low[match(quar_grid@data$csquares,VME_low$csquares), c("VME_Class")])
+    colnames(quar_grid@data)[ncol(quar_grid@data)]  <- "VME_low"
+    
+  # now get all grid cells that should be closed 
+    quar_grid@data$summing <- rowSums(quar_grid@data[,c("buffer","buffer_low","VME","VME_low")],na.rm = T) 
+    sce11 <- subset(quar_grid,quar_grid@data$summing > 0)
+    sce11 <- spTransform(sce11, CRS("+init=epsg:4326"))
+    assign(nam[iGrid],sce11)  
+  }
+    
 # save 0.25 c-sq output
+  sce11 <- rbind(north1,north2,north3,north4,south)
   sce11 <- sce11[,-1]
   rownames(sce11) <- NULL
+  sce11 <- sce11[!(duplicated(sce11@data$uni)),]
   save(sce11,file=paste(pathdir,"2-Data processing/sce11_quarter_csq_grid.RData",sep="/"))
   
 ## fill holes
