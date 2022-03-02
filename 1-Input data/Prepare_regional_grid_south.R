@@ -106,3 +106,15 @@
 
   save(bargrid, file = paste(pathdir,"1-Input data/Region_csquare_grid_south.RData",sep="/"))
   
+# combine both North and South
+  
+  ## double click on north grid
+  #bargrid1 <- bargrid
+  
+  ## double click on south grid
+  # bargrid <- rbind(bargrid1,bargrid)
+  # bargrid <- bargrid[!(duplicated(bargrid@data$csquares)), ]
+  # pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice"
+  # save(bargrid, file = paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))
+  
+  
