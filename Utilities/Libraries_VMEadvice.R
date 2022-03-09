@@ -3,7 +3,7 @@
 
 # ICES libraries
 #remotes::install_github("ices-tools-prod/icesSharePoint")
-library(icesSharePoint)
+# library(icesSharePoint), only needed to link to sharepoint
 
 # devtools::install_github("ices-tools-prod/icesVMS")
 # library(icesVMS), only needed to download VMS data from ICES data centre (data product is on sharepoint) 

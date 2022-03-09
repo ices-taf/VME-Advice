@@ -12,10 +12,16 @@
 ## install libraries
   source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
   
-## download data sharepoint 
+## download data sharepoint -- run only once
   options(icesSharePoint.username = ices_username)   # set ices username
-  options(icesSharePoint.site = "/xxxx/")  # set the site 
-  spdir() # put password
+  setspsite("/ExpertGroups/benchmarks/2022/WKVMEBM")
+  spdir("2021_Meeting_Documents") # put password
+  source("...")
+  fnames <- spfiles("06. Data/Fisheries and benthic state", full = TRUE)
+  for (fname in fnames) {
+    spgetfile(fname, destdir = pathdir_nogit)
+  }
+  
   
   # double check that password is not stored on your computer, "Element not found" is okay 
   keyring::key_delete("icesSharePoint", ices_username)
