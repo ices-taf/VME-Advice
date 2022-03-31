@@ -2,30 +2,25 @@
 ## make a leaflet map - for now quick and easy 
 ######
 
-# load area
-  load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
+# load footprint workspace
+  load(paste(pathdir,"2-Data processing/Footprint_workspace.RData",sep="/"))  
 
-# add VMEs
+# load closures workspace
+  load(paste(pathdir,"2-Data processing/Closures_workspace.RData",sep="/"))  
+  
+# get VME - csquare
   VME <- read.csv(paste(pathdir_nogit,
                         "VME data repository/VME observations and csquares/VME_csquares_datacall_2020.csv",sep="/"),
                   header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
   VME <- VME[,-1]
 
-# create VME spatial grid
+  # create VME spatial grid
+  load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
   VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
   VMEgrid       <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
   colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
   VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
-
-# get scenario as sp object
-  closedir <- paste(pathdir,"2-Data processing",sep="/")
-  scedat <- c("Scenario1_option1","Scenario1_option2","Scenario2_option1","Scenario2_option2")
-  sce <- 1
-  scen <- st_read(paste(closedir,paste(scedat[sce],"shp",sep="."),sep="/"))
-  scen <- as_Spatial(scen)
-  
-# add VMEs
   VME_habitat <- subset(VMEgrid,VMEgrid@data$VME_Class == 3)
   VME_high    <- subset(VMEgrid,VMEgrid@data$VME_Class == 2)
   VME_medium  <- subset(VMEgrid,VMEgrid@data$VME_Class == 1)

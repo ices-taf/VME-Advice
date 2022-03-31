@@ -1,15 +1,18 @@
-
 ### scenario 1 -- option 2
-
   load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/")) 
 
 # load VME observations
-  VMEobs <- read.csv(paste(pathdir_nogit,
-                         "VME data repository/VME observations and csquares/VME_observations_datacall_2019.csv",sep="/"),
+  VMEobs <- read.csv(paste(pathdir_nogit,paste(
+                         "VME data repository/VME observations and csquares/VME_observations_datacall_",
+                         datacallyear,".csv",sep=""),sep="/"),
                    header=T,sep=",",row.names = NULL)
   
+  # get all in ICES area
   VMEobs <- subset(VMEobs,VMEobs$StartLongitude > -20)
   
+  # get all presences
+  VMEobs <- subset(VMEobs,!(VMEobs$VME_Indicator =="NULL" & VMEobs$HabitatType =="NULL")) 
+
 # create polypoints based on the middle lat and long
   data <- data.frame(VMEid =VMEobs$ï..ICES_ID,
                      VME_longitude = VMEobs$MiddleLongitude,
@@ -61,9 +64,9 @@
 # unless the VMEs are isolated c-squares
 
 # add VMEs
-  VME <- read.csv(paste(pathdir_nogit,
-                        "VME data repository/VME observations and csquares/VME_csquares_datacall_2020.csv",sep="/"),
-                  header=T,sep=",",row.names = NULL)
+  VME <- read.csv(paste(pathdir_nogit,paste(
+                        "VME data repository/VME observations and csquares/VME_csquares_datacall_",
+                        datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
   VME <- VME[,-1]
   VME <-  cbind(VME, bargrid@data[match(VME$CSquare,bargrid@data$csquares), c("long","lat")])
@@ -263,17 +266,34 @@
   reg <- spTransform(reg, CRS( "+init=epsg:3347" ) ) 
   reg <- gBuffer(reg,width=0.0001)
   reg <- spTransform( reg, CRS("+init=epsg:4326")  )
-  
   reg   <- st_as_sf(reg)
-  reg   <- st_make_valid(reg) 
-  area_thresh <- units::set_units(50, km^2) # this should be 2 c-sq (but mininum size of c-sq = 13, max = 25) -- problematic
-  reg_dropped <- fill_holes(reg, threshold = area_thresh)
+  reg   <- st_make_valid(reg)
+  reg  <- st_cast(reg,"POLYGON")
+  
+  # since size of area differs with latitude 
+  midlat  <- round(coordinates(as_Spatial(reg))[,2]) # get midpoint
+  load(paste(pathdir,"Utilities/Gridsize_csquare_latitude.RData",sep="/")) # get size of c-sq per latitude
+  midlat <- cbind(midlat, gridsize[match(midlat,gridsize$latitude), c(2)])  # combine
+  colnames(midlat)[2] <- "area_km2" 
+  
+  # estimate threshold size - this should be 2 c-sq  
+  # multiply with 2.2 as mid-point and upper latitudinal boundary of each polygon may vary
+  area_thresh <- units::set_units(midlat[,2]*2.2, km^2) 
+  
+  # check for holes
+  reg_dropped <- fill_holes(reg[1,], threshold = area_thresh[1]) # fill first 
+  
+  for (iclos in 2:length(area_thresh)){
+    reg_fill <- fill_holes(reg[iclos,], threshold = area_thresh[iclos]) # and all others
+    reg_dropped <- rbind(reg_dropped,reg_fill)
+  }
   
   # write to shp file
   reg_dropped <- st_set_precision(reg_dropped,precision = 10000)
-  clos12 <- st_cast(reg_dropped,"POLYGON")
+  clos12 <- reg_dropped
   clos12$id <- 1:nrow(clos12) 
   write_sf(clos12, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Scenario1_option2.shp"))
   
   # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit")))
+  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear")))
+  

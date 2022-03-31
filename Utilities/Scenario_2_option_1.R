@@ -1,9 +1,8 @@
 
-### scenario 1 -- option 1
-
+### scenario 2 -- option 1
   load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
 
-  # get all long x lat at 0.25 c-square format
+# get all long x lat at 0.25 c-square format
   tt <- bargrid@data
   tt$long <- round(tt$long, digits = 4)
   tt$lat <- round(tt$lat, digits = 4)
@@ -28,8 +27,8 @@
 
 # add VMEs
   VME <- read.csv(paste(pathdir_nogit,paste(
-                  "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-                  datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+    "VME data repository/VME observations and csquares/VME_csquares_datacall_",
+    datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
   VME <- VME[,-1]
   
@@ -38,9 +37,21 @@
   VMEgrid       <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
   colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
   VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
+  
+  # get vms data
+  vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear,".rds",sep=""),sep="/"))  
+  nam <- c(paste("SAR_total",refyear,sep="_"))
+  indexcol <- which(names(vmsreg) %in% nam) 
+  vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
 
-  # and select all habitat + index high and medium
-  VME_high      <- VMEgrid@data[VMEgrid@data$VME_Class %in% c(3,2,1),]
+  # add to grid
+  VMEgrid <- cbind(VMEgrid, vmsreg[match(VMEgrid@data$csquares,vmsreg$c_square), c("SAR")])
+  colnames(VMEgrid@data)[ncol(VMEgrid@data)] <- "SAR" 
+  VMEgrid@data$SAR[is.na(VMEgrid@data$SAR)] <- 0
+  VMEgrid@data$VME_Class[VMEgrid@data$VME_Class == 0 & VMEgrid@data$SAR < SAR_threshold] <- 5 # low index with low SAR
+  
+  # and select all habitat + index high and medium + low index with low SAR
+  VME_high      <- VMEgrid@data[VMEgrid@data$VME_Class %in% c(3,2,1,5),]
   VME_high$long <- round(VME_high$long, digits = 3)
   VME_high$lat  <- round(VME_high$lat, digits = 3)
   
@@ -119,7 +130,7 @@
   
   ttall <- rbind(tt1,tt2,tt3,tt4)
   rm("tt1","tt2","tt3","tt4","bargrid")
-  
+
 # get 0.25 c-square grid to combine all data
   uni_cquare <- subset(ttall,ttall$buffer == 100 | ttall$buffer_low == 100)
   uni_cquare <- c(unique(uni_cquare$csquares),VME_high$csquares,VME_low$csquares)
@@ -127,10 +138,10 @@
   
   # this file is too big - so added in a loop (warnings are okay)
   nam <- c("south","north1","north2","north3","north4")
-
+  
   for (iGrid in 1:5){
     load(paste(pathdir,paste(paste("1-Input data/Region_0.25_csquare_grid",nam[iGrid],sep="_"),".RData",sep=""),sep="/"))
-  
+    
     # select all quarter grids that are important
     quar_grid <- subset(quar_grid,quar_grid@data$csquares %in% uni_cquare)
     
@@ -145,23 +156,23 @@
     quar_grid <- cbind(quar_grid, VME_low[match(quar_grid@data$csquares,VME_low$csquares), c("VME_Class")])
     colnames(quar_grid@data)[ncol(quar_grid@data)]  <- "VME_low"
     
-  # now get all grid cells that should be closed 
+    # now get all grid cells that should be closed 
     quar_grid@data$summing <- rowSums(quar_grid@data[,c("buffer","buffer_low","VME","VME_low")],na.rm = T) 
-    sce11 <- subset(quar_grid,quar_grid@data$summing > 0)
-    sce11 <- spTransform(sce11, CRS("+init=epsg:4326"))
-    assign(nam[iGrid],sce11)  
+    sce21 <- subset(quar_grid,quar_grid@data$summing > 0)
+    sce21 <- spTransform(sce21, CRS("+init=epsg:4326"))
+    assign(nam[iGrid],sce21)  
   }
-    
-# save 0.25 c-sq output
-  sce11 <- rbind(north1,north2,north3,north4,south)
-  sce11 <- sce11[,-1]
-  rownames(sce11) <- NULL
-  sce11 <- sce11[!(duplicated(sce11@data$uni)),]
-  save(sce11,file=paste(pathdir,"2-Data processing/sce11_quarter_csq_grid.RData",sep="/"))
   
+  # save 0.25 c-sq output
+  sce21 <- rbind(north1,north2,north3,north4,south)
+  sce21 <- sce21[,-1]
+  rownames(sce21) <- NULL
+  sce21 <- sce21[!(duplicated(sce21@data$uni)),]
+  save(sce21,file=paste(pathdir,"2-Data processing/sce21_quarter_csq_grid.RData",sep="/"))  
+
 # fill holes
-  sce11$summing <-  1
-  tt <- unionSpatialPolygons(sce11,sce11$summing)
+  sce21$summing <-  1
+  tt <- unionSpatialPolygons(sce21,sce21$summing)
   reg <- gUnaryUnion(tt)
   
   # add gbuffer to make sure that filling holes works
@@ -189,12 +200,13 @@
     reg_fill <- fill_holes(reg[iclos,], threshold = area_thresh[iclos]) # and all others
     reg_dropped <- rbind(reg_dropped,reg_fill)
   }
-    
-# write to shp file
+  
+  # write to shp file
   reg_dropped <- st_set_precision(reg_dropped,precision = 10000)
-  clos11 <- reg_dropped
-  clos11$id <- 1:nrow(clos11) 
-  write_sf(clos11, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Scenario1_option1.shp"))
+  clos21 <- reg_dropped
+  clos21$id <- 1:nrow(clos21) 
+  write_sf(clos21, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Scenario2_option1.shp"))
   
 # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear")))
+  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear","refyear","SAR_threshold")))
+  
