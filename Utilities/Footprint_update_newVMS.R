@@ -24,18 +24,20 @@
   # get c-sq with mobile fishing
   nam_footprint      <- c(paste("SAR_total",refyear_footprint,sep="_"))
   indexcol_footprint <- which(names(vmsreg) %in% nam_footprint) 
-  vmsreg$mob         <- rowSums(vmsreg[indexcol_footprint])
+  vmsreg$mob         <- rowSums(vmsreg[indexcol_footprint],na.rm=T)
   vmsreg$mob[vmsreg$mob > 0] <- 1
+  vmsreg$mob[is.na(vmsreg$mob)] <- 0
   
   # get c-sq with static fishing  
   nam_footprint <- c(paste("Static",refyear_footprint,sep="_"))
   indexcol_footprint <- which(names(vmsreg) %in% nam_footprint) 
-  vmsreg$stat <- rowSums(vmsreg[indexcol_footprint])
+  vmsreg$stat <- rowSums(vmsreg[indexcol_footprint],na.rm=T)
   vmsreg$stat[vmsreg$stat > 0] <- 1
+  vmsreg$stat[is.na(vmsreg$stat)] <- 0
   
   # get c-sq with any fishing
   vmsreg$comb <- vmsreg$mob + vmsreg$stat
-  vmsreg$comb[vmsreg$comb>0] <- 1
+  vmsreg$comb[vmsreg$comb > 0] <- 1
   
 # combine with 400-800 region
   Reg_w <- cbind(Reg_w, vmsreg[match(Reg_w$csquares,vmsreg$c_square), c("mob","stat","comb")])

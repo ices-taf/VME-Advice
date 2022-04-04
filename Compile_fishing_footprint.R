@@ -25,5 +25,5 @@
   source(paste(pathdir,"Utilities/Footprint_update_newVMS.R",sep="/")) 
 
 # save footprint workspace
-  save.image(file = "2-Data processing/Footprint_workspace.RData")
+  save.image(file = paste(pathdir,"2-Data processing/Footprint_workspace.RData",sep="/"))
   

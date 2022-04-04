@@ -1,0 +1,75 @@
+---
+title: "Vulnerable marine ecosystem assessment"
+author: "ICES"
+date: "April 2022"
+output: html_document
+
+
+chunk_output_type: console
+#runtime: shiny
+
+---
+<style>
+.html-widget {
+    margin: auto;
+
+}
+</style>
+
+
+<style type="text/css">
+  body{
+  font-size: 11pt;
+  font-family: times, serif;
+  text-align: justify;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice"
+pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" # stores the VMS and VME data from sharepoint
+  
+source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
+  
+# load the workspace with all layers
+load(paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))  
+
+# set the ecoregion of interest
+  subreg <- subset(ICESEcReg,ICESEcReg$Ecoregion =="Celtic Seas")
+  scen11 <- st_intersection(scen11,subreg)
+  scen12 <- st_intersection(scen12,subreg)
+  scen21 <- st_intersection(scen21,subreg)
+  scen22 <- st_intersection(scen22,subreg)
+  shapeEEZ <- st_intersection(shapeEEZ,subreg)
+  EUFootp <- st_intersection(EUFootp,subreg)
+  EUFootp_mob <- st_intersection(EUFootp_mob,subreg)
+  EUFootp_stat <- st_intersection(EUFootp_stat,subreg)
+  Footprint_both <- st_intersection(Footprint_both,subreg)
+  Footprint_mobile <- st_intersection(Footprint_mobile,subreg)
+  Footprint_static <- st_intersection(Footprint_static,subreg)
+  NEAFCFootp <- st_intersection(NEAFCFootp,subreg)
+  NEAFCReg <- st_intersection(NEAFCReg,subreg)
+  clos_EU <- st_make_valid(clos_EU)
+  clos_EU <- st_intersection(clos_EU,subreg)
+  clos_neafc <- st_intersection(clos_neafc,subreg)
+  VMEgrid_new <- st_intersection(VMEgrid_new,subreg)
+  VMEgrid_old <- st_intersection(VMEgrid_old,subreg)
+  Elements <- st_intersection(Elements,subreg)
+  Reg_depth <- st_intersection(Reg_depth,subreg)
+
+```
+**Available evidence on the occurrence of Vulnerable marine ecosystems (VMEs), fishing activity in relation to VMEs, and spatial management options to minimise the risk from fishing activities to VMEs**
+
+#  {.tabset .tabset-fade .tabset-pills}
+
+## Celtic Seas {.tabset}
+```{r add-to-main, child = 'C:/Users/danie/Documents/Online for git/VME-Advice/Utilities/rmarkdown_CelticS.Rmd'}
+```
+
+## Bay of Biscay and the Iberian Coast {.tabset}
+
+## NEAFC Reykjanes Ridge {.tabset}
+
+# {-}

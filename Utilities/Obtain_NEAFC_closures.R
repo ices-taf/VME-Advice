@@ -2,7 +2,7 @@
 # load current NEAFC closures 
 # https://www.neafc.org/closures/coordinates --> downloaded 21 Feb 2022 
 
-NEAFC1_dir <- paste(pathdir,"1-Input data/NEAFC closures/mid-atlantic-vme-closures",sep="/")
+NEAFC1_dir <- paste(pathdir,"1-Input data/NEAFC_closures/mid-atlantic-vme-closures",sep="/")
 
 shape1  <- st_read(paste(NEAFC1_dir,"altair.shp",sep="/"), crs = 4326)
 shape2  <- st_read(paste(NEAFC1_dir,"antialtair.shp",sep="/"), crs = 4326)
@@ -19,7 +19,7 @@ clos1  <- st_cast(clos1,"POLYGON")
 clos1  <- st_make_valid(clos1)
 
 # 
-NEAFC2_dir <- paste(pathdir,"1-Input data/NEAFC closures/hr_shape_files_2018",sep="/")
+NEAFC2_dir <- paste(pathdir,"1-Input data/NEAFC_closures/hr_shape_files_2018",sep="/")
 
 shape1  <- st_read(paste(NEAFC2_dir,"f_hattonbank1.shp",sep="/"), crs = 4326)  
 shape2  <- st_read(paste(NEAFC2_dir,"g_nw_rockall.shp",sep="/"), crs = 4326) ; shape2 <- st_make_valid(shape2)
@@ -45,7 +45,7 @@ clos2  <- st_cast(clos2,"POLYGON")
 clos2  <- st_make_valid(clos2)
 
 #
-NEAFC3_dir <- paste(pathdir,"1-Input data/NEAFC closures/IrmingerSeaClosure-shapefiles",sep="/")
+NEAFC3_dir <- paste(pathdir,"1-Input data/NEAFC_closures/IrmingerSeaClosure-shapefiles",sep="/")
 clos3  <- st_read(paste(NEAFC3_dir,"RedfishClosure.shp",sep="/"), crs = 4326)  
 clos3  <- st_make_valid(clos3)
 

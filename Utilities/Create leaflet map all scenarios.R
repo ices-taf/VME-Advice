@@ -1,88 +1,240 @@
-######
-## make a leaflet map - for now quick and easy 
-######
+####################################################################
+#### make the two leaflet maps - based on the scientific template ####
+####################################################################
 
 # load footprint workspace
-  load(paste(pathdir,"2-Data processing/Footprint_workspace.RData",sep="/"))  
+  load(paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))  
 
-# load closures workspace
-  load(paste(pathdir,"2-Data processing/Closures_workspace.RData",sep="/"))  
-  
-# get VME - csquare
-  VME <- read.csv(paste(pathdir_nogit,
-                        "VME data repository/VME observations and csquares/VME_csquares_datacall_2020.csv",sep="/"),
-                  header=T,sep=",",row.names = NULL)
-  VME <- as.data.frame(VME)
-  VME <- VME[,-1]
+# select all new c-squares
+# does this work when c-squares are being removed? / if updated it works!
+  VMEgrid_old$uni  <- paste(VMEgrid_old$csquares,VMEgrid_old$VME_Class)  
+  VMEgrid_new$uni  <- paste(VMEgrid_new$csquares,VMEgrid_new$VME_Class)
+  VMEgrid_new      <- VMEgrid_new[!(VMEgrid_new$uni %in% VMEgrid_old$uni ),]
 
-  # create VME spatial grid
-  load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
-  VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
-  VMEgrid       <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
-  colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
-  VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
-  VME_habitat <- subset(VMEgrid,VMEgrid@data$VME_Class == 3)
-  VME_high    <- subset(VMEgrid,VMEgrid@data$VME_Class == 2)
-  VME_medium  <- subset(VMEgrid,VMEgrid@data$VME_Class == 1)
-  VME_low     <- subset(VMEgrid,VMEgrid@data$VME_Class == 0)
+  
+# names for the leaflet
+  nam <- c("ICES Atlantic Ecoregions","EEZ", "NEAFC areas",
+           "Depths 400-800 (prelim.)", "NEAFC closures",
+           "EU VME clos. (prelim.)","Existing VME C-sq.",
+           "New/updated VME C-sq.","NEAFC fishing areas",
+           "EU fishing areas (prelim.)","Updated footprint (static + mobile)",
+           "Static EU footprint","Update static footprint",
+           "Mobile EU footprint","Update mobile footprint",
+           "VME physical elements","New VME physical elements (prelim.)")
 
-# create polygon of the area
+# Create colour palette for VMEs
+  VMEcolours <- c("#2E8AC6","#F40000","#F67E11","#FDF100")
+  VMEpal <- colorFactor(VMEcolours, VMEgrid_old$VME_Class_Lab)  
   
-  # load current NEAFC closures
-  source(paste(pathdir,"Utilities/Obtain_NEAFC_closures.R",sep="/"))
+  # set region
+  mxt <- st_bbox(ICESEcReg)
   
-  # EUVME area of interest --> NS, CS, BoBIC, Azores, Oceanic NE Atlantic
-  shapeEcReg <- st_read(paste(pathdir,"1-Input data/ICES_ecoregions/ICES_ecoregions_20171207_erase_ESRI.shp",sep="/"))
+# 
+  mfs <- leaflet() %>%
+    fitBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]-20) %>%
+    addProviderTiles(providers$Esri.WorldImagery) %>%
+   # boundaries
+    #addPolygons(data = ICESEcReg, group = nam[1],
+    #            stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = NEAFCReg, group = nam[3],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = Reg_depth, group = nam[4],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    
+    # existing closures
+    addPolygons(data = clos_neafc, group = nam[5],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    
+    addPolygons(data = clos_EU, group = nam[6],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color =  "white") %>%
   
-  # NEAFC region
-  NEAFCReg <- st_read(paste(pathdir,"1-Input data/NEAFC_regions.gpkg",sep="/"))
-  
-  # EUVME region
-  EUVME    <- subset(shapeEcReg, Ecoregion %in% c("Bay of Biscay and the Iberian Coast","Celtic Seas",
-                                                    "Greater North Sea", "Azores","Faroes",
-                                                  "Greenland Sea","Arctic Ocean","Icelandic Waters",
-                                                  "Barents Sea","Norwegian Sea","Oceanic Northeast Atlantic" ))
-  EUVME   <- st_make_valid(EUVME)
-  #EUVME <- st_union(EUVME)
-  shapeEEZ  <- st_read(paste(pathdir,"1-Input data/EEZ_land_union_v3_202003/EEZ_Land_v3_202030.shp",sep="/"))  # get southern part of Portugal/Spain
-  EEZtip    <- subset(shapeEEZ,UNION %in% c("Portugal","Spain")) 
-  subMed    <- subset(shapeEcReg, Ecoregion %in% c("Western Mediterranean Sea"))   # remove Med Sea part of EEZs
-  EEZtip    <- st_difference(EEZtip,st_make_valid(subMed))
-  #EUVME   <- st_union(EUVME, st_union(EEZtip))  # combine the areas
-  
-mfs <- leaflet() %>%
-  #addTiles() %>%  # Add default OpenStreetMap map tiles
-  addProviderTiles(providers$Esri.WorldImagery) %>%
-  addPolygons(data = scen, group = "Sce1-O1",
-              stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5,fillColor =  "white") %>%
-  addPolygons(data = VME_habitat, group = "VME habitat",
-              stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,fillColor =  "#2E8AC6") %>%
-  addPolygons(data = VME_high, group = "VME index - high",
-              stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,fillColor =  "#F40000") %>%
-  addPolygons(data = VME_medium, group = "VME index - medium",
-              stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,fillColor =   "#F67E11") %>%
-  addPolygons(data = VME_low, group = "VME index - low",
-              stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,fillColor =   "#FDF100") %>%
-  
-  addPolygons(data = EUVME, group = "ICES Atlantic Ecoregions",
-              stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-  addPolygons(data = EEZtip, group = "southern tip",
-              stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-  addPolygons(data = NEAFCReg, group = "NEAFC areas",
-              stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
-  addPolygons(data = clos_neafc, group = "NEAFC closures",
-              stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-  
-  # Layers control
-  addLayersControl(
-    overlayGroups = c("Sce1-O1",
-                      "VME habitat","VME index - high",
-                      "VME index - medium","VME index - low","ICES Atlantic Ecoregions","southern tip",
-                      "NEAFC areas","NEAFC closures"),
-    options = layersControlOptions(collapsed = FALSE)
-  )
-
+    # existing VME c-sqs
+    addPolygons(data = VMEgrid_old, group = nam[7],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
+    
+    addPolygons(data = VMEgrid_new, group = nam[8],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
+    
+    addPolygons(data = NEAFCFootp, group = nam[9],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = EUFootp, group = nam[10],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_both, group = nam[11],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = EUFootp_stat, group = nam[12],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_static, group = nam[13],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = EUFootp_mob, group = nam[14],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_mobile, group = nam[15],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = Elements, group = nam[16],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Elements, group = nam[17],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addLegend(group = "VME Class",
+              position = "bottomright",
+              colors = VMEcolours, labels= levels(VMEgrid_old$VME_Class_Lab)) %>%
+    
+    # Layers control
+    addLayersControl(
+      overlayGroups = nam[2:17],
+      options = layersControlOptions(collapsed = FALSE))%>%
+    
+    # hide 
+    hideGroup(nam[8:17])
+    
+   
 # save output
-outdir <- paste(pathdir,"Output",sep="/") 
-setwd(outdir)
-saveWidget(mfs, file="Scenario1_option1.html")
+  outdir <- paste(pathdir,"Output",sep="/") 
+  setwd(outdir)
+  saveWidget(mfs, file="Leaflet map figure 1.html")
+
+#### figure 2
+  # names for the leaflet
+  nam <- c("ICES Atlantic Ecoregions","EEZ", "NEAFC areas",
+           "Depths 400-800 (prelim.)", "NEAFC closures",
+           "EU VME clos. (prelim.)","Proposed closures S1 O1",
+           "Proposed closures S1 O2","Proposed closures S2 O1",
+           "Proposed closures S2 O2","NEAFC fishing areas",
+           "EU fishing areas (prelim.)")
+  
+  # add information for scenario 1 option 1 closures
+  scen <- scen11
+  
+  # get all c-sq with closures old + new
+  VMEgrid <- subset(VMEgrid_old,!(VMEgrid_old$csquares %in% VMEgrid_new$csquares))
+  VMEgrid <- rbind(VMEgrid,VMEgrid_new)
+  
+  # Assign VME grid cells to closure
+  intVME <- st_join(VMEgrid,scen)
+  # Add area (m2)
+  intVME$aream2 <- st_area(intVME)
+  
+  # Create table with sum of the area in each VME category by closure
+  VMEareas <- intVME %>%
+    st_drop_geometry() %>%
+    filter(!is.na(id)) %>%
+    pivot_wider(id_cols = id,
+                names_from = VME_Class,
+                values_from = aream2,
+                values_fn = sum) %>%
+    mutate(across(2:5,~as.integer(.)))  %>%
+    mutate(across(everything(),~replace_na(.x, 0)))
+  
+  # Add the area to closure polygons attribute table
+  scen <- merge(scen,VMEareas,by='id')
+  # Calculate area of closure
+  scen$closureA <- st_area(scen)
+  # Calculate percent area of closure in each VME class
+  scen$pctHab <- round(100*(scen$`3`/scen$closureA))
+  scen$pctHigh <- round(100*(scen$`2`/scen$closureA))
+  scen$pctMed <- round(100*(scen$`1`/scen$closureA))
+  scen$pctLow <- round(100*(scen$`0`/scen$closureA))
+  
+  # 
+  mfs2 <- leaflet() %>%
+    fitBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]-20) %>%
+    addProviderTiles(providers$Esri.WorldImagery) %>%
+    addMapPane("scens", zIndex = 420) %>%
+    # boundaries
+    #addPolygons(data = ICESEcReg, group = nam[1],
+    #            stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = NEAFCReg, group = nam[3],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = Reg_depth, group = nam[4],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    
+    # existing closures
+    addPolygons(data = clos_neafc, group = nam[5],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    
+    addPolygons(data = clos_EU, group = nam[6],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color =  "white") %>%
+    
+    # potential closures
+    addPolygons(data = scen,
+                group = nam[7],
+                layerId = scen$id,
+                stroke = FALSE, 
+                fillOpacity = 0.5,
+                #smoothFactor = 0.5,
+                fillColor =  "white",
+                color = "transparent",
+                highlightOptions = highlightOptions(stroke='white',
+                                                    color = "white",
+                                                    fillOpacity = 1,
+                                                    weight = 2,),
+                popup = paste0("<b>Closure area: </b>", round(scen$closureA/1000000,1), " Km<sup>2</sup>",
+                               "<br><br><b>Proportion of VME:</b>",
+                               "<table>
+                                      <tr>
+                                      <th>Category</th>
+                                      <th>% of Area</th>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Habitat</td>
+                                      <td align='right'>", scen$pctHab, "</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - High</td>
+                                      <td align='right'>",scen$pctHigh,"</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - Mod</td>
+                                      <td align='right'>",scen$pctMed,"</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - Mod</td>
+                                      <td align='right'>",scen$pctLow,"</td>
+                                      </tr>
+                                      </table>"),
+                options = pathOptions(pane = "scens")) %>%
+    
+    #addPolygons(data = scen11, group=nam[7],
+    #            stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = scen12, group=nam[8],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "orange") %>%
+    addPolygons(data = scen21, group=nam[9],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "#bcbddc") %>%
+    addPolygons(data = scen22, group=nam[10],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "#c7e9c0") %>%
+    
+    # existing footprints
+    addPolygons(data = NEAFCFootp, group = nam[11],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = EUFootp, group = nam[12],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    # Layers control
+    addLayersControl(
+      overlayGroups = nam[2:12],
+      options = layersControlOptions(collapsed = FALSE)) %>%
+  
+  # hide 
+  hideGroup(nam[8:12])
+  
+  
+  # save output
+  outdir <- paste(pathdir,"Output",sep="/") 
+  setwd(outdir)
+  saveWidget(mfs2, file="Leaflet map figure 2.html")
+  
+  

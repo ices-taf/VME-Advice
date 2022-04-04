@@ -47,9 +47,9 @@
   VMEgrid <- cbind(VMEgrid, vmsreg[match(VMEgrid@data$csquares,vmsreg$c_square), c("SAR")])
   colnames(VMEgrid@data)[ncol(VMEgrid@data)] <- "SAR" 
   VMEgrid@data$SAR[is.na(VMEgrid@data$SAR)] <- 0
-  VMEgrid@data$VME_Class[VMEgrid@data$SAR < SAR_threshold] <- 5 # low SAR
+  VMEgrid@data$VME_Class[VMEgrid@data$SAR < SAR_threshold] <- 5     # low SAR
   
-  VME_high      <- VMEgrid@data[VMEgrid@data$VME_Class %in% c(5),] # select all with VMEclass "5"
+  VME_high      <- VMEgrid@data[VMEgrid@data$VME_Class %in% c(5),]  # select all with VMEclass "5"
   VME_high$long <- round(VME_high$long, digits = 3)
   VME_high$lat  <- round(VME_high$lat,  digits = 3)
   
@@ -81,7 +81,7 @@
   ttall <- rbind(tt1,tt2,tt3,tt4)
 
 # get 0.25 c-square grid to combine all data
-  uni_cquare <- subset(ttall,ttall$buffer == 100 | ttall$buffer_low == 100)
+  uni_cquare <- subset(ttall,ttall$buffer == 100)
   uni_cquare <- c(unique(uni_cquare$csquares),VME_high$csquares)
   uni_cquare <- unique(uni_cquare)
   
@@ -96,7 +96,7 @@
     
     # get all quarter c-sq with buffer based on longitude - latitude
     quar_grid <- cbind(quar_grid, ttall[match(quar_grid@data$uni,ttall$coords), c("buffer")])
-    colnames(quar_grid@data)[ncol(quar_grid@data)] <- "buffer"
+    colnames(quar_grid@data)[ncol(quar_grid@data)] <- "buffer" 
     
     # add all VMEs (habitat + high/medium) cells based on c-sq id
     quar_grid <- cbind(quar_grid, VME_high[match(quar_grid@data$csquares,VME_high$csquares), c("VME_Class")])

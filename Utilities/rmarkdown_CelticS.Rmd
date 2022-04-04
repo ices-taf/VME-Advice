@@ -1,0 +1,314 @@
+
+### Summary {.tabset } 
+
+Within the Celtic Seas ecoregion, the ICES VME database contains 3,091 records for VME habitats and 9,278 records for VME indicators (as of March 2022). This information has been collected through various gear types and survey methods. The fishery closure scenarios for VME protection are based on the method described in the ACOM technical guidelines based on WKVMEBM (ICES 2022).
+
+Bottom fishing (static and mobile) is the single most important human-induced pressure on the seafloor in this area. Other important pressures are [XX], [YY] and [ZZ], but their occurrence and intensity [align with EO terminology?] is low compared to that of bottom fisheries (link to: ICES ecosystem overviews).
+
+For the purpose of this assessment, evidence of VME occurrence is aggregated at the scale of individual C-square cells where VME habitats or indicator taxa are assumed to be homogeneously distributed. Similarly, fishing effort information is aggregated at the scale of C-square cells to form the fishery footprint (FF) for mobile and static gear. The fishable domain is the total area in the 400-800m depth zone opened to bottom-contacting fishing activities in the ecoregion. It is defined as those C- square cells in which each individual cell with active fisheries has at least one neighbouring cell also with active fisheries between 2009-2011, excluding existing VME closures and other closures e.g. haddock box.
+
+
+### New VME and fishing data {.tabset } 
+
+* [p] new VME habitat and indicator records were submitted, and quality checked in the 2021 VME data call [ICES WGDEC 2021]. This resulted in [X] new VME Habitat and [Y] new VME indicator records distributed over [X] Habitat c-squares and [Y] Index c-squares ([X] index High, [Y] index Medium and [Z] index Low). 
+
+* [p] absence records were added to the VME database
+
+* The combined, static, or mobile fishing footprint within the 400-800m depth boundary did not change based on the VMS data call in 2021 
+
+* no new VME physical elements were added to the ecoregion
+
+* seafloor depths were updated with EmodNet Bathymetry (2020). This update did not result in any changes to the 400-800m deep sea access depth boundary. 
+
+#### Map of VMEs
+
+Existing VME closures, fishing footprint and VME c-square information
+
+```{r Build option map, include=FALSE}
+# select all new c-squares
+# does this work when c-squares are being removed? / if updated it works!
+  VMEgrid_old$uni  <- paste(VMEgrid_old$csquares,VMEgrid_old$VME_Class)  
+  VMEgrid_new$uni  <- paste(VMEgrid_new$csquares,VMEgrid_new$VME_Class)
+  VMEgrid_new      <- VMEgrid_new[!(VMEgrid_new$uni %in% VMEgrid_old$uni ),]
+
+  
+# names for the leaflet
+  nam <- c("ICES Ecoregion","EEZ", "NEAFC areas",
+           "Depths 400-800 (prelim.)", "NEAFC closures",
+           "EU VME clos. (prelim.)","Existing VME C-sq.",
+           "New/updated VME C-sq.","NEAFC fishing areas",
+           "EU fishing areas (prelim.)","Updated footprint (static + mobile)",
+           "Static EU footprint","Update static footprint",
+           "Mobile EU footprint","Update mobile footprint",
+           "VME physical elements","New VME physical elements (prelim.)")
+
+# Create colour palette for VMEs
+  VMEcolours <- c("#2E8AC6","#F40000","#F67E11","#FDF100")
+  VMEpal <- colorFactor(VMEcolours, VMEgrid_old$VME_Class_Lab)  
+  
+# set region
+  mxt <- st_bbox(subreg)
+  
+# 
+  mfs <- leaflet() %>%
+    fitBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]) %>%
+    #setMaxBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]) %>%
+    addProviderTiles(providers$Esri.WorldImagery) %>%
+   # boundaries
+    addPolygons(data = clos_neafc, group = nam[1],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = NEAFCReg, group = nam[3],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = Reg_depth, group = nam[4],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    
+    # existing closures
+    addPolygons(data = clos_neafc, group = nam[5],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    
+    addPolygons(data = clos_EU, group = nam[6],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color =  "white") %>%
+  
+    # existing VME c-sqs
+    addPolygons(data = VMEgrid_old, group = nam[7],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
+    
+    addPolygons(data = VMEgrid_new, group = nam[8],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
+    
+    addPolygons(data = NEAFCFootp, group = nam[9],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = EUFootp, group = nam[10],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_both, group = nam[11],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = EUFootp_stat, group = nam[12],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_static, group = nam[13],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = EUFootp_mob, group = nam[14],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Footprint_mobile, group = nam[15],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addPolygons(data = Elements, group = nam[16],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = Elements, group = nam[17],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
+    
+    addLegend(group = "VME Class",
+              position = "topright",
+              colors = VMEcolours, labels= levels(VMEgrid_old$VME_Class_Lab)) %>%
+    
+    # Layers control
+    addLayersControl(
+      overlayGroups = nam)%>%
+     
+    # hide 
+      hideGroup(nam[8:17])
+```
+
+```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
+ # knitr::include_graphics('C:/Users/danie/Desktop/VME draft/Figure 5.jpg')
+ # knitr::include_graphics('C:/Users/ad06/OneDrive - CEFAS/VME/ICES VME Benchmark/rmarkdown VMEs/VME draft/Figure 5.jpg')
+
+mfs
+
+
+```
+
+
+#### Overlap VME c-sqs and fishing 
+
+Summary table of new and cumulative VME evidence and overlap with static gear and/or mobile gear fishing footprint (FF) at the scale of C-square cells considered in the assessment. The cumulative c-square estimate is based on data submissions from 19XX-202X. 
+
+```{r echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
+  knitr::include_graphics('C:/Users/danie/Desktop/VME draft/Table 1.jpg')
+#knitr::include_graphics('C:/Users/ad06/OneDrive - CEFAS/VME/ICES VME Benchmark/rmarkdown VMEs/VME draft/Table 1.jpg')
+
+```
+### Closure options {.tabset } 
+
+* The new data submissions lead to several new closure proposals in the Celtic Seas ecoregion. The largest proposed changes are xxxx. 
+
+* The new closures will reduce the fishing footprint with x-x% (depending on the closure scenario). The proposed area closed is mainly fished with static/mobile bottom gears. 
+   
+
+#### Map of current and proposed closures
+
+Existing VME closures, and proposed closure options following the closure scenarios
+
+```{r Build option map2, include=FALSE}
+
+ nam <- c("ICES Ecoregion","EEZ", "NEAFC areas",
+           "Depths 400-800 (prelim.)", "NEAFC closures",
+           "EU VME clos. (prelim.)","Proposed closures S1 O1",
+           "Proposed closures S1 O2","Proposed closures S2 O1",
+           "Proposed closures S2 O2","NEAFC fishing areas",
+           "EU fishing areas (prelim.)")
+  
+  # add information for scenario 1 option 1 closures
+  scen <- scen11
+  
+  # get all c-sq with closures old + new
+  VMEgrid <- subset(VMEgrid_old,!(VMEgrid_old$csquares %in% VMEgrid_new$csquares))
+  VMEgrid <- rbind(VMEgrid,VMEgrid_new)
+  
+  # Assign VME grid cells to closure
+  intVME <- st_join(VMEgrid,scen)
+  # Add area (m2)
+  intVME$aream2 <- st_area(intVME)
+  
+  # Create table with sum of the area in each VME category by closure
+  VMEareas <- intVME %>%
+    st_drop_geometry() %>%
+    filter(!is.na(id)) %>%
+    pivot_wider(id_cols = id,
+                names_from = VME_Class,
+                values_from = aream2,
+                values_fn = sum) %>%
+    mutate(across(2:5,~as.integer(.)))  %>%
+    mutate(across(everything(),~replace_na(.x, 0)))
+  
+  # Add the area to closure polygons attribute table
+  scen <- merge(scen,VMEareas,by='id')
+  # Calculate area of closure
+  scen$closureA <- st_area(scen)
+  # Calculate percent area of closure in each VME class
+  scen$pctHab <- round(100*(scen$`3`/scen$closureA))
+  scen$pctHigh <- round(100*(scen$`2`/scen$closureA))
+  scen$pctMed <- round(100*(scen$`1`/scen$closureA))
+  scen$pctLow <- round(100*(scen$`0`/scen$closureA))
+  
+  # 
+  mfs2 <- leaflet() %>%
+    fitBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]) %>%
+    #setMaxBounds(mxt[[1]],mxt[[2]],mxt[[3]],mxt[[4]]) %>%
+    addProviderTiles(providers$Esri.WorldImagery) %>%
+    addMapPane("scens", zIndex = 420) %>%
+    # boundaries
+    addPolygons(data = clos_neafc, group = nam[1],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = NEAFCReg, group = nam[3],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = Reg_depth, group = nam[4],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    
+    # existing closures
+    addPolygons(data = clos_neafc, group = nam[5],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    
+    addPolygons(data = clos_EU, group = nam[6],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color =  "white") %>%
+    
+    # potential closures
+    addPolygons(data = scen,
+                group = nam[7],
+                layerId = scen$id,
+                stroke = FALSE, 
+                fillOpacity = 0.5,
+                #smoothFactor = 0.5,
+                fillColor =  "white",
+                color = "transparent",
+                highlightOptions = highlightOptions(stroke='white',
+                                                    color = "white",
+                                                    fillOpacity = 1,
+                                                    weight = 2,),
+                popup = paste0("<b>Closure area: </b>", round(scen$closureA/1000000,1), " Km<sup>2</sup>",
+                               "<br><br><b>Proportion of VME:</b>",
+                               "<table>
+                                      <tr>
+                                      <th>Category</th>
+                                      <th>% of Area</th>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Habitat</td>
+                                      <td align='right'>", scen$pctHab, "</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - High</td>
+                                      <td align='right'>",scen$pctHigh,"</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - Med</td>
+                                      <td align='right'>",scen$pctMed,"</td>
+                                      </tr>
+                                      <tr>
+                                      <td>VME Index - low</td>
+                                      <td align='right'>",scen$pctLow,"</td>
+                                      </tr>
+                                      </table>"),
+                options = pathOptions(pane = "scens")) %>%
+    
+    #addPolygons(data = scen11, group=nam[7],
+    #            stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = scen12, group=nam[8],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "orange") %>%
+    addPolygons(data = scen21, group=nam[9],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "#bcbddc") %>%
+    addPolygons(data = scen22, group=nam[10],
+                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "#c7e9c0") %>%
+    
+    # existing footprints
+    addPolygons(data = NEAFCFootp, group = nam[11],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    addPolygons(data = EUFootp, group = nam[12],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    # Layers control
+    addLayersControl(
+      overlayGroups = nam)%>%
+     
+    # hide 
+      hideGroup(nam[8:12])
+```
+
+```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
+ # knitr::include_graphics('C:/Users/danie/Desktop/VME draft/Figure 5.jpg')
+ # knitr::include_graphics('C:/Users/ad06/OneDrive - CEFAS/VME/ICES VME Benchmark/rmarkdown VMEs/VME draft/Figure 5.jpg')
+
+mfs2
+
+
+```
+
+#### Scenario outcomes and risks
+
+Summary table of scenario outcomes and associated risk to VMEs.
+```{r echo=FALSE, message=FALSE, out.width='70%',fig.align = 'center', fig.cap="** **"}
+  knitr::include_graphics('C:/Users/danie/Desktop/VME draft/Table 2.jpg')
+ # knitr::include_graphics('C:/Users/ad06/OneDrive - CEFAS/VME/ICES VME Benchmark/rmarkdown VMEs/VME draft/Table 2.jpg')
+
+```
+
+### Interpretation of results {.tabset } 
+
+Brief interpretation of results (max ½ page)  [A verbal reference to factors in ecology (realism), management and/or fishing practices which are important in understanding the indicated results and ranked closure options. Also if there are any noticable trendsm and if these changes are related to the specific locations or not. Special emphasis on certainty of data in terms of the VME index, elements, and other supporting information.
+
+Some limitations and caveats, listed in the more detailed online assessment sheet, should be taken into account when considering the advice. These relate to issues concerning the provision of vessel data and their interpretation, the scale at which the data are used and considered to be informative, and the information base used in the definition and evaluation of spatial closure scenarios.
+
+### Read me {.tabset } 
+
+* This scientific assessment of occurrence of Vulnerable marine ecosystems (VMEs), fishing activity in the vicinity of VMEs, as well as spatial management options for the Celtic Seas ecoregion consists of this assessment and a data product, consisting of spatial data layers (as shapefiles) of the fishing footprint, current VME closures and proposed closures based on the different scenarios/options. The spatial data layers are accompanied with a csv-file with the coordinates. Each closure csv-file also indicates the VME habitat, VME indicator and VME physical element data present in each closed area / proposed closed area, as well as the VME habitat and index C-squares. 
+
+* The scientific assessment of occurrence of Vulnerable marine ecosystems (VMEs) text should be read in conjunction with the interactive maps and can also be informed by the regional assessments. The limitations and caveats described above should be considered before using the data products. 
+
+* The data and scripts that produced the assessment sheet are available here: https://github.com/ices-taf/VME-Advice
+
+* The data product is [UU website].
+
+### Sources and references  {.tabset } 
