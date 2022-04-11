@@ -15,12 +15,19 @@
 # get data call year
  datacallyear      <- 2021
 
-# load VME closures
+# load VME polygons from last year
+ scen11_prev <- st_read(paste(pathdir,"1-Input data/2020_Scenarios_Options/Scenario1_option1.shp",sep="/"))
+ scen12_prev <- st_read(paste(pathdir,"1-Input data/2020_Scenarios_Options/Scenario1_option2.shp",sep="/"))
+ scen21_prev <- st_read(paste(pathdir,"1-Input data/2020_Scenarios_Options/Scenario2_option1.shp",sep="/"))
+ scen22_prev <- st_read(paste(pathdir,"1-Input data/2020_Scenarios_Options/Scenario2_option2.shp",sep="/"))
+
+# load VME polygons
  scen11 <- st_read(paste(pathdir,"2-Data processing/Scenario1_option1.shp",sep="/"))
  scen12 <- st_read(paste(pathdir,"2-Data processing/Scenario1_option2.shp",sep="/"))
  scen21 <- st_read(paste(pathdir,"2-Data processing/Scenario2_option1.shp",sep="/"))
  scen22 <- st_read(paste(pathdir,"2-Data processing/Scenario2_option2.shp",sep="/"))
-     
+ scen23 <- st_read(paste(pathdir,"2-Data processing/Scenario2_option3.shp",sep="/"))  
+   
 # load VME elements
  Bank       <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Bank.shp",sep="/"))
  Bank       <- st_make_valid(Bank)
@@ -33,17 +40,18 @@
  Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
      
 # clean and save workspace
- rm(list=setdiff(ls(), c("scen11" , "scen12","scen21","scen22","Elements",
-                         "pathdir","pathdir_nogit","datacallyear")))
+ rm(list=setdiff(ls(), c("scen11" , "scen12","scen21","scen22","scen23",
+                         "scen11_prev","scen12_prev","scen21_prev","scen22_prev",
+                         "Elements","pathdir","pathdir_nogit","datacallyear")))
  
 # load closure workspace
- load(paste(pathdir,"2-Data processing/Footprint_workspace.RData",sep="/"))
+ load(paste(pathdir,"2-Data processing/Fishing_workspace.RData",sep="/"))
  
-# load current NEAFC closures
+# load current NEAFC closures (warnings are okay)
  source(paste(pathdir,"Utilities/Obtain_NEAFC_closures.R",sep="/"))
  
 # load current EU closures Scenario 2 option 1
- clos_EU <- st_read(paste(pathdir,"1-Input data/EU_closures/EU_ICESS2O1.shp",sep="/"))
+ #clos_EU <- st_read(paste(pathdir,"1-Input data/EU_closures/EU_ICESS2O1.shp",sep="/"))
  
 # load existing VMEs datacallyear - 1
  VME <- read.csv(paste(pathdir_nogit,paste(
@@ -65,18 +73,6 @@
                 VME_Class==0  ~ "Low VME Index"), 
                 levels=c("VME Habitat","High VME Index","Med VME Index","Low VME Index")))
  
- 
- # create VME spatial grid
- #load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
- #VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
- #VMEgrid       <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
- #colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
- #VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
- #VME_habitat <- subset(VMEgrid,VMEgrid@data$VME_Class == 3)
- #VME_high    <- subset(VMEgrid,VMEgrid@data$VME_Class == 2)
- #VME_medium  <- subset(VMEgrid,VMEgrid@data$VME_Class == 1)
- #VME_low     <- subset(VMEgrid,VMEgrid@data$VME_Class == 0)
- 
 # load VMEs in datacallyear 
  VME <- read.csv(paste(pathdir_nogit,paste(
    "VME data repository/VME observations and csquares/VME_csquares_datacall_",
@@ -94,17 +90,6 @@
              VME_Class==1  ~ "Med VME Index" ,
              VME_Class==0  ~ "Low VME Index"), 
              levels=c("VME Habitat","High VME Index","Med VME Index","Low VME Index")))
- 
- # create VME spatial grid
- #load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
- #VMEgrid         <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
- #VMEgrid         <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
- #colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
- #VMEgrid         <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
- #VME_habitat_new <- subset(VMEgrid,VMEgrid@data$VME_Class == 3)
- #VME_high_new    <- subset(VMEgrid,VMEgrid@data$VME_Class == 2)
- #VME_medium_new  <- subset(VMEgrid,VMEgrid@data$VME_Class == 1)
- #VME_low_new     <- subset(VMEgrid,VMEgrid@data$VME_Class == 0)
  
  rm("VMEgrid","VME")
  
@@ -140,12 +125,15 @@
  Reg_w <- cbind(Reg_w,depth[match(Reg_w@data$csquares,depth$csquares),c("within")])
  colnames(Reg_w@data)[ncol(Reg_w@data)] <- "within"
  Reg_w <- subset(Reg_w,Reg_w@data$within == 1)
- Freg <- unionSpatialPolygons(Reg_w,Reg_w$within)
- Reg_w <- gUnaryUnion(Freg)
+ Reg_w <- raster::aggregate(Reg_w)
+ Reg_w <- gUnaryUnion(Reg_w)
  Reg_w   <- st_as_sf(Reg_w)
  Reg_depth <-  st_transform(Reg_w, "EPSG:4326")  
  
- rm("Reg_w","Freg","bargrid","IREG","depth","datacallyear","i")
+ rm("Reg_w","bargrid","IREG","depth","datacallyear","i")
+ 
+ # not used - only for new footprint request
+ rm("Footprint_both","Footprint_mobile","Footprint_static")
  
  save.image(file = paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))     
  
