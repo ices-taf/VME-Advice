@@ -35,28 +35,16 @@ tab1[18,3]    <- 0
 # now get per VME polygon option the new VME c-squares that are inside
 if (1 %in% reg$scen11){
   idx <- 3 #VME habitat
-  tt <- table(reg$cat[reg$scen11==1],reg$New_VMEs[reg$scen11==1] %in% idx)[,2]
-  tt <- rbind(tt,table(reg$cat[reg$scen12==1],reg$New_VMEs[reg$scen12==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen21==1],reg$New_VMEs[reg$scen21==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen22==1],reg$New_VMEs[reg$scen22==1] %in% idx)[,2])
-  tt <- rbind(tt,c("NA","NA","NA")) # S2O3 table(reg$cat[reg$scen23==1],reg$New_VMEs[reg$scen23==1] %in% idx)[,2]
-  tab1[3,4] <- toString(tt[,1]) ;tab1[4,4] <- toString(tt[,2]);tab1[5,4] <- toString(tt[,3])
+  tt <- matrix(table(reg$cat,reg$New_VMEs,reg$scen11))
+  tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen12)))
+  tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen21)))
+  tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen22)))
+  tt <- cbind(tt,rep(NA,nrow(tt))) #cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen23)))
+  tt <- rbind(tt[1:3,1:5],tt[4:6,1:5] + tt[7:9,1:5],tt[10:12,1:5])
   
-  idx <- c(2,1) #VME index medium + high 
-  tt <- table(reg$cat[reg$scen11==1],reg$New_VMEs[reg$scen11==1] %in% idx)[,2]
-  tt <- rbind(tt,table(reg$cat[reg$scen12==1],reg$New_VMEs[reg$scen12==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen21==1],reg$New_VMEs[reg$scen21==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen22==1],reg$New_VMEs[reg$scen22==1] %in% idx)[,2])
-  tt <- rbind(tt,c("NA","NA","NA")) # S2O3 table(reg$cat[reg$scen23==1],reg$New_VMEs[reg$scen23==1] %in% idx)[,2]
-  tab1[7,4] <- toString(tt[,1]) ;tab1[8,4] <- toString(tt[,2]);tab1[9,4] <- toString(tt[,3])
-  
-  idx <- 0 #VME index low
-  tt <- table(reg$cat[reg$scen11==1],reg$New_VMEs[reg$scen11==1] %in% idx)[,2]
-  tt <- rbind(tt,table(reg$cat[reg$scen12==1],reg$New_VMEs[reg$scen12==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen21==1],reg$New_VMEs[reg$scen21==1] %in% idx)[,2])
-  tt <- rbind(tt,table(reg$cat[reg$scen22==1],reg$New_VMEs[reg$scen22==1] %in% idx)[,2])
-  tt <- rbind(tt,c("NA","NA","NA")) # S2O3 table(reg$cat[reg$scen23==1],reg$New_VMEs[reg$scen23==1] %in% idx)[,2]
-  tab1[11,4] <- toString(tt[,1]) ;tab1[12,4] <- toString(tt[,2]);tab1[13,4] <- toString(tt[,3])
+  tab1[3,4] <- toString(tt[1,]) ;tab1[4,4] <- toString(tt[2,]);tab1[5,4] <- toString(tt[3,])
+  tab1[7,4] <- toString(tt[4,]) ;tab1[8,4] <- toString(tt[5,]);tab1[9,4] <- toString(tt[6,])
+  tab1[11,4] <- toString(tt[7,]) ;tab1[12,4] <- toString(tt[8,]);tab1[13,4] <- toString(tt[9,])
 }
 
 # now get overlap with fished area

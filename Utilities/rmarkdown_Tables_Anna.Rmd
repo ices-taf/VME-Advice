@@ -1,0 +1,71 @@
+---
+title: "Untitled"
+author: "D van Denderen"
+date: "4/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice" # folder to github
+pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" # folder to restricted data
+source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/")) # install libraries
+
+# set region: Azores, Bay of Biscay and the Iberian Coast, Celtic Seas, 
+#             Faroes, Icelandic Waters, North Sea and Norwegian Waters 
+#             (not yet for the other regions - Cecilia is working on depth data).  
+  Region_ID <- "Celtic Seas"
+
+# define fishable domain in table 2 - for now either EU or NEAFC 
+  FishD <- "EU"
+
+# set data call year
+  datacallyear <- 2021
+  newyear_fished <- (datacallyear-1):(datacallyear-3)
+  
+# table 2 might not work for some regions - no fishable domain (need to check)
+    
+```
+#  {.tabset .tabset-fade .tabset-pills}
+
+## Table 1 {.tabset}
+
+Table with summary of Celtic Seas new and cumulative VME evidence, with overlap of fishing activity. Total number of C-sqrs. in assessed area is 28315 (200-400m, 400-800m and >800m).
+```{r echo=FALSE, message=FALSE}
+  load(paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
+  reg  <- subset(table1,table1$Ecoregion == Region_ID)  
+  
+  #sum(table(reg$cat)) # get total assessed area - add to the table text
+  source(paste(pathdir,"Utilities/Compile_table1.R",sep="/"))
+  tab1[is.na(tab1)] <- ""
+  
+  kable(tab1 ) %>%
+    kable_styling(font_size=10)
+```
+
+## Table 2 {.tabset}
+Table with summary of scenario outcomes and associated risk to VMEs in Celtic Seas ecoregion in 2021
+
+```{r include=FALSE}
+
+  load(paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))   # load leaflet workspace
+  load(paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))    # load table1 data
+  source(paste(pathdir,"Utilities/Compile_table2.R",sep="/")) # warnings okay
+  tab2[is.na(tab2)] <- "" 
+  
+```  
+
+```{r echo=FALSE, message=FALSE}
+  tab2[5,2:6] <- NA
+  tab2[8,2:6] <- NA
+  tab2[10,2:6] <- NA
+
+  kable(tab2 ) %>%
+    kable_styling(font_size=10)
+```
+
