@@ -7,20 +7,23 @@
   Regiontab1 <- subset(table1, table1$Ecoregion == Region_ID)
   
 # get VME polygons in the region
-  scen11_R <- st_intersection(scen11,Region)
-  scen12_R <- st_intersection(scen12,Region)
-  scen21_R <- st_intersection(scen21,Region)
-  scen22_R <- st_intersection(scen22,Region)
-  scen23_R <- st_intersection(scen23,Region)
+  scen11_R <- st_make_valid(st_intersection(scen11,Region))
+  scen12_R <- st_make_valid(st_intersection(scen12,Region))
+  scen21_R <- st_make_valid(st_intersection(scen21,Region))
+  scen22_R <- st_make_valid(st_intersection(scen22,Region))
+  scen23_R <- st_make_valid(st_intersection(scen23,Region))
 
 # get fishable domain in the region
   Fishdom <- st_intersection(eval(parse(text = paste(FishD,"Footp",sep=""))),Region)
   Fishdom <- st_make_valid(Fishdom)
 
 # get fished area in the region
-  Mobile_fish <- st_intersection(New_mobile,Region) ; Mobile_fish <- st_make_valid(Mobile_fish)
-  Static_fish <- st_intersection(New_static,Region) ; Static_fish <- st_make_valid(Static_fish)
-
+  # Mobile_fish <- st_intersection(New_mobile,Region) ; Mobile_fish <- st_make_valid(Mobile_fish)
+  # Static_fish <- st_intersection(New_static,Region) ; Static_fish <- st_make_valid(Static_fish)
+  
+  Mobile_fish <- New_mobile ; Mobile_fish <- st_make_valid(Mobile_fish)
+  Static_fish <- New_static ; Static_fish <- st_make_valid(Static_fish)
+  
 # get fishing SAR in the region
   vmsreg          <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear,".rds",sep=""),sep="/"))  
   nam_fished      <- c(paste("SAR_total",newyear_fished,sep="_"))
@@ -68,18 +71,30 @@
   }
 
 # Number of VME polygons and their average areal extent (size)
-  tab2[6,2] <- paste(nrow(scen11_R)," (",round(mean(st_area(scen11_R)/10^6),digits=1)," km2)",sep="")
-  tab2[6,3] <- paste(nrow(scen12_R)," (",round(mean(st_area(scen12_R)/10^6),digits=1)," km2)",sep="")
-  tab2[6,4] <- paste(nrow(scen21_R)," (",round(mean(st_area(scen21_R)/10^6),digits=1)," km2)",sep="")
-  tab2[6,5] <- paste(nrow(scen22_R)," (",round(mean(st_area(scen22_R)/10^6),digits=1)," km2)",sep="")
-  tab2[6,6] <- paste(nrow(scen23_R)," (",round(mean(st_area(scen23_R)/10^6),digits=1)," km2)",sep="")
+  tab2[6,2] <- paste(nrow(scen11_R)," (",round(mean(st_area(scen11_R)/10^6),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[6,3] <- paste(nrow(scen12_R)," (",round(mean(st_area(scen12_R)/10^6),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[6,4] <- paste(nrow(scen21_R)," (",round(mean(st_area(scen21_R)/10^6),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[6,5] <- paste(nrow(scen22_R)," (",round(mean(st_area(scen22_R)/10^6),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[6,6] <- paste(nrow(scen23_R)," (",round(mean(st_area(scen23_R)/10^6),digits=1)," km<sup>2</sup>)",sep="")
 
-# Number of large VME polygons in upper 25th percentile of the size distribution
-  tab2[7,2] <- length(which(as.numeric(cumsum(sort(st_area(scen11_R)/10^6))/sum(st_area(scen11_R)/10^6))>0.75))
-  tab2[7,3] <- length(which(as.numeric(cumsum(sort(st_area(scen12_R)/10^6))/sum(st_area(scen12_R)/10^6))>0.75))
-  tab2[7,4] <- length(which(as.numeric(cumsum(sort(st_area(scen21_R)/10^6))/sum(st_area(scen21_R)/10^6))>0.75))
-  tab2[7,5] <- length(which(as.numeric(cumsum(sort(st_area(scen22_R)/10^6))/sum(st_area(scen22_R)/10^6))>0.75))
-  tab2[7,6] <- length(which(as.numeric(cumsum(sort(st_area(scen23_R)/10^6))/sum(st_area(scen23_R)/10^6))>0.75))
+# Number of large VME polygons in upper 25th percentile of the size distribution nd their average areal extent (size)
+  sc11areas <- sort(st_area(scen11_R)/10^6)
+  sc12areas <- sort(st_area(scen12_R)/10^6)
+  sc21areas <- sort(st_area(scen21_R)/10^6)
+  sc22areas <- sort(st_area(scen22_R)/10^6)
+  sc23areas <- sort(st_area(scen23_R)/10^6)
+  
+  sc11p25 <- which(as.numeric(cumsum(sort(st_area(scen11_R)/10^6))/sum(st_area(scen11_R)/10^6))>0.75)
+  sc12p25 <- which(as.numeric(cumsum(sort(st_area(scen12_R)/10^6))/sum(st_area(scen12_R)/10^6))>0.75)
+  sc21p25 <- which(as.numeric(cumsum(sort(st_area(scen21_R)/10^6))/sum(st_area(scen21_R)/10^6))>0.75)
+  sc22p25 <- which(as.numeric(cumsum(sort(st_area(scen22_R)/10^6))/sum(st_area(scen22_R)/10^6))>0.75)
+  sc23p25 <- which(as.numeric(cumsum(sort(st_area(scen23_R)/10^6))/sum(st_area(scen23_R)/10^6))>0.75)
+
+  tab2[7,2] <- paste(length(sc11p25)," (",round(mean(sc11areas[sc11p25]),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[7,3] <- paste(length(sc12p25)," (",round(mean(sc12areas[sc12p25]),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[7,4] <- paste(length(sc21p25)," (",round(mean(sc21areas[sc21p25]),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[7,5] <- paste(length(sc22p25)," (",round(mean(sc22areas[sc22p25]),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[7,6] <- paste(length(sc23p25)," (",round(mean(sc23areas[sc23p25]),digits=1)," km<sup>2</sup>)",sep="")
 
 # overlap between static fishing effort and vme polygons
 # not available
@@ -155,7 +170,7 @@
 tab2[,1] <- c("VME polygon description","","VME polygon outcomes","% of fishable domain identified as VME polygon",
               "% of VME polygon protected by existing VME fishery closures",
               "Number of VME polygons and their average areal extent (size)",
-              "Number of large VME polygons in upper 25th percentile of the size distribution",
+              "Number (and average size) of large VME polygons in upper 25<sup>th</sup> percentile of the size distribution",
               "Risk to VME","Fishery consequences",
               "% of [effort] per year by static gear (>200m depth) overlapping with VME polygons (average annual [effort] between 2018 to 2020)",
               "% of fished area (>200m depth) by static gear overlapping with VME polygons between 2018 to 2020",
