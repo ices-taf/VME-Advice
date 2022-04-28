@@ -4,6 +4,43 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r region subset,include=FALSE}
+
+# load the workspace with all layers
+  load(paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))
+
+# set the ecoregion of interest
+  subreg <- subset(ICESEcReg,ICESEcReg$Ecoregion == Region_ID)
+  scen11_prev <- st_intersection(st_make_valid(scen11_prev),subreg)
+  scen12_prev <- st_intersection(st_make_valid(scen12_prev),subreg)
+  scen21_prev <- st_intersection(st_make_valid(scen21_prev),subreg)
+  scen22_prev <- st_intersection(st_make_valid(scen22_prev),subreg)
+  scen11 <- st_intersection(st_make_valid(scen11),subreg)
+  scen12 <- st_intersection(scen12,subreg)
+  scen21 <- st_intersection(scen21,subreg)
+  scen22 <- st_intersection(scen22,subreg)
+  scen23 <-  st_intersection(st_make_valid(scen23),subreg)
+  shapeEEZ <- st_intersection(shapeEEZ,subreg)
+  EUFootp <- st_intersection(EUFootp,subreg)
+  Ref_comb <- st_intersection(Ref_comb,subreg)
+  Ref_mobile <- st_intersection(Ref_mobile,subreg)
+  Ref_static <- st_intersection(Ref_static,subreg)
+  New_comb <- st_intersection(New_comb,subreg)
+  New_mobile <- st_intersection(New_mobile,subreg)
+  New_static <- st_intersection(New_static,subreg)
+  NEAFCFootp <- st_intersection(NEAFCFootp,subreg)
+  NEAFCReg <- st_intersection(NEAFCReg,subreg)
+  clos_neafc <- st_intersection(clos_neafc,subreg)
+  VMEgrid_new <- st_intersection(VMEgrid_new,subreg)
+  VMEgrid_old <- st_intersection(VMEgrid_old,subreg)
+  Elements <- st_intersection(Elements,subreg)
+  Reg_depth <- st_intersection(Reg_depth,subreg)
+  
+  textreg   <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_ICESregions.xlsx",sep="/"),Region_ID_Excel)
+
+```
+
+
 ### Overview {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Overview")
@@ -183,22 +220,9 @@ Summary table of new and cumulative VME evidence and overlap with static gear an
   #sum(table(reg$cat)) # get total assessed area - add to the table text
   source(paste(pathdir,"Utilities/Compile_table1.R",sep="/"))
   tab1[is.na(tab1)] <- ""
-  
-  names(tab1) <-c('C1','C2','C3','C4','C5','C6','C7')
-  tab1 <- tab1[-1,]
-  tab1$C8 <- " "
-
-  tab1 <- tab1 %>% 
-            relocate(c('C5','C6','C7','C8'),.after = 'C2')  %>% 
-            separate(C4,c('S1O1',' S1O2', 'S2O1',' S2O2', 'S1O2'), sep=',')  %>% 
-            select(-S1O2)  %>% 
-            replace(is.na(.), '')
-  
-  # Temporary fix, this table needs checking!
-  tab1[14:17,8:11] <-0
 
   tab1  %>%
-    kable('html',escape = FALSE, align=c('l',rep('c',9)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'S1O1',' S1O2', 'S2O1',' S2O2')) %>%
+    kable('html',escape = FALSE, align=c('l',rep('c',11)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
     row_spec(c(1,5,9,13),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
@@ -208,9 +232,9 @@ Summary table of new and cumulative VME evidence and overlap with static gear an
     column_spec(3:5, width = "2.5cm") %>%
     column_spec(6, width = ".75cm") %>%
     column_spec(8:ncol(tab1), width = "1.2cm") %>%
-    add_header_above(c(" " = 1, "Assessed area" = 1,"Areas fished between 2018-2020" = 3," "=1, "Assessed area" = 1, "In defined VME polygons" = 4 ),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,'Total existing' = 4," "=1, 'New/updated in 2021'=5),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 10),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
+    add_header_above(c(" " = 1, "Assessed area" = 1,"Areas fished between 2018-2020" = 3," "=1, "Assessed area" = 1, "In defined VME polygons" = 5 ),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,'Total existing' = 4," "=1, 'New/updated in 2021'=6),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 
 ```
 ### VME polygon options {.tabset } 
@@ -256,8 +280,10 @@ Update of the VME polygons following the scenarios/options.
     pivot_wider(id_cols = id,
                 names_from = VME_Class,
                 values_from = aream2,
-                values_fn = sum) %>%
-    mutate(across(2:5,~as.integer(.)))  %>%
+                values_fn = sum)
+  
+  VMEareas <- VMEareas %>%
+    mutate(across(2:ncol(VMEareas),~as.integer(.)))  %>%
     mutate(across(everything(),~replace_na(.x, 0)))
   
   # Add the area to closure polygons attribute table
@@ -266,9 +292,9 @@ Update of the VME polygons following the scenarios/options.
   scen$closureA <- st_area(scen)
   # Calculate percent area of closure in each VME class
   scen$pctHab <- round(100*(scen$`3`/scen$closureA))
-  scen$pctHigh <- round(100*(scen$`2`/scen$closureA))
+  scen$pctHigh <- rep(0,nrow(scen)) #round(100*(scen$`2`/scen$closureA))
   scen$pctMed <- round(100*(scen$`1`/scen$closureA))
-  scen$pctLow <- round(100*(scen$`0`/scen$closureA))
+  scen$pctLow <- rep(0,nrow(scen)) #round(100*(scen$`0`/scen$closureA))
   
   # 
  mfs2 <- leaflet() %>%

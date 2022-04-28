@@ -112,6 +112,16 @@
                                             "Germany","Iceland","Belgium","Greenland","Azores"))
 
 # get 400-800 meter depths
+ load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
+ IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
+ IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ IREG$within <- 1  # if TRUE
+ depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
+ colnames(depth)[ncol(depth)] <- "within"
+ depth$within[is.na(depth$within)] <- 0 # if not TRUE
+ depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
+ depth_EUVME <- depth
+ 
  load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
@@ -119,6 +129,12 @@
  depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
  colnames(depth)[ncol(depth)] <- "within"
  depth$within[is.na(depth$within)] <- 0 # if not TRUE
+ depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
+ 
+ depth <- subset(depth, !(depth$Ecoregion %in% c("Celtic Seas","Greater North Sea",
+                                                 "Bay of Biscay and the Iberian Coast")))
+ 
+ depth <- rbind(depth,depth_EUVME)
  
  # get region within 400-800 meter
  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
