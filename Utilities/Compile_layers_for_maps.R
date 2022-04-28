@@ -109,7 +109,7 @@
  shapeEEZ  <- st_read(paste(pathdir,"1-Input data/EEZ_land_union_v3_202003/EEZ_Land_v3_202030.shp",sep="/"))  # get southern part of Portugal/Spain
  shapeEEZ  <- subset(shapeEEZ, UNION %in% c("Spain","France","Portugal",'Ireland',
                                             "United Kingdom","Norway","Denmark","Sweden",
-                                            "Germany","Iceland","Belgium","Greenland","Azores"))
+                                            "Germany","Iceland","Belgium","Greenland","Azores","Netherlands"))
 
 # get 400-800 meter depths
  load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
