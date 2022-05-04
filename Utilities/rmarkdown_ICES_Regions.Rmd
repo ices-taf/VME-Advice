@@ -108,10 +108,9 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
   
 # names for the leaflet
   nam <- c("Ecoregion boundaries","EEZ boundaries","Depth zone 400-800m",
-           "Existing VME C-sq.","New VME C-sq.","EU fishable domain (prelim.)",
-           "Fished area (S+M)","Reference fished area (S)","Fished area (S)",
+           "Existing VME C-sq.","New/updated VME C-sq.","EU fishable domain", "Fished area (S+M)","Reference fished area (S)","Fished area (S)",
            "Reference fished area (M)","Fished area (M)",
-           "Existing VME physical elements","Updated VME physical elements (prelim.)",
+           "Existing VME phys. elements","New/updated VME phys. elements",
            "NEAFC Convention Area","Existing NEAFC Closures","NEAFC fishable domain")
 
 # Create colour palette for VMEs
@@ -257,7 +256,7 @@ Update of the VME polygons following the scenarios/options.
            "Existing VME polygon S1 O2","New VME polygon S1 O2",
            "Existing VME polygon S2 O1","New VME polygon S2 O1",
            "Existing VME polygon S2 O2","New VME polygon S2 O2",
-           "Existing VME polygon S2 O3","New VME polygon S2 O3",
+           "Exist. VME pol. S1O2 + S2O1","New VME pol. S1O2 + S2O1",
            "NEAFC fishable domain","NEAFC Convention Area",
            "EU fishable domain (prelim.)")
   
