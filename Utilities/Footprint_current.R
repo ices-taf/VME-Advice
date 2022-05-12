@@ -1,21 +1,23 @@
-
 #
 # load current footprints of EU and NEAFC
 #
 
-# load EU footprint
+# the EU footprint is based on ICES 2021 (EUVME workshop and advice) 
+# it should be updated once the EU has established a footprint 
+
+# load EU footprint 
   EUFootp       <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_all.shp",sep="/"))
   EUFootp       <- st_make_valid(EUFootp)
 
-  EUFootp_mob   <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_mobile.shp",sep="/"))
-  EUFootp_mob   <- st_make_valid(EUFootp_mob)
+  #EUFootp_mob   <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_mobile.shp",sep="/"))
+  #EUFootp_mob   <- st_make_valid(EUFootp_mob)
   
-  EUFootp_stat  <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_static.shp",sep="/"))
-  EUFootp_stat  <- st_make_valid(EUFootp_stat)
+  #EUFootp_stat  <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_static.shp",sep="/"))
+  #EUFootp_stat  <- st_make_valid(EUFootp_stat)
 
   st_crs(EUFootp)      = 4326
-  st_crs(EUFootp_mob)  = 4326
-  st_crs(EUFootp_stat) = 4326
+  #st_crs(EUFootp_mob)  = 4326
+  #st_crs(EUFootp_stat) = 4326
   
 # load NEAFC areas
   tt      <- read.csv(paste(pathdir,"1-Input data/NEAFC_fishingareas/Fishingareas_coords.csv",sep="/"),
@@ -44,9 +46,6 @@
   st_crs(NEAFCFootp) = 4326
   
   # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","NEAFCFootp",
-                          "EUFootp","EUFootp_mob","EUFootp_stat")))
-  
-  
+  rm(rr,areaNam,area_sub,p,ps,sps,tt,i,Footp_N)
   
       

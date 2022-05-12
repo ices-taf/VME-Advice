@@ -2,14 +2,8 @@
 #### code to compile underlying data Table 1 ##
 ################################################
 
-# set path to folder VME advice
-  pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice"
-
-# install libraries
-  source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
-
 # load footprint workspace
-  load(paste(pathdir,"2-Data processing/Map_layer_workspace.RData",sep="/"))  
+  load(paste(pathdir,"2-Data processing/Map_layers_workspace.RData",sep="/"))  
 
 # select all new c-squares
   VMEgrid_old$uni  <- paste(VMEgrid_old$csquares,VMEgrid_old$VME_Class)  

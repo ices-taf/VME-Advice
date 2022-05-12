@@ -12,7 +12,7 @@
   Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
   
 # get fishing data - mobile and static
-  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear,".rds",sep=""),sep="/"))  
+  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
   
 # get area fished reference years
   # get c-sq with mobile fishing
@@ -96,8 +96,5 @@
   New_comb   <-  st_transform(New_comb, "EPSG:4326")
   
   # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","NEAFCFootp",
-                          "EUFootp","Footprint_both",
-                          "Footprint_static","Footprint_mobile","Ref_mobile",
-                          "New_mobile","Ref_static","New_static","Ref_comb","New_comb")))
+  rm(Reg_w,depth,vmsreg,indexcol_fished,nam_fished,refyear_fished,bargrid)
   

@@ -38,7 +38,7 @@
   VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))  
 
   # get vms data
-  vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear,".rds",sep=""),sep="/"))  
+  vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
   nam <- c(paste("SAR_total",refyear,sep="_"))
   indexcol <- which(names(vmsreg) %in% nam) 
   vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
@@ -114,7 +114,8 @@
   sce22 <- sce22[,-1]
   rownames(sce22) <- NULL
   sce22 <- sce22[!(duplicated(sce22@data$uni)),]
-  save(sce22,file=paste(pathdir,"2-Data processing/sce22_quarter_csq_grid.RData",sep="/"))
+  save(sce22,file=paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),
+                            "sce22_quarter_csq_grid.RData",sep="/"))
   
 # fill holes
   sce22$summing <-  1
@@ -151,8 +152,9 @@
   reg_dropped <- st_set_precision(reg_dropped,precision = 10000)
   clos22 <- reg_dropped
   clos22$id <- 1:nrow(clos22) 
-  write_sf(clos22, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Scenario2_option2.shp"))
+  write_sf(clos22, paste0(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),sep="/"),
+                         "/Scenario2_option2.shp"))
   
 # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear","refyear","SAR_threshold")))
+  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear","datacallyear_VMS","refyear","SAR_threshold")))
   

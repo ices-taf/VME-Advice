@@ -157,7 +157,8 @@
   sce11 <- sce11[,-1]
   rownames(sce11) <- NULL
   sce11 <- sce11[!(duplicated(sce11@data$uni)),]
-  save(sce11,file=paste(pathdir,"2-Data processing/sce11_quarter_csq_grid.RData",sep="/"))
+  save(sce11,file=paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),
+                        "sce11_quarter_csq_grid.RData",sep="/"))
   
 # fill holes
   sce11$summing <-  1
@@ -194,7 +195,8 @@
   reg_dropped <- st_set_precision(reg_dropped,precision = 10000)
   clos11 <- reg_dropped
   clos11$id <- 1:nrow(clos11) 
-  write_sf(clos11, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Scenario1_option1.shp"))
+  write_sf(clos11, paste0(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),sep="/"),
+                          "/Scenario1_option1.shp"))
   
 # and clean
-  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear")))
+  rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","datacallyear","datacallyear_VMS")))

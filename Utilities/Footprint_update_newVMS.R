@@ -19,7 +19,8 @@
   Reg_w <- subset(Reg_w@data,Reg_w@data$within == 1)
 
 # get fishing data - mobile and static
-  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear,".rds",sep=""),sep="/"))  
+  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",
+                                                          datacallyear_VMS,".rds",sep=""),sep="/"))  
   
   # get c-sq with mobile fishing
   nam_footprint      <- c(paste("SAR_total",refyear_footprint,sep="_"))
