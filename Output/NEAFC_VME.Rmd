@@ -6,7 +6,7 @@ output: html_document
 chunk_output_type: console
 #runtime: shiny
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 ---
 <style>
@@ -48,11 +48,13 @@ editor_options:
   pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT" # stores the VMS and VME data from sharepoint
   icespal       <- c('#939DBD','#012B5B','#7FA99C')
   names(icespal)<- c('lb','db','lg')
+  datacallyear_VMS <- 2021
+  fishing_data <- "NEAFC"
     
   source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
 
   # load all data layers for rmarkdown (including the datacall year)
-  load(paste(pathdir,"2-Data processing/Map_layers_workspace.RData",sep="/")) 
+  load(paste(pathdir,"2-Data processing", paste(datacallyear_VMS, fishing_data, "Map_layers_workspace.RData", sep = "_"), sep="/")) 
   
   # set the most recent fishing years
   newyear_fished <- (datacallyear_VMS-1):(datacallyear_VMS-3)
@@ -74,36 +76,28 @@ editor_options:
 #  {.tabset .tabset-fade .tabset-pills}
 
 ## Overview Tab {.tabset}
-```{r}
+```{r overview, include=FALSE}
 #
 ```
-
-
 ## Region 1 {.tabset}
-```{r CS,include=FALSE}
-  Region_ID <- "Region 1"
+```{r NEAFC1,include=FALSE}
+  Region_ID <- "Region_1"
   Region_ID_Excel <- "Region 1"
   # define fishable domain - either EU or NEAFC 
   FishD <- "NEAFC"
 ```
 
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_NEAFC_Regions.Rmd'}
-```
-
 ## Region 2 {.tabset}
-```{r CS,include=FALSE}
-  Region_ID <- "Region 2"
+```{r NEAFC2,include=FALSE}
+  Region_ID <- "Region_2"
   Region_ID_Excel <- "Region 2"
   # define fishable domain - either EU or NEAFC 
   FishD <- "NEAFC"
 ```
 
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_NEAFC_Regions.Rmd'}
-```
-
 ## Region 3 {.tabset}
-```{r CS,include=FALSE}
-  Region_ID <- "Region 3"
+```{r NEAFC3,include=FALSE}
+  Region_ID <- "Region_3"
   Region_ID_Excel <- "Region 3"
   # define fishable domain - either EU or NEAFC 
   FishD <- "NEAFC"

@@ -7,7 +7,7 @@ editor_options:
 ```{r region subset,include=FALSE}
 
 # set the Ecoregion of interest
-  s_reg         <- subset(NEAFCReg,NEAFCReg$NEAFC_region == Region_ID)
+  s_reg         <- subset(NEAFCReg,NEAFCReg$region == Region_ID)
   s_scen11_prev <- st_intersection(st_make_valid(scen11_prev),s_reg)
   s_scen12_prev <- st_intersection(st_make_valid(scen12_prev),s_reg)
   s_scen21_prev <- st_intersection(st_make_valid(scen21_prev),s_reg)
@@ -65,7 +65,7 @@ VME data call). This information has been collected through various gear types a
 Previously, 
 ```{r, results='asis'}
 
-  reg  <- subset(table1,table1$Region %in% Region_ID)  
+  reg  <- subset(table1,table1$NEAFCregion %in% Region_ID)  
   cat(sum(reg$Exist_VMEs ==3, na.rm = TRUE))
 ```
 VME habitat c-squares and
@@ -156,9 +156,9 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
                 stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
                 color = ~VMEpal(VME_Class_Lab)) %>%
     
-    addPolygons(data = s_VMEgrid_new, group = nam[5],
-                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
-                color = ~VMEpal(VME_Class_Lab)) %>%
+    # addPolygons(data = s_VMEgrid_new, group = nam[5],
+    #             stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+    #             color = ~VMEpal(VME_Class_Lab)) %>%
     
     # EU footprint and fishing areas
     addPolygons(data = s_EUFootp, group = nam[6],
@@ -233,14 +233,14 @@ Summary table of new and cumulative VME evidence and overlap with static gear an
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
 
   # Subset data to region
-  reg  <- subset(table1,table1$Ecoregion == Region_ID)  
+  reg  <- subset(table1,table1$NEAFCregion == Region_ID)  
   
   #sum(table(reg$cat)) # get total assessed area - add to the table text
   source(paste(pathdir,"Utilities/Compile_table1.R",sep="/"))
   tab1[is.na(tab1)] <- ""
-
+  tab1 <- tab1[,-c(4:5)]
   tab1  %>%
-    kable('html',escape = FALSE, align=c('l',rep('c',11)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
+    kable('html',escape = FALSE, align=c('l',rep('c',9)),row.names = FALSE,col.names = c('','All','Mobile gears', ' ','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
     row_spec(c(1,5,9,13),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
@@ -250,9 +250,9 @@ Summary table of new and cumulative VME evidence and overlap with static gear an
     column_spec(3:5, width = "2.5cm") %>%
     column_spec(6, width = ".75cm") %>%
     column_spec(8:ncol(tab1), width = "1.2cm") %>%
-    add_header_above(c(" " = 1, "Assessed area" = 1,"Areas fished between 2018-2020" = 3," "=1, "Assessed area" = 1, "In defined VME polygons" = 5 ),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,'Total existing' = 4," "=1, 'New/updated in 2021'=6),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
+    add_header_above(c(" " = 1, "Assessed area" = 1,"Areas fished between 2018-2020" = 1," "=1, "Assessed area" = 1, "In defined VME polygons" = 5 ),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,'Total existing' = 2," "=1, 'New/updated in 2021'=6),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 9),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 
 ```
 ### VME polygon options {.tabset } 
@@ -426,7 +426,7 @@ map2layers[,-2] %>%
 ```
 
 #### Scenario options
-```{r }
+```{r scenario options}
 
 scenop %>%
   kbl('html',escape = FALSE, align='l',col.names = c('Scenario','Option',
@@ -447,13 +447,14 @@ scenop %>%
 Summary table of scenario outcomes and associated risk to VMEs.
 ```{r echo=FALSE, message=FALSE, out.width='70%',fig.align = 'center', fig.cap="** **"}
 
-  source(paste(pathdir,"Utilities/Compile_table2.R",sep="/")) # warnings okay
+  source(paste(pathdir,"Utilities/Compile_table2_NEAFC.R",sep="/")) # warnings okay
   tab2[is.na(tab2)] <- "" 
   
   tab2[5,2:6] <- NA
   tab2[8,2:6] <- NA
   tab2[10,2:6] <- NA
-
+  display_columns <- c("Scenario 2 Option 1", "Scenario 2 Option 2", "Scenario 1 Option 2 + Scenario 2 Option 1")
+  tab2 <- tab2[,!colnames(tab2) %in% display_columns]
   tab2  %>%
     kable('html',escape = FALSE, align='l',row.names = FALSE) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%

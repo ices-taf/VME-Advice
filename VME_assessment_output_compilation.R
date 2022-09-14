@@ -108,7 +108,7 @@
 
   # compile output for table 1 of the RMarkdown
   source(paste(pathdir,"Utilities/Compile_table1_underlyingdata.R",sep="/"))  
-  
+  save(table1,file = paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
 #------------------------------------------------------------------------------------
 
   
