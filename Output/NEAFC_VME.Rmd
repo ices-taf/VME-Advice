@@ -1,12 +1,13 @@
 ---
 title: "Vulnerable marine ecosystem assessment <img src=\"C:/Users/neilm/Documents/projects/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
 author: "ICES"
-date: "April 2022"
+date: "September 2022"
 output: html_document
 chunk_output_type: console
 #runtime: shiny
 editor_options: 
   chunk_output_type: console
+---
 ---
 <style>
 .html-widget {
@@ -63,6 +64,7 @@ editor_options:
 
   # Load source data used for table 1
   load(paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
+  
 
 ```
 
@@ -71,59 +73,43 @@ editor_options:
 
 #  {.tabset .tabset-fade .tabset-pills}
 
-## Celtic Seas {.tabset}
+## Overview Tab {.tabset}
+```{r}
+#
+```
+
+
+## Region 1 {.tabset}
 ```{r CS,include=FALSE}
-  Region_ID <- "Celtic Seas"
-  Region_ID_Excel <- "Celtic Seas"
+  Region_ID <- "Region 1"
+  Region_ID_Excel <- "Region 1"
   # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
+  FishD <- "NEAFC"
 ```
 
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_ICES_Regions.Rmd'}
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_NEAFC_Regions.Rmd'}
 ```
 
-## Bay of Biscay and the Iberian Coast {.tabset}
-```{r BoBIC,include=FALSE}
-  Region_ID <- "Bay of Biscay and the Iberian Coast"
-  Region_ID_Excel <- "BoBIC"
+## Region 2 {.tabset}
+```{r CS,include=FALSE}
+  Region_ID <- "Region 2"
+  Region_ID_Excel <- "Region 2"
   # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
+  FishD <- "NEAFC"
 ```
 
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_ICES_Regions.Rmd'}
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_NEAFC_Regions.Rmd'}
 ```
 
-## Greater North Sea {.tabset}
-```{r GNS,include=FALSE}
-  Region_ID <- "Greater North Sea"
-  Region_ID_Excel <- "Greater North Sea"
+## Region 3 {.tabset}
+```{r CS,include=FALSE}
+  Region_ID <- "Region 3"
+  Region_ID_Excel <- "Region 3"
   # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
+  FishD <- "NEAFC"
 ```
 
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_ICES_Regions.Rmd'}
-```
-
-## Azores {.tabset}
-```{r Az,include=FALSE}
-  Region_ID <- "Azores"
-  Region_ID_Excel <- "Azores"
-  # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
-```
-
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_ICES_Regions.Rmd'}
-```
-
-## Icelandic Waters {.tabset}
-```{r IW,include=FALSE}
-  Region_ID <- "Icelandic Waters"
-  Region_ID_Excel <- "Icelandic Waters"
-  # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
-```
-
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_ICES_Regions.Rmd'}
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_NEAFC_Regions.Rmd'}
 ```
 
 # {-}

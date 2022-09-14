@@ -27,16 +27,16 @@
   datacallyear_VMS <- 2021   # VMS data call year with latest data
   
   # set path to the VME advice folder
-  pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice"
+  pathdir <- getwd() #"C:/Users/danie/Documents/Online for git/VME-advice"
   
   # set path to the folder with VMS and VME data (restricted data - outside github)
-  pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" 
+  pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT" #"C:/Users/danie/Documents/Online for git/VME-advice_noGIT" 
   
   # R libraries used
   source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
   
   
-#-------------------------------------------------------------------------------------  
+ #-------------------------------------------------------------------------------------  
 
   
   
@@ -70,25 +70,27 @@
 # step 3 - load fishable domains and obtain fishing layers
 #-------------------------------------------------------------------------------------
 
-  # load EU + NEAFC polygons with fishable domain
-  source(paste(pathdir,"Utilities/Footprint_current.R",sep="/"))  
+# Note on fishable domain: 
+# if ICES is requested to update the EU fishing footprint
+# the Footprint_update_newVMS.R can be run (see folder utilities)
+
+#------------------------------------------------------------------------------------
+
+    # load EU + NEAFC polygons with fishable domain
+  source(paste(pathdir,"Utilities/Footprint_current.R",sep="/"))  # unclear to us at this stage Which NEAFC data used to generate footprint
 
   # obtain fished area based on the latest VMS datacall
   refyear_fished <- 2009:2011
   newyear_fished <- (datacallyear_VMS-1):(datacallyear_VMS-3)
-  source(paste(pathdir,"Utilities/Fishedarea_newVMS.R",sep="/")) 
+  source(paste(pathdir,"Utilities/Fishedarea_newVMS.R",sep="/"))  # check whether
   
   # create new folder for the fishing layers based on latest VMS datacall
   dir.create(paste(pathdir,"2-Data processing",paste("Fishing_layers",datacallyear_VMS,sep="_"),sep="/"))
 
-  # save    save(EUFootp,NEAFCFootp,New_comb,New_mobile,New_static, Ref_comb,Ref_mobile,Ref_static,
+  # save    
+  save(EUFootp,NEAFCFootp,New_comb,New_mobile,New_static, Ref_comb,Ref_mobile,Ref_static, # previously most of these only available for ICES
        file=paste(pathdir,"2-Data processing",paste("Fishing_layers",datacallyear_VMS,sep="_"),
-                  "Fishing_workspace.RData",sep="/")
-
-#------------------------------------------------------------------------------------
-# Note on fishable domain: 
-# if ICES is requested to update the EU fishing footprint
-# the Footprint_update_newVMS.R can be run (see folder utilities)
+                  "Fishing_workspace.RData",sep="/"))
 
 #------------------------------------------------------------------------------------
 
@@ -117,7 +119,5 @@
   #  EU_VME.RMD
   #  ICES_Ecoregions_VME.RMD
   #  NEAFC_VME.RMD (not yet available)
-  
-  
   
   

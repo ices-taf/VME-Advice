@@ -46,6 +46,6 @@
   st_crs(NEAFCFootp) = 4326
   
   # and clean
-  rm(rr,areaNam,area_sub,p,ps,sps,tt,i,Footp_N)
+  rm(areaNam,area_sub,p,ps,sps,tt,i,Footp_N)
   
       

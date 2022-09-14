@@ -8,11 +8,11 @@
   load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
   depth <- subset(depth, !(depth$max_depth_emodnet  < 200)) 
 
-# get region within 400-800 meter
+# get region with depth > 200 meter
   Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
   
 # get fishing data - mobile and static
-  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
+  vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
   
 # get area fished reference years
   # get c-sq with mobile fishing
@@ -52,7 +52,7 @@
   vmsreg$combnew <- vmsreg$statnew + vmsreg$mobnew
   vmsreg$combnew[vmsreg$combnew > 0] <- 1
   
-# combine with >200 region
+# combine fishing data with depth >200 region
   Reg_w <- cbind(Reg_w, vmsreg[match(Reg_w$csquares,vmsreg$c_square), c("mobref","statref","combref",
                                                                         "mobnew","statnew","combnew")])
 

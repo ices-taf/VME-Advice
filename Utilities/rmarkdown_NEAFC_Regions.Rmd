@@ -6,8 +6,8 @@ editor_options:
 
 ```{r region subset,include=FALSE}
 
-# set the region of interest
-  s_reg         <- subset(shapeEEZ,shapeEEZ$UNION %in% Region_ID)
+# set the Ecoregion of interest
+  s_reg         <- subset(NEAFCReg,NEAFCReg$NEAFC_region == Region_ID)
   s_scen11_prev <- st_intersection(st_make_valid(scen11_prev),s_reg)
   s_scen12_prev <- st_intersection(st_make_valid(scen12_prev),s_reg)
   s_scen21_prev <- st_intersection(st_make_valid(scen21_prev),s_reg)
@@ -18,13 +18,13 @@ editor_options:
   s_scen21      <- st_intersection(scen21,s_reg)
   s_scen22      <- st_intersection(scen22,s_reg)
   s_scen23      <- st_intersection(st_make_valid(scen23),s_reg)
-  s_shapeEEZ    <- s_reg
+  s_shapeEEZ    <- st_intersection(shapeEEZ,s_reg)
   s_EUFootp     <- st_intersection(EUFootp,s_reg)
   s_Ref_comb    <- st_intersection(Ref_comb,s_reg)
   s_Ref_mobile  <- st_intersection(Ref_mobile,s_reg)
   s_Ref_static  <- st_intersection(Ref_static,s_reg)
   s_New_comb    <- st_intersection(New_comb,s_reg)
-  s_New_mobile  <- st_make_valid(st_intersection(New_mobile,s_reg))
+  s_New_mobile  <- st_intersection(New_mobile,s_reg)
   s_New_static  <- st_intersection(New_static,s_reg)
   s_NEAFCFootp  <- st_intersection(NEAFCFootp,s_reg)
   s_NEAFCReg    <- st_intersection(NEAFCReg,s_reg)
@@ -34,12 +34,12 @@ editor_options:
   s_Elements    <- st_intersection(Elements,s_reg)
   s_Reg_depth   <- st_intersection(Reg_depth,s_reg)
   
-  textreg   <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_EUVME.xlsx",sep="/"),Region_ID_Excel)
+  textreg       <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_NEAFCregions.xlsx",sep="/"),Region_ID_Excel)
 
 ```
 
 
-## Overview {.tabset } 
+### Overview {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Overview")
 for(i in 1:nrow(tt)){
@@ -61,11 +61,11 @@ cat(datacallyear)
 ```
 VME data call). This information has been collected through various gear types and survey methods. 
 
-## New VME data {.tabset } 
+### New VME data {.tabset } 
 Previously, 
 ```{r, results='asis'}
 
-  reg  <- subset(table1,table1$EEZ %in% Region_ID)  
+  reg  <- subset(table1,table1$Region %in% Region_ID)  
   cat(sum(reg$Exist_VMEs ==3, na.rm = TRUE))
 ```
 VME habitat c-squares and
@@ -113,7 +113,7 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-### Map of VMEs
+#### Map of VME
 Information on VME Habitat and Index C-squares and the spatial distribution of static and mobile bottom-fishing
 <br> 
 ```{r Build option map, include=FALSE}
@@ -121,19 +121,20 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
 # does this work when c-squares are being removed? / if updated it works!
   s_VMEgrid_old$uni  <- paste(s_VMEgrid_old$csquares,s_VMEgrid_old$VME_Class)  
   s_VMEgrid_new$uni  <- paste(s_VMEgrid_new$csquares,s_VMEgrid_new$VME_Class)
-  s_VMEgrid_new      <- s_VMEgrid_new[!(s_VMEgrid_new$uni %in% s_VMEgrid_old$uni ),]
+  s_VMEgrid_new      <- s_VMEgrid_new[!(s_VMEgrid_new$uni %in% s_VMEgrid_old$uni),]
 
   
 # names for the leaflet
-  nam <- c("EEZ boundaries","Depth zone 400-800m",
-           "Existing VME C-sq.","New VME C-sq.","EU fishable domain (prelim.)",
-           "Fished area (S+M)","Reference fished area (S)","Fished area (S)",
+  nam <- c("Ecoregion boundaries","EEZ boundaries","Depth zone 400-800m",
+           "Existing VME C-sq.","New/updated VME C-sq.","EU fishable domain", "Fished area (S+M)",
+           "Reference fished area (S)","Fished area (S)",
            "Reference fished area (M)","Fished area (M)",
-           "Existing VME physical elements","Updated VME physical elements (prelim.)")
+           "Existing VME phys. elements","New/updated VME phys. elements",
+           "NEAFC Convention Area","Existing NEAFC Closures","NEAFC fishable domain")
 
 # Create colour palette for VMEs
   VMEcolours <- c("#2E8AC6","#F40000","#F67E11","#FDF100")
-  VMEpal <- colorFactor(VMEcolours, VMEgrid_old$VME_Class_Lab)  
+  VMEpal <- colorFactor(VMEcolours, s_VMEgrid_old$VME_Class_Lab)  
   
 # set region
   mxt <- st_bbox(s_reg)
@@ -145,44 +146,54 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
    # boundaries
     addPolygons(data = s_reg, group = nam[1],
                 stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-    addPolygons(data = s_Reg_depth, group = nam[2],
+    addPolygons(data = s_shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = s_Reg_depth, group = nam[3],
                 stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
     
     # VME c-sqs
-    addPolygons(data = s_VMEgrid_old, group = nam[3],
+    addPolygons(data = s_VMEgrid_old, group = nam[4],
                 stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
                 color = ~VMEpal(VME_Class_Lab)) %>%
     
-    addPolygons(data = s_VMEgrid_new, group = nam[4],
+    addPolygons(data = s_VMEgrid_new, group = nam[5],
                 stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
                 color = ~VMEpal(VME_Class_Lab)) %>%
     
     # EU footprint and fishing areas
-    addPolygons(data = s_EUFootp, group = nam[5],
+    addPolygons(data = s_EUFootp, group = nam[6],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
-    addPolygons(data = s_New_comb, group = nam[6],
+    addPolygons(data = s_New_comb, group = nam[7],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
     
-    addPolygons(data = s_Ref_static, group = nam[7],
+    addPolygons(data = s_Ref_static, group = nam[8],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
-    addPolygons(data = s_New_static, group = nam[8],
+    addPolygons(data = s_New_static, group = nam[9],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
     
-    addPolygons(data = s_Ref_mobile, group = nam[9],
+    addPolygons(data = s_Ref_mobile, group = nam[10],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
-    addPolygons(data = s_New_mobile, group = nam[10],
+    addPolygons(data = s_New_mobile, group = nam[11],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
     
     # elements
-    addPolygons(data = s_Elements, group = nam[11],
+    addPolygons(data = s_Elements, group = nam[12],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
-    addPolygons(data = s_Elements, group = nam[12],
+    addPolygons(data = s_Elements, group = nam[13],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
-   
+    
+    # NEAFC information
+    addPolygons(data = s_NEAFCReg, group = nam[14],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    addPolygons(data = s_clos_neafc, group = nam[15],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = s_NEAFCFootp, group = nam[16],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
     addLegend(group = "VME Class",
               position = "bottomright",
               colors = VMEcolours, labels= levels(s_VMEgrid_old$VME_Class_Lab)) %>%
@@ -192,7 +203,7 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
       overlayGroups = nam)%>%
     
     # hide 
-    hideGroup(nam[4:12])
+    hideGroup(nam[5:16])
 ```
 
 ```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
@@ -201,12 +212,12 @@ mfs
 
 ```
 
-### Key to map layers
+#### Key to map layers
 
 ```{r map1 key}
-map1layers <- map1layers[-c(1,14:16),] 
+
 map1layers[,-2] %>%
-  kbl('html',escape = FALSE, align='l',col.names = c('Layer','Description'),row.names = F) %>%
+  kbl('html',escape = FALSE, align='l',col.names = c('Layer','Description')) %>%
   kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
   row_spec(0, bold = T)  %>%
   row_spec(0:nrow(map1layers), extra_css = 'padding: 10px;vertical-align:top;') %>%
@@ -216,18 +227,17 @@ map1layers[,-2] %>%
 ```
 
 
-### Overlap VME c-sqs and fishing 
+#### Overlap VME c-sqs and fishing 
 Summary table of new and cumulative VME evidence and overlap with static gear and/or mobile fishing gears at the scale of C-squares. 
 <br>
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
 
   # Subset data to region
-  reg  <- subset(table1,table1$EEZ %in% Region_ID)  
+  reg  <- subset(table1,table1$Ecoregion == Region_ID)  
   
   #sum(table(reg$cat)) # get total assessed area - add to the table text
   source(paste(pathdir,"Utilities/Compile_table1.R",sep="/"))
   tab1[is.na(tab1)] <- ""
-  tab1[c(2,4,6,8,10,12),8:12] <- ""
 
   tab1  %>%
     kable('html',escape = FALSE, align=c('l',rep('c',11)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
@@ -245,7 +255,7 @@ Summary table of new and cumulative VME evidence and overlap with static gear an
     add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 
 ```
-## VME polygon options {.tabset } 
+### VME polygon options {.tabset } 
 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "VME polygons")
@@ -254,18 +264,19 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-### Map of updated VME polygons
+#### Map of updated VME polygons
 Update of the VME polygons following the scenarios/options.
 <br>
 ```{r Build option map2, include=FALSE}
 
-nam <- c("EEZ boundaries", 
-           "Depth zone 400-800m (prelim.)",
+nam <- c("Ecoregion boundaries","EEZ boundaries", 
+           "Depth zone 400-800m (prelim.)", "Existing NEAFC closures",
            "Existing VME polygon S1 O1","New VME polygon S1 O1",
            "Existing VME polygon S1 O2","New VME polygon S1 O2",
            "Existing VME polygon S2 O1","New VME polygon S2 O1",
            "Existing VME polygon S2 O2","New VME polygon S2 O2",
            "Exist. VME pol. S1O2 + S2O1","New VME pol. S1O2 + S2O1",
+           "NEAFC fishable domain","NEAFC Convention Area",
            "EU fishable domain (prelim.)")
 
 # Colourpalette for options
@@ -278,25 +289,31 @@ mfs2 <- leaflet() %>%
     addProviderTiles(providers$Esri.WorldImagery) %>%
     addMapPane("scens", zIndex = 420) %>%
     # boundaries
-    addPolygons(data = s_shapeEEZ, group = nam[1],
+    addPolygons(data = s_reg, group = nam[1],
                 stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-    addPolygons(data = s_Reg_depth, group = nam[2],
+    addPolygons(data = s_shapeEEZ, group = nam[2],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    addPolygons(data = s_Reg_depth, group = nam[3],
                 stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
-
-    addPolygons(data = s_scen11_prev, group=nam[3],
+    
+    # existing closures
+    addPolygons(data = s_clos_neafc, group = nam[4],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
+    
+    addPolygons(data = s_scen11_prev, group=nam[5],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[1]) %>%
-    addPolygons(data = s_scen12_prev, group=nam[5],
+    addPolygons(data = s_scen12_prev, group=nam[7],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[2]) %>%
-    addPolygons(data = s_scen21_prev, group=nam[7],
+    addPolygons(data = s_scen21_prev, group=nam[9],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[3]) %>%
-    addPolygons(data = s_scen22_prev, group=nam[9],
+    addPolygons(data = s_scen22_prev, group=nam[11],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[4]) %>%
-    addPolygons(data = s_scen23_prev, group=nam[11],
+    addPolygons(data = s_scen23_prev, group=nam[13],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[5]) %>%  
   
     # potential closures
     addPolygons(data = s_scen11,
-                group = nam[4],
+                group = nam[6],
                 layerId = s_scen11$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -310,7 +327,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen11$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen12, 
-                group=nam[6],
+                group=nam[8],
                 layerId = s_scen12$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -324,7 +341,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen12$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen21, 
-                group=nam[8],
+                group=nam[10],
                 layerId = s_scen21$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -338,7 +355,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen21$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen22, 
-                group=nam[10],
+                group=nam[12],
                 layerId = s_scen22$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -353,7 +370,7 @@ mfs2 <- leaflet() %>%
                 options = pathOptions(pane = "scens")) %>%
 
     addPolygons(data = s_scen23, 
-                group=nam[12],
+                group=nam[14],
                 layerId = s_scen23$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -369,16 +386,21 @@ mfs2 <- leaflet() %>%
     
     
     # existing footprints
-
-    addPolygons(data = s_EUFootp, group = nam[13],
+    addPolygons(data = s_NEAFCFootp, group = nam[15],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
-   # Layers control
+    addPolygons(data = s_NEAFCReg, group = nam[16],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "red") %>%
+    
+    addPolygons(data = s_EUFootp, group = nam[17],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    
+    # Layers control
     addLayersControl(
-      overlayGroups = nam)%>%
+      overlayGroups = nam) %>%
   
   # hide 
-  hideGroup(nam[c(4:13)])
+  hideGroup(nam[c(6:17)])
 
 ```
 
@@ -388,12 +410,13 @@ mfs2
 
 ```
 
-### Key to map layers
+
+#### Key to map layers
 
 ```{r map2 key}
-map2layers <- map2layers[-c(1,4,13,14),] 
+
 map2layers[,-2] %>%
-  kbl('html',escape = FALSE, align='l',row.names=F,col.names = c('Layer','Description')) %>%
+  kbl('html',escape = FALSE, align='l',col.names = c('Layer','Description')) %>%
   kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
   row_spec(0, bold = T)  %>%
   row_spec(0:nrow(map2layers), extra_css = 'padding: 10px;vertical-align:top;') %>%
@@ -402,7 +425,7 @@ map2layers[,-2] %>%
 
 ```
 
-### Scenario options
+#### Scenario options
 ```{r }
 
 scenop %>%
@@ -419,12 +442,12 @@ scenop %>%
 
 ```
 
-### Scenario outcomes and risks
+#### Scenario outcomes and risks
 
 Summary table of scenario outcomes and associated risk to VMEs.
 ```{r echo=FALSE, message=FALSE, out.width='70%',fig.align = 'center', fig.cap="** **"}
 
-  source(paste(pathdir,"Utilities/Compile_table2_EUVME.R",sep="/")) # warnings okay
+  source(paste(pathdir,"Utilities/Compile_table2.R",sep="/")) # warnings okay
   tab2[is.na(tab2)] <- "" 
   
   tab2[5,2:6] <- NA
@@ -446,7 +469,7 @@ Summary table of scenario outcomes and associated risk to VMEs.
 ```
 \* Risks to VMEs are not currently quantifiable due to no agreed metrics.
 
-## Interpretation of results {.tabset } 
+### Interpretation of results {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Interpretation")
 for(i in 1:nrow(tt)){
@@ -454,7 +477,7 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-## Read me {.tabset } 
+### Read me {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Read me")
 for(i in 1:nrow(tt)){
@@ -462,7 +485,7 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-## Sources and references  {.tabset } 
+### Sources and references  {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "References")
 for(i in 1:nrow(tt)){

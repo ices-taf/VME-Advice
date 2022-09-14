@@ -30,7 +30,8 @@
     "VME data repository/VME observations and csquares/VME_csquares_datacall_",
     datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
-  VME <- VME[,-1]
+  #VME <- VME[,-1]
+  colnames(VME)[1] <- "CSquare"
   
   # create VME spatial grid
   VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
@@ -38,7 +39,7 @@
   colnames(VMEgrid@data)[ncol(VMEgrid)] <- "VME_Class"
   VMEgrid       <- subset(VMEgrid,!(is.na(VMEgrid@data$VME_Class)))
   
-  # get vms data
+  # get vms data  - this not currently possible for NEAFC as we don't have SAR. 
   vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
   nam <- c(paste("SAR_total",refyear,sep="_"))
   indexcol <- which(names(vmsreg) %in% nam) 

@@ -14,8 +14,8 @@
   VMEobs <- subset(VMEobs,!(VMEobs$VME_Indicator =="NULL" & VMEobs$HabitatType =="NULL")) 
 
 # create polypoints based on the middle lat and long
-  data <- data.frame(VMEid =VMEobs$ï..ICES_ID,
-                     VME_longitude = VMEobs$MiddleLongitude,
+  data <- data.frame(VMEid = VMEobs[,1],
+    VME_longitude = VMEobs$MiddleLongitude,
                      VME_latitude  = VMEobs$MiddleLatitude,
                      stringsAsFactors = F)
 
@@ -32,8 +32,10 @@
   Mudvolcano <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Mud_Volcano.shp",sep="/"))
   Mudvolcano <- st_make_valid(Mudvolcano)
   Seamount   <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Seamount.shp",sep="/"))
-  Seamount   <- st_make_valid(Seamount)
-  Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
+  Seamount   <- st_make_valid(Seamount) %>% select(OBJECTID = OBJECTID_1)
+  Elements <- purrr::map_dfr(.x =list(Bank,Coralmound,Mudvolcano,Seamount), .f = ~ select(.x, OBJECTID))
+  #Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
+  
   
 # change VME observations to same projection
   Proj     <- as(Bank, 'Spatial')
@@ -68,7 +70,7 @@
                         "VME data repository/VME observations and csquares/VME_csquares_datacall_",
                         datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
-  VME <- VME[,-1]
+  colnames(VME)[1] <- "CSquare"
   VME <-  cbind(VME, bargrid@data[match(VME$CSquare,bargrid@data$csquares), c("long","lat")])
   VME$uni <- paste(VME$long,VME$lat)
 

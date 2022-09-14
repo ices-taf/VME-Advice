@@ -1,5 +1,5 @@
 ---
-title: "EU vulnerable marine ecosystem assessment <img src=\"C:/Users/danie/Documents/Online for git/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
+title: "EU vulnerable marine ecosystem assessment <img src=\"C:/Users/neilm/Documents/projects/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
 author: "ICES"
 date: "April 2022"
 output: html_document
@@ -43,8 +43,9 @@ knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 options(knitr.duplicate.label = "allow")
 
-  pathdir       <- "C:/Users/danie/Documents/Online for git/VME-Advice"
-  pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" # stores the VMS and VME data from sharepoint
+  pathdir <- "C:/Users/neilm/Documents/projects/VME-Advice"
+  pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT" # stores the VMS and VME data from sharepoint
+  
   icespal       <- c('#939DBD','#012B5B','#7FA99C')
   names(icespal)<- c('lb','db','lg')
     
@@ -78,7 +79,7 @@ options(knitr.duplicate.label = "allow")
 
 ```
 
-```{r add-to-main, child = 'C:/Users/danie/Documents/Online for git/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
+```{r add-to-main, child = paste(pathdir, 'Utilities/rmarkdown_EUwaters.Rmd', sep = "/")}
 ```
 
 # {-}
