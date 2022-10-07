@@ -104,11 +104,12 @@ save(EUFootp,NEAFCFootp,New_comb,New_mobile,New_static, Ref_comb,Ref_mobile,Ref_
 # it will overwrite any previous version 
 # to return to a previous year, change the data call year above and re-run the below
 
-source(paste(pathdir,"Utilities/Compile_spatial_data_layers_NEAFC_Temp.R",sep="/"))  
+source(paste(pathdir,"Utilities/Compile_spatial_data_layers_NEAFC_Temp.R",sep="/"))
+colnames(depth_Gebco)
 save.image(file = paste(pathdir,"2-Data processing", paste(datacallyear_VMS, fishing_data, "Map_layers_workspace.RData", sep = "_"), sep="/"))
 
 # compile output for table 1 of the RMarkdown
-source(paste(pathdir,"Utilities/Compile_table1_underlyingdata.R",sep="/"))  
+source(paste(pathdir,"Utilities/Compile_table1_underlyingdata_NEAFC.R",sep="/"))  
 
 #------------------------------------------------------------------------------------
 

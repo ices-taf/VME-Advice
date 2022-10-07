@@ -3,7 +3,8 @@
 ################################################
 
 # load footprint workspace
-  load(paste(pathdir,"2-Data processing/Map_layers_workspace.RData",sep="/"))  
+  #load(paste(pathdir,"2-Data processing/Map_layers_workspace.RData",sep="/"))  
+  load(paste(pathdir,"2-Data processing", paste(datacallyear_VMS, fishing_data, "Map_layers_workspace.RData", sep = "_"), sep="/"))
 
 # select all new c-squares
   VMEgrid_old$uni  <- paste(VMEgrid_old$csquares,VMEgrid_old$VME_Class)  
@@ -18,13 +19,13 @@
 # load depths
   load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
 
-  # get area 400-800
-  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
-  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+  IREG <- subset(depth,!(depth$min_depth_emodnet > 200))
+  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 50)) 
   IREG$within <- 1  # if TRUE
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
-  colnames(depth)[ncol(depth)] <- "de4_8"
-  depth$de4_8[is.na(depth$de4_8)] <- 0 # if not TRUE
+  colnames(depth)[ncol(depth)] <- "de05_2"
+  depth$de05_2[is.na(depth$de05_2)] <- 0 # if not TRUE
+  
   
   # get area 200-400  
   IREG <- subset(depth,!(depth$min_depth_emodnet > 400))
@@ -33,6 +34,14 @@
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
   colnames(depth)[ncol(depth)] <- "de2_4"
   depth$de2_4[is.na(depth$de2_4)] <- 0 # if not TRUE
+  
+  # get area 400-800
+  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
+  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+  IREG$within <- 1  # if TRUE
+  depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
+  colnames(depth)[ncol(depth)] <- "de4_8"
+  depth$de4_8[is.na(depth$de4_8)] <- 0 # if not TRUE
   
   IREG <- subset(depth,depth$max_depth_emodnet > 800)
   IREG$within <- 1  # if TRUE
@@ -127,6 +136,7 @@
   
   bargrid@data$scen23 <- NA
   
+  bargrid_sf2 <- st_as_sf(bargrid)
   table1 <- bargrid@data 
   
 

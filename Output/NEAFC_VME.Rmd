@@ -1,5 +1,5 @@
 ---
-title: "Vulnerable marine ecosystem assessment <img src=\"C:/Users/neilm/Documents/projects/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
+title: "Vulnerable marine ecosystem assessment <br> for NEAFC regions <img src=\"C:/Users/neilm/Documents/projects/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
 author: "ICES"
 date: "September 2022"
 output: html_document
@@ -23,6 +23,10 @@ editor_options:
   font-family: times, serif;
   text-align: justify;
   }
+  h1 { /* Header 1 */
+  font-size: 28px;
+  color: DarkBlue;
+}
   table,td,th {
     font-size: 10pt;
     font-family: times, serif;
@@ -76,9 +80,25 @@ editor_options:
 #  {.tabset .tabset-fade .tabset-pills}
 
 ## Overview Tab {.tabset}
-```{r overview, include=FALSE}
-#
+```{r NEAFCoverview, include=FALSE}
+  neafc_mxt <- st_bbox(NEAFCReg)
+  nam <- c("NEAFC regulatory areas")
+# 
+  neafc_mfs <- leaflet() %>%
+    fitBounds(neafc_mxt[[1]],neafc_mxt[[2]],neafc_mxt[[3]],neafc_mxt[[4]]) %>%
+    addProviderTiles(providers$Esri.WorldImagery)%>%
+   # boundaries
+    addPolygons(data = NEAFCReg, group = nam[1],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white")
 ```
+
+**NEAFC Regulatory Areas**
+```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
+
+neafc_mfs
+
+```
+
 ## Region 1 {.tabset}
 ```{r NEAFC1,include=FALSE}
   Region_ID <- "Region_1"

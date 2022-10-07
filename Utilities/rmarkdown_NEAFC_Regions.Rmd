@@ -454,7 +454,7 @@ Summary table of scenario outcomes and associated risk to VMEs.
   tab2[8,2:6] <- NA
   tab2[10,2:6] <- NA
   display_columns <- c("Scenario 2 Option 1", "Scenario 2 Option 2", "Scenario 1 Option 2 + Scenario 2 Option 1")
-  tab2 <- tab2[,!colnames(tab2) %in% display_columns]
+  tab2 <- tab2[-c(10,11),!colnames(tab2) %in% display_columns]
   tab2  %>%
     kable('html',escape = FALSE, align='l',row.names = FALSE) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
@@ -468,7 +468,9 @@ Summary table of scenario outcomes and associated risk to VMEs.
   
 
 ```
-\* Risks to VMEs are not currently quantifiable due to no agreed metrics.
+\* Risks to VMEs are not currently quantifiable due to no agreed metrics. <br>
+\*\* For the Barents Sea NEAFC region, depths >50m are also considered.
+
 
 ### Interpretation of results {.tabset } 
 ```{r , results = 'asis'}

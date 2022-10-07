@@ -132,31 +132,46 @@ New_mobile       <- st_make_valid(New_mobile[,-c(1:ncol(New_mobile)-1)])
 # and the other area - EMODNET depth has been updated - need to decide
 # which depth to use in the update of the advice
  
- # EUVME depth based on EmodNet 2018
- load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
- IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ # # EUVME depth based on EmodNet 2018
+ # load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
+ # IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
+ # IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ # IREG$within <- 1  # if TRUE
+ # depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
+ # colnames(depth)[ncol(depth)] <- "within"
+ # depth$within[is.na(depth$within)] <- 0 # if not TRUE
+ # depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
+ # depth_EUVME <- depth
+ # 
+ # #  depth based on EmodNet 2020 (for areas without Emodnet coverage GEBCO is used)
+ # load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
+ # IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
+ # IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ # IREG$within <- 1  # if TRUE
+ # depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
+ # colnames(depth)[ncol(depth)] <- "within"
+ # depth$within[is.na(depth$within)] <- 0 # if not TRUE
+ # depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
+ # 
+ # depth <- subset(depth, !(depth$Ecoregion %in% c("Celtic Seas","Greater North Sea",
+ #                                                 "Bay of Biscay and the Iberian Coast")))
+ # # combined depth 
+ # depth <- rbind(depth,depth_EUVME)
+ 
+ 
+ load(paste(pathdir,"1-Input data/Region_depth_gebco.RData",sep="/"))
+ depth <- depth_Gebco
+ depth$mean_depth <- depth_Gebco$GebcoAtlan *-1
+ 
+ IREG <- subset(depth,!(depth$mean_depth > 800))
+ IREG <- subset(IREG, !(IREG$mean_depth  < 400))
  IREG$within <- 1  # if TRUE
  depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
  colnames(depth)[ncol(depth)] <- "within"
  depth$within[is.na(depth$within)] <- 0 # if not TRUE
  depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
- depth_EUVME <- depth
+ depth_Gebco <- depth
  
- #  depth based on EmodNet 2020 (for areas without Emodnet coverage GEBCO is used)
- load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
- IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
- IREG$within <- 1  # if TRUE
- depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
- colnames(depth)[ncol(depth)] <- "within"
- depth$within[is.na(depth$within)] <- 0 # if not TRUE
- depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
- 
- depth <- subset(depth, !(depth$Ecoregion %in% c("Celtic Seas","Greater North Sea",
-                                                 "Bay of Biscay and the Iberian Coast")))
- # combined depth 
- depth <- rbind(depth,depth_EUVME)
  
  # create polygon of 400-800m depths 
  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
