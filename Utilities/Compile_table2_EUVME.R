@@ -26,6 +26,60 @@
   tab2 <- as.data.frame(matrix(data=NA,nrow = 13, ncol= 6))
 
 # calculate overlap with fishable domain
+percentage_spatial_overlap <- function(scenario_polygons, domain_polygons) {
+  
+  overlap <- sf::st_intersection(scenario_polygons,domain_polygons) %>% 
+    sf::st_make_valid()
+  
+  (sum_polygons_area(overlap)/sum_polygons_area(domain_polygons))*100 %>% 
+    round(digits = 1)
+}
+sum_polygons_area <- function(polygons) {
+  
+  sf::st_area(polygons) %>% 
+    sum()
+} 
+
+scenario_polygons_list <- list(s_scen11, s_scen12, s_scen21, s_scen22, s_scen23)
+domain_polygons_list <- list(rep(Fishdom), 5)
+static_fishing_polygons_list <- list(rep(Static_fish), 5)
+mobile_fishing_polygons_list <- list(rep(Mobile_fish), 5)
+
+vme_fishing_domain_overlap <- purrr::map2_dfr(.x = scenario_polygons_list, 
+                                              .y = domain_polygons_list, 
+                                              .f = percentage_spatial_overlap)
+
+vme_static_fishing_overlap <- purrr::map2_dfr(.x = scenario_polygons_list, 
+                                              .y = static_fishing_polygons_list, 
+                                              .f = percentage_spatial_overlap)
+
+vme_mobile_fishing_overlap <- purrr::map2_dfr(.x = scenario_polygons_list, 
+                                              .y = mobile_fishing_polygons_list, 
+                                              .f = percentage_spatial_overlap)
+# Number of large VME polygons in upper 25th percentile of the size distribution nd their average areal extent (size)
+n_and_mean_area_extent_of_top_x_polygons <- function(vme_polygons, x = 0.25) {
+  
+  vme_areas <- sf::st_area(vme_polygons)/10^6 %>% 
+    sort()
+  
+  percentile_x_polygons <- top_x_percentile(vme_areas = vme_areas, x = x)
+  
+  paste(length(percentile_x_polygons)," (",round(mean(vme_areas[percentile_x_polygons]),digits=1)," km<sup>2</sup>)",sep="")
+}
+
+top_x_percentile <- function(vme_areas, x = x) {
+  
+  cumsum(vme_areas)/vme_areas %>% 
+    as.numeric() %>% 
+    which(.data>1-x)
+}
+
+purrr::map_dfr(.x = scenario_polygons_list,
+               .f = n_and_mean_area_extent_of_top_x_polygons, x = 0.25)
+
+
+
+# calculate overlap with fishable domain
   FD_scen11 <- st_intersection(s_scen11,Fishdom); FD_scen11 <- st_make_valid(FD_scen11)
   tab2[4,2] <- round(sum(st_area(FD_scen11))/sum(st_area(Fishdom)) * 100,digits = 1)
   
@@ -49,6 +103,27 @@
   tab2[6,6] <- paste(nrow(s_scen23)," (",round(mean(st_area(s_scen23)/10^6),digits=1)," km<sup>2</sup>)",sep="")
 
 # Number of large VME polygons in upper 25th percentile of the size distribution nd their average areal extent (size)
+  n_and_mean_area_extent_of_top_x_polygons <- function(vme_polygons, x = 0.25) {
+  
+  vme_areas <- sf::st_area(vme_polygons)/10^6 %>% 
+    sort()
+  
+  percentile_x_polygons <- top_x_percentile(vme_areas = vme_areas, x = x)
+  
+  paste(length(percentile_x_polygons)," (",round(mean(vme_areas[percentile_x_polygons]),digits=1)," km<sup>2</sup>)",sep="")
+  }
+  
+  top_x_percentile <- function(vme_areas, x = x) {
+    
+    cumsum(vme_areas)/vme_areas %>% 
+      as.numeric() %>% 
+      which(.data>1-x)
+  }
+  
+  purrr::map_dfr(.x = scenario_polygons_list,
+                 .f = n_and_mean_area_extent_of_top_x_polygons, x = 0.25)
+  
+  
   sc11areas <- sort(st_area(s_scen11)/10^6)
   sc12areas <- sort(st_area(s_scen12)/10^6)
   sc21areas <- sort(st_area(s_scen21)/10^6)
@@ -87,6 +162,24 @@
   tab2[11,6] <- round(sum(st_area(SF_scen23))/sum(st_area(Static_fish)) * 100,digits = 1)
 
 # overlap between mobile fishing effort and vme polygons
+vme_fishing_effort_overlap <- function(scenario_grid?, region_table1?) {
+    scenario_grid <- subset(scenario_grid,scenario_grid@data$csquares %in% region_table1$csquares)
+    scenario_grid@data$area_sqkm <- area(scenario_grid)/10^6
+    scenario_grid <- cbind(scenario_grid, region_table1[match(scenario_grid$csquares,region_table1$csquares), c("mobeff")])
+    colnames(scenario_grid@data)[ncol(scenario_grid@data)] <- "mobeff"
+    round(sum(scenario_grid@data$area_sqkm * scenario_grid@data$mobeff,na.rm=T) / sum(region_table1$area_sqkm * region_table1$mobeff,na.rm=T) * 100,digits =1)
+  }
+
+file_list_names <- list("sce11", "sce12", "sce21", "sce22", "sce23")
+regional_table_list <- list(rep(regional_table1), 5)
+vme_xxxx_scenarios <- purrr::map(.x = file_list_names,
+                                 .f = ~ paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"), paste0(.x, "_quarter_csq_grid.RData"),sep="/") %>% load())
+
+purrr::map2_dfr(.x = vme_xxxx_scenarios,
+              .y = regional_table_list,
+             .f = vme_fishing_effort_overlap)
+  
+
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce11_quarter_csq_grid.RData",sep="/"))
   sce11 <- subset(sce11,sce11@data$csquares %in% Regiontab1$csquares)
   sce11@data$area_sqkm <- area(sce11)/10^6
