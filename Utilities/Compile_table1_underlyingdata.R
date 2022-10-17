@@ -121,9 +121,60 @@
   save(table1,file = paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
   
 
+    
+  #Refactoring
   
+  bargrid <- bargrid %>% mutate(Exist_VMEs = dplyr::left_join(., dplyr::select(VMEgrid_old, c("csquares", "VME_Class")), by = c("csquares")),
+                                New_VMEs = dplyr::left_join(., dplyr::select(VMEgrid_new, c("csquares", "VME_Class")), by = c("csquares")),
+                                Tot_VMEs = dplyr::left_join(., dplyr::select(VMEgrid_tot, c("csquares", "VME_Class")), by = c("csquares"))) 
   
+  bargrid_sf <- st_as_sf(bargrid)
   
+################# still to be refactored
+  # get old element data
+  grid_over    <- st_intersects(bargrid_sf,Elements)
+  idx          <- as.data.frame(grid_over)
+  idx$csquare  <- bargrid_sf$csquares[idx$row.id]
+  idx$element  <- Elements$Name[idx$col.id]
+  dat          <- data.frame(csquare = unique(idx$csquare))
+  banks        <- subset(idx,idx$element %in% c("bk","sedBk"))
+  dat$banks[dat$csquare %in% unique(banks$csquare)] <- 1
+  corMd        <- subset(idx,idx$element %in% c("corMd"))
+  dat$corMd[dat$csquare %in% unique(corMd$csquare)] <- 1
+  mudVolc        <- subset(idx,idx$element %in% c("mudVolc"))
+  dat$mudVolc[dat$csquare %in% unique(mudVolc$csquare)] <- 1
+  seaMt        <- subset(idx,idx$element %in% c("seaMt"))
+  dat$seaMt[dat$csquare %in% unique(seaMt$csquare)] <- 1
+  bargrid <- cbind(bargrid,dat[match(bargrid@data$csquares,dat$csquare),
+                               c("banks","corMd","mudVolc","seaMt")])
+
+#################
+  bargrid_sf <- bargrid_sf %>% 
+    dplyr::mutate(FareaM = dplyr::case_when(intersect_fishing_activity(bargrid_sf,New_mobile) = 1, ~0),
+                  FareaS = dplyr::case_when(intersect_fishing_activity(bargrid_sf,New_static) = 1, ~0),
+                  FareaC = dplyr::case_when(intersect_fishing_activity(bargrid_sf,New_comb) = 1, ~0)) %>% 
+    dplyr::mutate(scen11 = dplyr::case_when(select_intersecting_csquares(VMEgrid_new, scen11_prev, fraction =0.9) = 1, ~ 0),
+                  scen12 = dplyr::case_when(select_intersecting_csquares(VMEgrid_new, scen12_prev, fraction =0.9) = 1, ~ 0),
+                  scen21 = dplyr::case_when(select_intersecting_csquares(VMEgrid_new, scen21_prev, fraction =0.9) = 1, ~ 0),
+                  scen22 = dplyr::case_when(select_intersecting_csquares(VMEgrid_new, scen22_prev, fraction =0.9) = 1, ~ 0),
+                  scen23 = NA)
   
+  bargrid <- sf::as_Spatial(bargrid_sf)
   
+
+grid_ids_intersecting_with_layer <- function(grid, col_id, layer) {
+  grid_over    <- st_intersects(grid,layer)
+  idx          <- as.data.frame(grid_over)
+  grid$col_id %in% idx$row.id
+  
+}
+    
+  
+select_intersecting_csquares <- function(grid, scenario, fraction) {
+  intersection <- st_intersection(grid,st_make_valid(scenario))
+  intersection$area <- st_area(st_make_valid(intersection))/10^6
+  intersection$frac <- as.numeric(intersection$area/intersection$area_sqkm)
+  intersection$frac > fraction
+}
+
   
