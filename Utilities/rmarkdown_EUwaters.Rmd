@@ -62,28 +62,59 @@ cat(datacallyear)
 VME data call). This information has been collected through various gear types and survey methods. 
 
 ## New VME data {.tabset } 
-New VME habitat and indicator records were submitted and quality checked. This resulted in
-```{r , results = 'asis'}
+Previously, 
+```{r, results='asis'}
   reg  <- subset(table1,table1$EEZ %in% Region_ID)  
-  cat(sum(c(length(which(reg$New_VMEs==3 & reg$cat =="de2_4")),length(which(reg$New_VMEs==3 & reg$cat  =="de4_8")), length(which(reg$New_VMEs==3 & reg$cat =="de8")))))
+  cat(sum(reg$Exist_VMEs ==3, na.rm = TRUE))
 ```
-new VME Habitat c-squares and 
-```{r , results = 'asis'}
-  cat(sum(c(length(which(reg$New_VMEs %in% c(0,1,2) & reg$cat =="de2_4")),length(which(reg$New_VMEs %in% c(0,1,2) & reg$cat  =="de4_8")), length(which(reg$New_VMEs %in% c(0,1,2) & reg$cat =="de8")))))
+VME habitat c-squares and
+```{r, results='asis'}
+  cat(sum(reg$Exist_VMEs %in% c(0:2), na.rm = TRUE))
 ```
-new VME Index c-squares;
-```{r , results = 'asis'}
-  cat(sum(c(length(which(reg$New_VMEs %in% c(2) & reg$cat =="de2_4")),length(which(reg$New_VMEs %in% c(2) & reg$cat  =="de4_8")), length(which(reg$New_VMEs %in% c(2) & reg$cat =="de8")))))
+VME Index c-squares were identified
+
+```{r, results='asis'}
+if (length(!is.na(reg$New_VMEs))==0){
+  cat("This latest assesment has not identified additional VME Habitat or Index c-squares.")
+  } else {
+  cat("New VME habitat and indicator records were submitted and quality checked. This resulted in ")
+  cat(sum(reg$New_VMEs==3, na.rm = TRUE))
+  
+  cat(" new VME Habitat c-squares and ")
+  cat(sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE))
+  
+  cat(" new VME Index c-squares; ")
+  cat(sum(reg$New_VMEs %in% 2, na.rm = TRUE))
+  
+  cat(" index High, ")
+  cat(sum(reg$New_VMEs %in% 1, na.rm = TRUE))
+  
+  cat(" index Medium and ")
+  cat(sum(reg$New_VMEs %in% 0, na.rm = TRUE))
+  
+  cat(" index Low.")
+  
+  glue("
+  New VME habitat and indicator records were submitted and quality checked.",
+  "This resulted in ",
+  "{sum(reg$New_VMEs==3, na.rm = TRUE)} new VME Habitat c-squares and ",
+  "{sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE)} new VME Index c-squares; ",
+  "{sum(reg$New_VMEs %in% 2, na.rm = TRUE)} index High, ",
+  "{sum(reg$New_VMEs %in% 1, na.rm = TRUE)} index Medium and ",
+  "{sum(reg$New_VMEs %in% 0, na.rm = TRUE)} index Low."
+  )
+  glue("
+  New VME habitat and indicator records were submitted and quality checked. This resulted in \\
+  {sum(reg$New_VMEs==3, na.rm = TRUE)} new VME Habitat c-squares and \\
+  {sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE)} new VME Index c-squares; \\
+  {sum(reg$New_VMEs %in% 2, na.rm = TRUE)} index High, \\
+  {sum(reg$New_VMEs %in% 1, na.rm = TRUE)} index Medium and \\
+  {sum(reg$New_VMEs %in% 0, na.rm = TRUE)} index Low."
+  )
+  
+}
 ```
-index High, 
-```{r , results = 'asis'}
-  cat(sum(c(length(which(reg$New_VMEs %in% c(1) & reg$cat =="de2_4")),length(which(reg$New_VMEs %in% c(1) & reg$cat  =="de4_8")), length(which(reg$New_VMEs %in% c(1) & reg$cat =="de8")))))
-```
-index Medium and 
-```{r , results = 'asis'}
-  cat(sum(c(length(which(reg$New_VMEs %in% c(0) & reg$cat =="de2_4")),length(which(reg$New_VMEs %in% c(0) & reg$cat  =="de4_8")), length(which(reg$New_VMEs %in% c(0) & reg$cat =="de8")))))
-```
-index Low.
+
 <br>
 
 ```{r , results = 'asis'}
