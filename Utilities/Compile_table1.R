@@ -24,33 +24,33 @@ tab1[17,2]    <- sum(reg$mudVolc,na.rm=T)
 tab1[c(2:4,6:8,10:12),c(3,4,5)] <- 0
 
 if (1 %in% reg$FareaM){
-  tt <- table(factor(reg$cat)[reg$FareaM==1],factor(reg$Tot_VMEs)[reg$FareaM==1]==3) 
+  tt <- table(factor(reg$cat)[reg$FareaM==1],factor(reg$Exist_VMEs)[reg$FareaM==1]==3) 
   if(length(which(colnames(tt) =="TRUE")) == 1){tab1[2:4,3] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(reg$cat[reg$FareaM==1],reg$Tot_VMEs[reg$FareaM==1] %in% c(2,1))
+  tt <- table(reg$cat[reg$FareaM==1],reg$Exist_VMEs[reg$FareaM==1] %in% c(2,1))
   if(length(which(colnames(tt) =="TRUE")) == 1){tab1[6:8,3] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(reg$cat[reg$FareaM==1],reg$Tot_VMEs[reg$FareaM==1] %in% c(0))
+  tt <- table(reg$cat[reg$FareaM==1],reg$Exist_VMEs[reg$FareaM==1] %in% c(0))
   if(length(which(colnames(tt) =="TRUE")) == 1){tab1[10:12,3] <- tt[,which(colnames(tt) =="TRUE")]}
   tab1[14:17,3]  <- c(sum(reg$seaMt[reg$FareaM==1],na.rm=T),sum(reg$banks[reg$FareaM==1],na.rm=T),
                       sum(reg$corMd[reg$FareaM==1],na.rm=T),sum(reg$mudVolc[reg$FareaM==1],na.rm=T))
 }
 
 if (1 %in% reg$FareaS){
-  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Tot_VMEs)[reg$FareaS==1]==3)
+  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Exist_VMEs)[reg$FareaS==1]==3)
   if(length(which(colnames(tt) =="TRUE")) == 1){tab1[2:4,4] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Tot_VMEs)[reg$FareaS==1] %in% c(2,1))
+  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Exist_VMEs)[reg$FareaS==1] %in% c(2,1))
   if(length(which(colnames(tt) =="TRUE")) == 1){ tab1[6:8,4] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Tot_VMEs)[reg$FareaS==1] %in% c(0))
+  tt <- table(factor(reg$cat)[reg$FareaS==1],factor(reg$Exist_VMEs)[reg$FareaS==1] %in% c(0))
   if(length(which(colnames(tt) =="TRUE")) == 1){ tab1[10:12,4] <- tt[,which(colnames(tt) =="TRUE")]}
   tab1[14:17,4]  <- c(sum(reg$seaMt[reg$FareaS==1],na.rm=T),sum(reg$banks[reg$FareaS==1],na.rm=T),
                       sum(reg$corMd[reg$FareaS==1],na.rm=T),sum(reg$mudVolc[reg$FareaS==1],na.rm=T))
 }
 
 if (1 %in% reg$FareaC){
-  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Tot_VMEs)[reg$FareaC==1]==3)
+  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Exist_VMEs)[reg$FareaC==1]==3)
   if(length(which(colnames(tt) =="TRUE")) == 1){ tab1[2:4,5] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Tot_VMEs)[reg$FareaC==1] %in% c(2,1))
+  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Exist_VMEs)[reg$FareaC==1] %in% c(2,1))
   if(length(which(colnames(tt) =="TRUE")) == 1){ tab1[6:8,5] <- tt[,which(colnames(tt) =="TRUE")]}
-  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Tot_VMEs)[reg$FareaC==1] %in% c(0))
+  tt <- table(factor(reg$cat)[reg$FareaC==1],factor(reg$Exist_VMEs)[reg$FareaC==1] %in% c(0))
   if(length(which(colnames(tt) =="TRUE")) == 1){ tab1[10:12,5] <- tt[,which(colnames(tt) =="TRUE")]}
   tab1[14:17,5]  <- c(sum(reg$seaMt[reg$FareaC==1],na.rm=T),sum(reg$banks[reg$FareaC==1],na.rm=T),
                       sum(reg$corMd[reg$FareaC==1],na.rm=T),sum(reg$mudVolc[reg$FareaC==1],na.rm=T))
