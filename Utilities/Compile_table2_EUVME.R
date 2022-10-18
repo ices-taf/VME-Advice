@@ -142,7 +142,7 @@ tab2[,1] <- c("VME polygon description","","VME polygon outcomes","% of fishable
               "% of VME polygon protected by existing VME fishery closures",
               "Number of VME polygons and their average areal extent (size)",
               "Number (and average size) of large VME polygons in upper 25<sup>th</sup> percentile of the size distribution",
-              "Risk to VME","Fishery consequences",
+              "Risk to VME*","Fishery consequences",
               "% of effort per year by static gear (400-800m depth) overlapping with VME polygons (average annual effort between 2018 to 2020)",
               "% of fished area (400-800m depth) by static gear overlapping with VME polygons between 2018 to 2020",
               "% of SAR  by mobile gear (400-800m depth) overlapping with VME polygons (average annual SAR between 2018 to 2020)",

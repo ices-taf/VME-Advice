@@ -424,6 +424,8 @@ Summary table of scenario outcomes and associated risk to VMEs.
   
 
 ```
+\* Risks to VMEs are not currently quantifiable due to no agreed metrics. <br>
+
 
 ## Interpretation of results {.tabset } 
 ```{r , results = 'asis'}
