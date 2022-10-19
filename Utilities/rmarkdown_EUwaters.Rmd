@@ -272,6 +272,7 @@ Update of the VME polygons following the scenarios/options.
 
 nam <- c("EEZ boundaries", 
            "Depth zone 400-800m (prelim.)",
+           "Existing VME C-sq.","New VME C-sq.",
            "Existing VME polygon S1 O1","New VME polygon S1 O1",
            "Existing VME polygon S1 O2","New VME polygon S1 O2",
            "Existing VME polygon S2 O1","New VME polygon S2 O1",
@@ -294,20 +295,20 @@ mfs2 <- leaflet() %>%
     addPolygons(data = s_Reg_depth, group = nam[2],
                 stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
 
-    addPolygons(data = s_scen11_prev, group=nam[3],
+    addPolygons(data = s_scen11_prev, group=nam[5],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[1]) %>%
-    addPolygons(data = s_scen12_prev, group=nam[5],
+    addPolygons(data = s_scen12_prev, group=nam[7],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[2]) %>%
-    addPolygons(data = s_scen21_prev, group=nam[7],
+    addPolygons(data = s_scen21_prev, group=nam[9],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[3]) %>%
-    addPolygons(data = s_scen22_prev, group=nam[9],
+    addPolygons(data = s_scen22_prev, group=nam[11],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[4]) %>%
-    addPolygons(data = s_scen23_prev, group=nam[11],
+    addPolygons(data = s_scen23_prev, group=nam[13],
                 stroke = TRUE, fillOpacity = 0.4, smoothFactor = 0.5, opacity = 0.5, weight = 2, color = optpalOld[5]) %>%  
   
     # potential closures
     addPolygons(data = s_scen11,
-                group = nam[4],
+                group = nam[6],
                 layerId = s_scen11$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -321,7 +322,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen11$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen12, 
-                group=nam[6],
+                group=nam[8],
                 layerId = s_scen12$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -335,7 +336,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen12$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen21, 
-                group=nam[8],
+                group=nam[10],
                 layerId = s_scen21$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -349,7 +350,7 @@ mfs2 <- leaflet() %>%
                 popup = s_scen21$popTbl,
                 options = pathOptions(pane = "scens")) %>%
     addPolygons(data = s_scen22, 
-                group=nam[10],
+                group=nam[12],
                 layerId = s_scen22$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -364,7 +365,7 @@ mfs2 <- leaflet() %>%
                 options = pathOptions(pane = "scens")) %>%
 
     addPolygons(data = s_scen23, 
-                group=nam[12],
+                group=nam[14],
                 layerId = s_scen23$id,
                 stroke = FALSE, 
                 fillOpacity = 0.7,
@@ -381,15 +382,25 @@ mfs2 <- leaflet() %>%
     
     # existing footprints
 
-    addPolygons(data = s_EUFootp, group = nam[13],
+    addPolygons(data = s_EUFootp, group = nam[15],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+  
+    # VME csquares
+  
+    addPolygons(data = s_VMEgrid_old, group = nam[3],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
+    
+    addPolygons(data = s_VMEgrid_new, group = nam[4],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                color = ~VMEpal(VME_Class_Lab)) %>%
     
    # Layers control
     addLayersControl(
       overlayGroups = nam)%>%
   
   # hide 
-  hideGroup(nam[c(4:13)])
+  hideGroup(nam[c(6:15)])
 
 ```
 
@@ -402,7 +413,7 @@ mfs2
 ### Key to map layers
 
 ```{r map2 key}
-map2layers <- map2layers[-c(1,4,13,14),] 
+map2layers <- map2layers[-c(1,4,15,16),] 
 map2layers[,-2] %>%
   kbl('html',escape = FALSE, align='l',row.names=F,col.names = c('Layer','Description')) %>%
   kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
