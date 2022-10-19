@@ -35,7 +35,7 @@
   colnames(Regiontab1)[ncol(Regiontab1)] <- "mobeff"
   
 # make the table
-  tab2 <- as.data.frame(matrix(data=NA,nrow = 13, ncol= 6))
+  tab2 <- as.data.frame(matrix(data=NA,nrow = 14, ncol= 6))
 
 # calculate overlap with fishable domain
   FD_scen11 <- st_intersection(scen11_R,Fishdom); FD_scen11 <- st_make_valid(FD_scen11)
@@ -97,24 +97,32 @@
   tab2[7,5] <- paste(length(sc22p25)," (",round(mean(sc22areas[sc22p25]),digits=1)," km<sup>2</sup>)",sep="")
   tab2[7,6] <- paste(length(sc23p25)," (",round(mean(sc23areas[sc23p25]),digits=1)," km<sup>2</sup>)",sep="")
 
+# Total area closed
+  
+  tab2[8,2] <- paste(round(sum(st_area(scen11_R)),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[8,3] <- paste(round(sum(st_area(scen12_R)),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[8,4] <- paste(round(sum(st_area(scen21_R)),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[8,5] <- paste(round(sum(st_area(scen22_R)),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[8,6] <- paste(round(sum(st_area(scen23_R)),digits=1)," km<sup>2</sup>)",sep="")
+  
 # overlap between static fishing effort and vme polygons
 # not available
 
 # overlap between static fishing area and vme polygons
   SF_scen11 <- st_intersection(scen11_R,Static_fish); SF_scen11 <- st_make_valid(SF_scen11)
-  tab2[11,2] <- round(sum(st_area(SF_scen11))/sum(st_area(Static_fish)) * 100,digits = 1)
+  tab2[12,2] <- round(sum(st_area(SF_scen11))/sum(st_area(Static_fish)) * 100,digits = 1)
   
   SF_scen12 <- st_intersection(scen12_R,Static_fish); SF_scen12 <- st_make_valid(SF_scen12)
-  tab2[11,3] <- round(sum(st_area(SF_scen12))/sum(st_area(Static_fish)) * 100,digits = 1)
+  tab2[12,3] <- round(sum(st_area(SF_scen12))/sum(st_area(Static_fish)) * 100,digits = 1)
   
   SF_scen21 <- st_intersection(scen21_R,Static_fish); SF_scen21 <- st_make_valid(SF_scen21)
-  tab2[11,4] <- round(sum(st_area(SF_scen21))/sum(st_area(Static_fish)) * 100,digits = 1)
+  tab2[12,4] <- round(sum(st_area(SF_scen21))/sum(st_area(Static_fish)) * 100,digits = 1)
   
   SF_scen22 <- st_intersection(scen22_R,Static_fish); SF_scen22 <- st_make_valid(SF_scen22)
-  tab2[11,5] <- round(sum(st_area(SF_scen22))/sum(st_area(Static_fish)) * 100,digits = 1)
+  tab2[12,5] <- round(sum(st_area(SF_scen22))/sum(st_area(Static_fish)) * 100,digits = 1)
   
   SF_scen23 <- st_intersection(scen23_R,Static_fish); SF_scen23 <- st_make_valid(SF_scen23)
-  tab2[11,6] <- round(sum(st_area(SF_scen23))/sum(st_area(Static_fish)) * 100,digits = 1)
+  tab2[12,6] <- round(sum(st_area(SF_scen23))/sum(st_area(Static_fish)) * 100,digits = 1)
 
 # overlap between mobile fishing effort and vme polygons
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce11_quarter_csq_grid.RData",sep="/"))
@@ -122,56 +130,57 @@
   sce11@data$area_sqkm <- area(sce11)/10^6
   sce11 <- cbind(sce11, Regiontab1[match(sce11$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce11@data)[ncol(sce11@data)] <- "mobeff"
-  tab2[12,2] <- round(sum(sce11@data$area_sqkm * sce11@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  tab2[13,2] <- round(sum(sce11@data$area_sqkm * sce11@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce12_quarter_csq_grid.RData",sep="/"))
   sce12 <- subset(sce12,sce12@data$csquares %in% Regiontab1$csquares)
   sce12@data$area_sqkm <- area(sce12)/10^6
   sce12 <- cbind(sce12, Regiontab1[match(sce12$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce12@data)[ncol(sce12@data)] <- "mobeff"
-  tab2[12,3] <- round(sum(sce12@data$area_sqkm * sce12@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  tab2[13,3] <- round(sum(sce12@data$area_sqkm * sce12@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce21_quarter_csq_grid.RData",sep="/"))
   sce21 <- subset(sce21,sce21@data$csquares %in% Regiontab1$csquares)
   sce21@data$area_sqkm <- area(sce21)/10^6
   sce21 <- cbind(sce21, Regiontab1[match(sce21$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce21@data)[ncol(sce21@data)] <- "mobeff"
-  tab2[12,4] <- round(sum(sce21@data$area_sqkm * sce21@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  tab2[13,4] <- round(sum(sce21@data$area_sqkm * sce21@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce22_quarter_csq_grid.RData",sep="/"))
   sce22 <- subset(sce22,sce22@data$csquares %in% Regiontab1$csquares)
   sce22@data$area_sqkm <- area(sce22)/10^6
   sce22 <- cbind(sce22, Regiontab1[match(sce22$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce22@data)[ncol(sce22@data)] <- "mobeff"
-  tab2[12,5] <- round(sum(sce22@data$area_sqkm * sce22@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  tab2[13,5] <- round(sum(sce22@data$area_sqkm * sce22@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce23_quarter_csq_grid.RData",sep="/"))
   sce23 <- subset(sce23,sce23@data$csquares %in% Regiontab1$csquares)
   sce23@data$area_sqkm <- area(sce23)/10^6
   sce23 <- cbind(sce23, Regiontab1[match(sce23$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce23@data)[ncol(sce23@data)] <- "mobeff"
-  tab2[12,6] <- round(sum(sce23@data$area_sqkm * sce23@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  tab2[13,6] <- round(sum(sce23@data$area_sqkm * sce23@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
   
 # overlap between mobile fishing area and vme polygons
   SF_scen11 <- st_intersection(scen11_R,Mobile_fish); SF_scen11 <- st_make_valid(SF_scen11)
-  tab2[13,2] <- round(sum(st_area(SF_scen11))/sum(st_area(Mobile_fish)) * 100,digits = 1)
+  tab2[14,2] <- round(sum(st_area(SF_scen11))/sum(st_area(Mobile_fish)) * 100,digits = 1)
   
   SF_scen12 <- st_intersection(scen12_R,Mobile_fish); SF_scen12 <- st_make_valid(SF_scen12)
-  tab2[13,3] <- round(sum(st_area(SF_scen12))/sum(st_area(Mobile_fish)) * 100,digits = 1)
+  tab2[14,3] <- round(sum(st_area(SF_scen12))/sum(st_area(Mobile_fish)) * 100,digits = 1)
   
   SF_scen21 <- st_intersection(scen21_R,Mobile_fish); SF_scen21 <- st_make_valid(SF_scen21)
-  tab2[13,4] <- round(sum(st_area(SF_scen21))/sum(st_area(Mobile_fish)) * 100,digits = 1)
+  tab2[14,4] <- round(sum(st_area(SF_scen21))/sum(st_area(Mobile_fish)) * 100,digits = 1)
   
   SF_scen22 <- st_intersection(scen22_R,Mobile_fish); SF_scen22 <- st_make_valid(SF_scen22)
-  tab2[13,5] <- round(sum(st_area(SF_scen22))/sum(st_area(Mobile_fish)) * 100,digits = 1)
+  tab2[14,5] <- round(sum(st_area(SF_scen22))/sum(st_area(Mobile_fish)) * 100,digits = 1)
   
   SF_scen23 <- st_intersection(scen23_R,Mobile_fish); SF_scen23 <- st_make_valid(SF_scen23)
-  tab2[13,6] <- round(sum(st_area(SF_scen23))/sum(st_area(Mobile_fish)) * 100,digits = 1)
+  tab2[14,6] <- round(sum(st_area(SF_scen23))/sum(st_area(Mobile_fish)) * 100,digits = 1)
 
 tab2[,1] <- c("VME polygon description","","VME polygon outcomes","% of fishable domain identified as VME polygon",
               "% of VME polygon protected by existing VME fishery closures",
               "Number of VME polygons and their average areal extent (size)",
               "Number (and average size) of large VME polygons in upper 25<sup>th</sup> percentile of the size distribution",
+              "Total area closed",
               "Risk to VME*","Fishery consequences",
               "% of [effort] per year by static gear (>200m depth) overlapping with VME polygons (average annual [effort] between 2018 to 2020)",
               "% of fished area (>200m depth) by static gear overlapping with VME polygons between 2018 to 2020",
