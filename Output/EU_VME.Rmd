@@ -99,7 +99,22 @@ To be completed following input from regional experts
 ## Assessment methodology
 
 [Links to  relevent  WG documentation](https://www.ices.dk/Pages/default.aspx)
-## Sources and References
+## Read me {.tabset } 
+```{r , results = 'asis'}
+tt <- subset(textreg,textreg$Tab == "Read me")
+for(i in 1:nrow(tt)){
+  cat(tt[i,3])
+  }
+```
+
+## Sources and references  {.tabset } 
+```{r , results = 'asis'}
+tt <- subset(textreg,textreg$Tab == "References")
+for(i in 1:nrow(tt)){
+  cat(tt[i,3])
+  }
+```
+
 
 ADG to provide 
 ## {-}

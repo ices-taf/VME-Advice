@@ -240,6 +240,7 @@ Summary table of overlap between fishing activities and new and cumulative VME e
 
   tab1[is.na(tab1)] <- ""
   tab1 %>% 
+    filter(across(1, ~. %in% -c("200-400m", ">800m"))) %>% 
     kable('html',escape = FALSE, align=c('l',rep('c',11)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'Mobile gears','Static gears',' M + S gears',' ', 'All')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
@@ -253,14 +254,15 @@ Summary table of overlap between fishing activities and new and cumulative VME e
     add_header_above(c(" " = 1,'Existing' = 4," "=1, 'New/updated in 2021'=4, " "=1, 'Total'=1),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
     add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 ```
-<br>
+### Overlap between new and previously defined VME c-sqs    
 Summary table of overlap between new and updated VME C-squares and already defined VME closures???
 <br>
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
   
   tab1b[is.na(tab1b)] <- ""
   
-  tab1b  %>%
+  tab1 %>% 
+    filter(across(1, ~. %in% -c("200-400m", ">800m"))) %>% 
     kable('html',escape = FALSE, align=c('l',rep('c',6)),row.names = FALSE,col.names = c('','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
@@ -495,22 +497,6 @@ Summary table of scenario outcomes and associated risk to VMEs.
 ## Interpretation of results {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Interpretation")
-for(i in 1:nrow(tt)){
-  cat(tt[i,3])
-  }
-```
-
-## Read me {.tabset } 
-```{r , results = 'asis'}
-tt <- subset(textreg,textreg$Tab == "Read me")
-for(i in 1:nrow(tt)){
-  cat(tt[i,3])
-  }
-```
-
-## Sources and references  {.tabset } 
-```{r , results = 'asis'}
-tt <- subset(textreg,textreg$Tab == "References")
 for(i in 1:nrow(tt)){
   cat(tt[i,3])
   }
