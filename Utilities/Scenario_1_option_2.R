@@ -4,7 +4,7 @@
 # load VME observations
   VMEobs <- read.csv(paste(pathdir_nogit,paste(
                          "VME data repository/VME observations and csquares/VME_observations_datacall_",
-                         datacallyear,".csv",sep=""),sep="/"),
+                         datacallyear,"_eu.csv",sep=""),sep="/"),
                    header=T,sep=",",row.names = NULL)
   
   # get all in ICES area
@@ -14,29 +14,41 @@
   VMEobs <- subset(VMEobs,!(VMEobs$VME_Indicator =="NULL" & VMEobs$HabitatType =="NULL")) 
 
 # create polypoints based on the middle lat and long
-  data <- data.frame(VMEid =VMEobs$ï..ICES_ID,
+  data <- data.frame(VMEid = VMEobs[,2],
                      VME_longitude = VMEobs$MiddleLongitude,
                      VME_latitude  = VMEobs$MiddleLatitude,
                      stringsAsFactors = F)
-
+  
   coordinates(data) <- c("VME_longitude","VME_latitude")
   data@data$VME_longitude <- VMEobs$MiddleLongitude
   data@data$VME_latitude <- VMEobs$MiddleLatitude
   VMEobs_points <- data
+  
+  # data <- data.frame(VMEid =VMEobs$?..ICES_ID,
+  #                    VME_longitude = VMEobs$MiddleLongitude,
+  #                    VME_latitude  = VMEobs$MiddleLatitude,
+  #                    stringsAsFactors = F)
+  # 
+  # coordinates(data) <- c("VME_longitude","VME_latitude")
+  # data@data$VME_longitude <- VMEobs$MiddleLongitude
+  # data@data$VME_latitude <- VMEobs$MiddleLatitude
+  # VMEobs_points <- data
 
 # load VME elements
-  Bank       <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Bank.shp",sep="/"))
-  Bank       <- st_make_valid(Bank)
-  Coralmound <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_CoralMounds.shp",sep="/"))
-  Coralmound <- st_make_valid(Coralmound)
-  Mudvolcano <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Mud_Volcano.shp",sep="/"))
-  Mudvolcano <- st_make_valid(Mudvolcano)
-  Seamount   <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Seamount.shp",sep="/"))
-  Seamount   <- st_make_valid(Seamount)
-  Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
+  # Bank       <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Bank.shp",sep="/"))
+  # Bank       <- st_make_valid(Bank)
+  # Coralmound <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_CoralMounds.shp",sep="/"))
+  # Coralmound <- st_make_valid(Coralmound)
+  # Mudvolcano <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Mud_Volcano.shp",sep="/"))
+  # Mudvolcano <- st_make_valid(Mudvolcano)
+  # Seamount   <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Seamount.shp",sep="/"))
+  # Seamount   <- st_make_valid(Seamount)
+  # Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
+  Elements <- st_read(paste(pathdir_nogit, "VME data repository/VME elements/VME_elements.gpkg", sep="/")) %>%
+    st_make_valid()
   
 # change VME observations to same projection
-  Proj     <- as(Bank, 'Spatial')
+  Proj     <- as(Elements[1,], 'Spatial')
   proj4string(VMEobs_points) <- CRS(proj4string(Proj)) 
   VMEobs_points <- st_as_sf(VMEobs_points)
   VMEobs_poly   <- VMEobs_points
@@ -66,9 +78,9 @@
 # add VMEs
   VME <- read.csv(paste(pathdir_nogit,paste(
                         "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-                        datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+                        datacallyear,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
-  VME <- VME[,-1]
+  #VME <- VME[,-1]
   VME <-  cbind(VME, bargrid@data[match(VME$CSquare,bargrid@data$csquares), c("long","lat")])
   VME$uni <- paste(VME$long,VME$lat)
 

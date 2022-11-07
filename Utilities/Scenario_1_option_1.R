@@ -29,9 +29,9 @@
 # add VMEs
   VME <- read.csv(paste(pathdir_nogit,paste(
                   "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-                  datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+                  datacallyear,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
   VME <- as.data.frame(VME)
-  VME <- VME[,-1]
+  #VME <- VME[,-1]
   
   # create VME spatial grid
   VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))

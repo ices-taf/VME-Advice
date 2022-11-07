@@ -25,25 +25,27 @@
  
 #------------------------------------------------------------------------------------- 
 # load VME physical elements
- Bank       <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Bank.shp",sep="/"))
- Bank       <- st_make_valid(Bank)
- Coralmound <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_CoralMounds.shp",sep="/"))
- Coralmound <- st_make_valid(Coralmound)
- Mudvolcano <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Mud_Volcano.shp",sep="/"))
- Mudvolcano <- st_make_valid(Mudvolcano)
- Seamount   <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Seamount.shp",sep="/"))
- Seamount   <- st_make_valid(Seamount)
- Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
- rm(Bank,Coralmound,Mudvolcano,Seamount)
+ # Bank       <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Bank.shp",sep="/"))
+ # Bank       <- st_make_valid(Bank)
+ # Coralmound <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_CoralMounds.shp",sep="/"))
+ # Coralmound <- st_make_valid(Coralmound)
+ # Mudvolcano <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Mud_Volcano.shp",sep="/"))
+ # Mudvolcano <- st_make_valid(Mudvolcano)
+ # Seamount   <- st_read(paste(pathdir_nogit,"VME data repository/VME elements/EMODNET_Seamount.shp",sep="/"))
+ # Seamount   <- st_make_valid(Seamount)
+ # Elements   <- rbind(Bank,Coralmound,Mudvolcano,Seamount)
+ # rm(Bank,Coralmound,Mudvolcano,Seamount)
+ Elements <- st_read(paste(pathdir_nogit, "VME data repository/VME elements/VME_elements.gpkg", sep="/")) %>%
+   st_make_valid()
  
  
 #-------------------------------------------------------------------------------------
 # load all available VMEs from previous year (datacallyear - 1)
  VME <- read.csv(paste(pathdir_nogit,paste(
                  "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-                                  datacallyear-1,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+                                  datacallyear-1,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
  VME <- as.data.frame(VME)
- VME <- VME[,-1]
+ #VME <- VME[,-1]
  
  # create VME spatial grid
  load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
@@ -62,9 +64,9 @@
 # load latest VME information (datacallyear)
  VME <- read.csv(paste(pathdir_nogit,paste(
    "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-   datacallyear,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+   datacallyear,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
  VME <- as.data.frame(VME)
- VME <- VME[,-1]
+ #VME <- VME[,-1]
  
  VMEgrid       <- subset(bargrid,bargrid@data$csquares %in% unique(VME$CSquare))
  VMEgrid       <- cbind(VMEgrid, VME[match(VMEgrid@data$csquares,VME$CSquare), c("VME_Class")])
@@ -115,6 +117,9 @@
                                             "United Kingdom","Norway","Denmark","Sweden",
                                             "Germany","Iceland","Belgium","Greenland","Azores","Netherlands"))
 
+ # Combined ICES ecoregions and EEZs
+ shape_ices_EEZ <- st_read(paste(pathdir,"1-Input data/eco_bathymetry_v2/ICES_Ecoregions_EEZext_Bob_CS_AZ_diss_noUK_single_export.shp",sep="/")) %>% 
+   st_make_valid()
  
 #-------------------------------------------------------------------------------------
 # get 400-800 meter depths
@@ -123,31 +128,35 @@
 # and the other area - EMODNET depth has been updated - need to decide
 # which depth to use in the update of the advice
  
- # EUVME depth based on EmodNet 2018
+ # # EUVME depth based on EmodNet 2018
  load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400))
  IREG$within <- 1  # if TRUE
  depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
  colnames(depth)[ncol(depth)] <- "within"
  depth$within[is.na(depth$within)] <- 0 # if not TRUE
  depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
  depth_EUVME <- depth
- 
+
  #  depth based on EmodNet 2020 (for areas without Emodnet coverage GEBCO is used)
  load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+ IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400))
  IREG$within <- 1  # if TRUE
  depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
  colnames(depth)[ncol(depth)] <- "within"
  depth$within[is.na(depth$within)] <- 0 # if not TRUE
  depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
- 
+
  depth <- subset(depth, !(depth$Ecoregion %in% c("Celtic Seas","Greater North Sea",
                                                  "Bay of Biscay and the Iberian Coast")))
- # combined depth 
+ # combined depth
  depth <- rbind(depth,depth_EUVME)
+ 
+ depth2 <- st_read(paste(pathdir,"1-Input data/eco_bathymetry_v2/Fishnet_Csquares_Extended_ICES_area_join_labels_belowZero.shp",sep="/")) %>% 
+   st_drop_geometry()
+ depth2 %>% mutate(within = case_when(Depth_min < 800 & Depth_max > 400 ~ 1, TRUE ~ 0))
  
  # create polygon of 400-800m depths 
  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)

@@ -23,14 +23,14 @@
 # step 1 - assessment year, rlibraries and folder structure
 #------------------------------------------------------------------------------------- 
  
-  datacallyear     <- 2021   # VME data call year with latest data
+  datacallyear     <- 2022   # VME data call year with latest data
   datacallyear_VMS <- 2021   # VMS data call year with latest data
   
   # set path to the VME advice folder
-  pathdir <- "C:/Users/danie/Documents/Online for git/VME-advice"
+  pathdir <- "C:/Users/neilm/Documents/projects/VME-Advice/"
   
   # set path to the folder with VMS and VME data (restricted data - outside github)
-  pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" 
+  pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT/EU" 
   
   # R libraries used
   source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
@@ -52,7 +52,9 @@
   source(paste(pathdir,"Utilities/Scenario_1_option_2.R",sep="/")) 
   
   # run scenario 2 - option 1& 2 (warnings are okay)
-  refyear       <- 2009:datacallyear-1   # specify years to estimate sar threshold
+  
+  
+  refyear       <- 2009:(datacallyear-1)   # specify years to estimate sar threshold
   SAR_threshold <- 0.43                  # SAR threshold value
   source(paste(pathdir,"Utilities/Scenario_2_option_1.R",sep="/")) 
   source(paste(pathdir,"Utilities/Scenario_2_option_2.R",sep="/"))
@@ -89,6 +91,7 @@
 # Note on fishable domain: 
 # if ICES is requested to update the EU fishing footprint
 # the Footprint_update_newVMS.R can be run (see folder utilities)
+       # Need to specify the refyear_footprint to run update with
 
 #------------------------------------------------------------------------------------
 
