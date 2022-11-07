@@ -39,7 +39,7 @@ editor_options:
 ```
 
 
-## Overview {.tabset } 
+## Ecoregion Overview {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Overview")
 for(i in 1:nrow(tt)){
