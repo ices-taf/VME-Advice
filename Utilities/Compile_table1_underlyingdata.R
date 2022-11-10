@@ -15,25 +15,26 @@
   load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
   
 # load depths
-  load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
-
+  #load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
+  depth <- read.csv(paste(pathdir,"1-Input data/eco_bathymetry_v2/Extended_ICES_area_EMODNET_GEBCO_Combined.csv",sep="/"))
+  
   # get area 400-800
-  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
-  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+  IREG <- subset(depth,!(depth$Depth_min  > 800))
+  IREG <- subset(IREG, !(IREG$Depth_max  < 400)) 
   IREG$within <- 1  # if TRUE
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
   colnames(depth)[ncol(depth)] <- "de4_8"
   depth$de4_8[is.na(depth$de4_8)] <- 0 # if not TRUE
   
   # get area 200-400  
-  IREG <- subset(depth,!(depth$min_depth_emodnet > 400))
-  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 200)) 
+  IREG <- subset(depth,!(depth$Depth_min  > 400))
+  IREG <- subset(IREG, !(IREG$Depth_max  < 200)) 
   IREG$within <- 1  # if TRUE
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
   colnames(depth)[ncol(depth)] <- "de2_4"
   depth$de2_4[is.na(depth$de2_4)] <- 0 # if not TRUE
   
-  IREG <- subset(depth,depth$max_depth_emodnet > 800)
+  IREG <- subset(depth,depth$Depth_max > 800)
   IREG$within <- 1  # if TRUE
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
   colnames(depth)[ncol(depth)] <- "de8"
@@ -43,9 +44,11 @@
   depth$cat <- ifelse(depth$de2_4 ==1 & depth$de4_8 ==0,"de2_4",depth$cat)
   depth$cat <- ifelse(depth$de8 ==1 & depth$de4_8 ==0,"de8",depth$cat)
   
+  
+  
   # get depth ranges
   bargrid <- subset(bargrid,bargrid@data$csquares %in% depth$csquares)
-  bargrid <- cbind(bargrid,depth[match(bargrid@data$csquares,depth$csquares),c("cat","mean_depth_emodnet")])
+  bargrid <- cbind(bargrid,depth[match(bargrid@data$csquares,depth$csquares),c("cat","Depth_mean")])
   bargrid <- subset(bargrid,!(is.na(bargrid@data$cat)))
   
   # select all c-squares
@@ -64,13 +67,13 @@
   idx$csquare  <- bargrid_sf$csquares[idx$row.id]
   idx$element  <- Elements$Name[idx$col.id]
   dat          <- data.frame(csquare = unique(idx$csquare))
-  banks        <- subset(idx,idx$element %in% c("bk","sedBk"))
+  banks        <- subset(idx,idx$element %in% c("bk","sedBk", "bank"))
   dat$banks[dat$csquare %in% unique(banks$csquare)] <- 1
-  corMd        <- subset(idx,idx$element %in% c("corMd"))
+  corMd        <- subset(idx,idx$element %in% c("corMd", "coral_mound"))
   dat$corMd[dat$csquare %in% unique(corMd$csquare)] <- 1
-  mudVolc        <- subset(idx,idx$element %in% c("mudVolc"))
+  mudVolc        <- subset(idx,idx$element %in% c("mudVolc", "mud_volcano"))
   dat$mudVolc[dat$csquare %in% unique(mudVolc$csquare)] <- 1
-  seaMt        <- subset(idx,idx$element %in% c("seaMt"))
+  seaMt        <- subset(idx,idx$element %in% c("seaMt", "seamount"))
   dat$seaMt[dat$csquare %in% unique(seaMt$csquare)] <- 1
   bargrid <- cbind(bargrid,dat[match(bargrid@data$csquares,dat$csquare),
                                                       c("banks","corMd","mudVolc","seaMt")])

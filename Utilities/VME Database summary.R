@@ -6,7 +6,7 @@
 # load the VME database extraction
 vmedb <-  read.csv(paste(pathdir_nogit,paste(
                        "VME data repository/VME observations and csquares/VME_observations_datacall_",
-                        datacallyear,".csv",sep=""),sep="/"), header=T,sep=",",row.names = NULL)
+                        datacallyear,"_eu.csv",sep=""),sep="/"), header=T,sep=",",row.names = NULL)
 
 source(paste(pathdir,"Utilities/coords_to_csquare_VMStools.R",sep="/"))
 vmedb$CSquare <- CSquare(vmedb$MiddleLongitude,vmedb$MiddleLatitude,0.05)   

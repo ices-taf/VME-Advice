@@ -4,8 +4,8 @@
 
 
 #-------------------------------------------------------------------------------------
-# load VME polygons from last year (datacallyear-1)
- dir_polprev  <- paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear-1,sep="_"),sep="/")
+# load VME polygons from last year (datacallyear-2)
+ dir_polprev  <- paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear-2,sep="_"),sep="/")
  scen11_prev  <- st_read(paste(dir_polprev,"Scenario1_option1.shp",sep="/"))
  scen12_prev  <- st_read(paste(dir_polprev,"Scenario1_option2.shp",sep="/"))
  scen21_prev  <- st_read(paste(dir_polprev,"Scenario2_option1.shp",sep="/"))
@@ -40,10 +40,15 @@
  
  
 #-------------------------------------------------------------------------------------
-# load all available VMEs from previous year (datacallyear - 1)
+# load all available VMEs from previous year (datacallyear - 1) or previous assessment - could be datacallyear -2
  VME <- read.csv(paste(pathdir_nogit,paste(
                  "VME data repository/VME observations and csquares/VME_csquares_datacall_",
-                                  datacallyear-1,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+                                  datacallyear-2,"_eu.csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+ 
+ # VME <- read.csv(paste(pathdir_nogit,paste(
+ #   "VME data repository/VME observations and csquares/VME_csquares_datacall_",
+ #   datacallyear-2,".csv",sep=""),sep="/"),header=T,sep=",",row.names = NULL)
+ 
  VME <- as.data.frame(VME)
  #VME <- VME[,-1]
  
@@ -123,40 +128,13 @@
  
 #-------------------------------------------------------------------------------------
 # get 400-800 meter depths
-# Notes:
-# now split in two - the already defined EUVME 400-800 m depth
-# and the other area - EMODNET depth has been updated - need to decide
-# which depth to use in the update of the advice
- 
- # # EUVME depth based on EmodNet 2018
- load(paste(pathdir,"1-Input data/Region_depth_EUVME.RData",sep="/"))
- IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400))
- IREG$within <- 1  # if TRUE
- depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
- colnames(depth)[ncol(depth)] <- "within"
- depth$within[is.na(depth$within)] <- 0 # if not TRUE
- depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
- depth_EUVME <- depth
 
- #  depth based on EmodNet 2020 (for areas without Emodnet coverage GEBCO is used)
- load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
- IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
- IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400))
- IREG$within <- 1  # if TRUE
- depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
- colnames(depth)[ncol(depth)] <- "within"
- depth$within[is.na(depth$within)] <- 0 # if not TRUE
- depth <- cbind(depth,bargrid@data[match(depth$csquares,bargrid@data$csquares),c(2,3)])
+ depth <- read.csv(paste(pathdir,"1-Input data/eco_bathymetry_v2/Extended_ICES_area_EMODNET_GEBCO_Combined.csv",sep="/"))
 
- depth <- subset(depth, !(depth$Ecoregion %in% c("Celtic Seas","Greater North Sea",
-                                                 "Bay of Biscay and the Iberian Coast")))
- # combined depth
- depth <- rbind(depth,depth_EUVME)
- 
- depth2 <- st_read(paste(pathdir,"1-Input data/eco_bathymetry_v2/Fishnet_Csquares_Extended_ICES_area_join_labels_belowZero.shp",sep="/")) %>% 
-   st_drop_geometry()
- depth2 %>% mutate(within = case_when(Depth_min < 800 & Depth_max > 400 ~ 1, TRUE ~ 0))
+ depth <- depth %>% 
+   mutate(within = case_when(Depth_min < 800 & Depth_max > 400 ~ 1, TRUE ~ 0)) %>% 
+   left_join(bargrid@data, by=c("csquares")) %>% 
+   select(-c(area_sqkm, long, lat))
  
  # create polygon of 400-800m depths 
  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)

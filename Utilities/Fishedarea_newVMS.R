@@ -6,21 +6,18 @@
 
   # load depths
   #load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
-  depth <- st_read(paste(pathdir,"1-Input data/eco_bathymetry_v2/Fishnet_Csquares_Extended_ICES_area_join_labels_belowZero.shp",sep="/")) %>% 
-    st_drop_geometry()
+  depth <- read.csv(paste(pathdir,"1-Input data/eco_bathymetry_v2/Extended_ICES_area_EMODNET_GEBCO_Combined.csv",sep="/"))
   
-  #depth <- subset(depth, !(depth$max_depth_emodnet  < 200)) 
-  depth <- subset(depth, !(depth$Depth_max  < -200)) 
+  depth <- subset(depth, !(Depth_max  < 200)) 
   
   #get region within 400-800 meter
-  #Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
-  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$Code)
+  Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$csquares)
+  #Reg_w <- subset(bargrid, bargrid@data$csquares %in% depth$Code)
   
   
 # get fishing data - mobile and static
-  # vmsreg  <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
-  vmsreg  <- readRDS(paste("C:/Users/neilm/Documents/VME-advice_noGIT",paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
-  
+  vmsreg  <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))
+  #vmsreg <- read.csv(paste(pathdir_nogit, paste("VMS data repository/adhoc_VMS_datacall",datacallyear_VMS,".csv",sep=""),sep="/"))
   
 # get area fished reference years
   # get c-sq with mobile fishing

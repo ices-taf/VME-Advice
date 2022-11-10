@@ -3,7 +3,7 @@
 ################################################
 
 # get table 1
-  Regiontab1 <- subset(table1, table1$EEZ %in% Region_ID)
+  Regiontab1 <- subset(table1, table1$Ecoregion %in% Region_ID)
   
 # get fishable domain in the region
   Fishdom <- s_EUFootp
@@ -13,7 +13,8 @@
   Static_fish <- st_intersection(s_New_static,s_reg) ; Static_fish <- st_make_valid(Static_fish)
 
 # get fishing SAR in the region
-  vmsreg          <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
+  vmsreg          <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))
+  #vmsreg <- read.csv(paste(pathdir_nogit, paste("VMS data repository/adhoc_VMS_datacall",datacallyear_VMS,".csv",sep=""),sep="/"))
   nam_fished      <- c(paste("SAR_total",newyear_fished,sep="_"))
   indexcol_fished <- which(names(vmsreg) %in% nam_fished) 
   vmsreg$mobeff   <- rowMeans(vmsreg[indexcol_fished],na.rm=T)
