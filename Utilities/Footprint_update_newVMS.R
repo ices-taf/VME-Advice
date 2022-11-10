@@ -5,9 +5,10 @@
   load(paste(pathdir,"1-Input data/Region_csquare_grid.RData",sep="/"))  
 
 # load depths
-  load(paste(pathdir,"1-Input data/Region_depth_prelim.RData",sep="/"))
-  IREG <- subset(depth,!(depth$min_depth_emodnet > 800))
-  IREG <- subset(IREG, !(IREG$max_depth_emodnet  < 400)) 
+  depth <- read.csv(paste(pathdir,"1-Input data/eco_bathymetry_v2/Extended_ICES_area_EMODNET_GEBCO_Combined.csv",sep="/"))
+
+  IREG <- subset(depth,!(depth$Depth_min > 800))
+  IREG <- subset(IREG, !(IREG$Depth_max  < 400)) 
   IREG$within <- 1  # if TRUE
   depth <- cbind(depth,IREG[match(depth$csquare,IREG$csquare),c("within")])
   colnames(depth)[ncol(depth)] <- "within"
@@ -19,8 +20,10 @@
   Reg_w <- subset(Reg_w@data,Reg_w@data$within == 1)
 
 # get fishing data - mobile and static
-  vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",
-                                                          datacallyear_VMS,".rds",sep=""),sep="/"))  
+  #vmsreg             <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",
+                                                        # datacallyear_VMS,".rds",sep=""),sep="/"))  
+  vmsreg  <- readRDS(paste(pathdir_nogit,   paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
+  
   
   # get c-sq with mobile fishing
   nam_footprint      <- c(paste("SAR_total",refyear_footprint,sep="_"))
@@ -135,21 +138,21 @@
   Footprint <- cbind(barsub, Reg_w[match(barsub@data$csquares,Reg_w$csquares), 
                                     c("MBCG_footprint","Static_footprint","Both_footprint")])
   
-  # for mobile footprint
-  Footprint_mobile <- subset(Footprint,Footprint@data$MBCG_footprint == 1)
-  Freg <- unionSpatialPolygons(Footprint_mobile,Footprint_mobile$MBCG_footprint)
-  Footprint_mobile <- gUnaryUnion(Freg)
-  Footprint_mobile   <- st_as_sf(Footprint_mobile)
-  Footprint_mobile <-  st_transform(Footprint_mobile, "EPSG:4326")
-  write_sf(Footprint_mobile, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_mobile.shp"))
-  
-  # for static footprint
-  Footprint_static <- subset(Footprint,Footprint@data$Static_footprint == 1)
-  Freg <- unionSpatialPolygons(Footprint_static,Footprint_static$Static_footprint)
-  Footprint_static <- gUnaryUnion(Freg)
-  Footprint_static   <- st_as_sf(Footprint_static)
-  Footprint_static <-  st_transform(Footprint_static, "EPSG:4326")
-  write_sf(Footprint_static, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_static.shp"))
+  # # for mobile footprint
+  # Footprint_mobile <- subset(Footprint,Footprint@data$MBCG_footprint == 1)
+  # Freg <- unionSpatialPolygons(Footprint_mobile,Footprint_mobile$MBCG_footprint)
+  # Footprint_mobile <- gUnaryUnion(Freg)
+  # Footprint_mobile   <- st_as_sf(Footprint_mobile)
+  # Footprint_mobile <-  st_transform(Footprint_mobile, "EPSG:4326")
+  # write_sf(Footprint_mobile, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_mobile_2022.shp"))
+  # 
+  # # for static footprint
+  # Footprint_static <- subset(Footprint,Footprint@data$Static_footprint == 1)
+  # Freg <- unionSpatialPolygons(Footprint_static,Footprint_static$Static_footprint)
+  # Footprint_static <- gUnaryUnion(Freg)
+  # Footprint_static   <- st_as_sf(Footprint_static)
+  # Footprint_static <-  st_transform(Footprint_static, "EPSG:4326")
+  # write_sf(Footprint_static, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_static_2022.shp"))
   
   # for combined footprint
   Footprint_both <- subset(Footprint,Footprint@data$Both_footprint == 1)
@@ -157,7 +160,7 @@
   Footprint_both <- gUnaryUnion(Freg)
   Footprint_both   <- st_as_sf(Footprint_both)
   Footprint_both <-  st_transform(Footprint_both, "EPSG:4326")  
-  write_sf(Footprint_both, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_both.shp"))
+  write_sf(Footprint_both, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_all_2022.shp"))
   
   # and clean
   rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","NEAFCFootp",

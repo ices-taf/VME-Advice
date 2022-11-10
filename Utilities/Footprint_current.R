@@ -6,7 +6,7 @@
 # it should be updated once the EU has established a footprint 
 
 # load EU footprint 
-  EUFootp       <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_all.shp",sep="/"))
+  EUFootp       <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_all_2022.shp",sep="/"))
   EUFootp       <- st_make_valid(EUFootp)
 
   #EUFootp_mob   <- st_read(paste(pathdir,"1-Input data/EU_fishingareas/Footprint_mobile.shp",sep="/"))
