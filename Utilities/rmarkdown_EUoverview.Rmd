@@ -1,0 +1,58 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+
+---
+#  {.tabset .tabset-fade .tabset-pills}
+
+## Assessment Overview {.tabset}
+
+### Assessment Area
+```{r eu_map, include=FALSE}
+eu_mxt <- st_bbox(shape_ices_EEZ)
+  nam <- c("EU regions with VME")
+# 
+  eu_mfs <- leaflet() %>%
+    fitBounds(eu_mxt[[1]],eu_mxt[[2]],eu_mxt[[3]],eu_mxt[[4]]) %>%
+    addProviderTiles(providers$Esri.WorldImagery)%>%
+   # boundaries
+    addPolygons(data = shape_ices_EEZ, group = nam[1],
+                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white")
+```
+
+**Areas include in the current vulnerable marine ecosystem assessment**
+```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
+eu_mfs
+```
+
+### Advice Summary
+
+To be completed following input from regional experts
+### Assessment background
+
+[Link to  request](https://www.ices.dk/Pages/default.aspx)
+
+### Assessment methodology
+
+[Links to  relevent  WG documentation](https://www.ices.dk/Pages/default.aspx)
+
+### Read me {.tabset } 
+```{r readme, results = 'asis'}
+tt <- subset(textreg,textreg$Tab == "Read me")
+for(i in 1:nrow(tt)){
+  cat(tt[i,3])
+  }
+```
+
+### Sources and references  {.tabset } 
+```{r sources, results = 'asis'}
+tt <- subset(textreg,textreg$Tab == "References")
+for(i in 1:nrow(tt)){
+  cat(tt[i,3])
+  }
+```
+
+
+ADG to provide 
+

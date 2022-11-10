@@ -1,7 +1,7 @@
 ---
-title: "EU vulnerable marine ecosystem assessment <img src=\"C:/Users/danie/Documents/Online for git/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
+title: "EU vulnerable marine ecosystem assessment <img src=\"C:/Users/neilm/Documents/projects/VME-Advice/Utilities/iceslogo.png\" style=\"float: right;\"/>"
 author: "ICES"
-date: "April 2022"
+date: "November 2022"
 output: html_document
 chunk_output_type: console
 #runtime: shiny
@@ -43,8 +43,8 @@ knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 options(knitr.duplicate.label = "allow")
 
-  pathdir       <- "C:/Users/danie/Documents/Online for git/VME-Advice"
-  pathdir_nogit <- "C:/Users/danie/Documents/Online for git/VME-advice_noGIT" # stores the VMS and VME data from sharepoint
+  pathdir       <- "C:/Users/neilm/Documents/projects/VME-Advice"
+  pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT/EU" # stores the VMS and VME data from sharepoint
   icespal       <- c('#939DBD','#012B5B','#7FA99C')
   names(icespal)<- c('lb','db','lg')
     
@@ -63,72 +63,55 @@ options(knitr.duplicate.label = "allow")
 
   # Load source data used for table 1
   load(paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
+  
+  # Load text data
+  #textreg   <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_EUVME.xlsx",sep="/"),Region_ID_Excel)
+  textreg   <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_EUVME.xlsx",sep="/"), "EUVME")
+
 
 ```
 
 
 **Available evidence on the occurrence of Vulnerable marine ecosystems (VMEs), fishing activity in relation to VMEs, and spatial management options to minimise the risk from fishing activities to VMEs**
 
-# Assessment Overview {.tabset .tabset-fade .tabset-pills}
 
-## Assessment Area
-```{r, include=FALSE}
-eu_mxt <- #st_bbox(eu_map)
-  nam <- c("EU regions with VME")
-# 
-  eu_mfs <- leaflet() %>%
-    fitBounds(eu_mxt[[1]],eu_mxt[[2]],eu_mxt[[3]],eu_mxt[[4]]) %>%
-    addProviderTiles(providers$Esri.WorldImagery)%>%
-   # boundaries
-    addPolygons(data = eu_map, group = nam[1],
-                stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white")
-```
-
-**Areas include in the current vulnerable marine ecosystem assessment**
-```{r echo=FALSE, message=FALSE,fig.asp=0.8,out.width='85%', fig.cap="** **"}
-eu_mfs
-```
-
-## Advice Summary
-
-To be completed following input from regional experts
-## Assessment background
-
-[Link to  request](https://www.ices.dk/Pages/default.aspx)
-
-## Assessment methodology
-
-[Links to  relevent  WG documentation](https://www.ices.dk/Pages/default.aspx)
-## Read me {.tabset } 
-```{r , results = 'asis'}
-tt <- subset(textreg,textreg$Tab == "Read me")
-for(i in 1:nrow(tt)){
-  cat(tt[i,3])
-  }
-```
-
-## Sources and references  {.tabset } 
-```{r , results = 'asis'}
-tt <- subset(textreg,textreg$Tab == "References")
-for(i in 1:nrow(tt)){
-  cat(tt[i,3])
-  }
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUoverview.Rmd'}
 ```
 
 
-ADG to provide 
-## {-}
-
-#  {.tabset .tabset-fade .tabset-pills}
-
-```{r EU,include=FALSE}
-  Region_ID <- c("France","Ireland","Azores","Spain","Portugal","Denmark",
-                 "Netherlands","Germany","Sweden","Belgium")
-  Region_ID_Excel <- "EUVME"
-
+## Celtic Seas {.tabset}
+```{r CS,include=FALSE}
+  Region_ID <- "Celtic Seas"
+  Region_ID_Excel <- "Celtic Seas"
+  # define fishable domain - either EU or NEAFC 
+  FishD <- "EU"
 ```
 
-```{r add-to-main, child = 'C:/Users/danie/Documents/Online for git/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
 ```
+
+## Bay of Biscay and the Iberian Coast {.tabset}
+```{r BoBIC,include=FALSE}
+  Region_ID <- "Bay of Biscay & Iberian Coast"
+  Region_ID_Excel <- "BoBIC"
+  # define fishable domain - either EU or NEAFC 
+  FishD <- "EU"
+```
+
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
+```
+
+
+## Azores {.tabset}
+```{r Az,include=FALSE}
+  Region_ID <- "Azores"
+  Region_ID_Excel <- "Azores"
+  # define fishable domain - either EU or NEAFC 
+  FishD <- "EU"
+```
+
+```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
+```
+
 
 # {-}

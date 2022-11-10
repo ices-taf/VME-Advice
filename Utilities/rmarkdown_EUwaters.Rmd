@@ -7,7 +7,7 @@ editor_options:
 ```{r region subset,include=FALSE}
 
 # set the region of interest
-  s_reg         <- subset(shapeEEZ,shapeEEZ$UNION %in% Region_ID)
+  s_reg         <- subset(shape_ices_EEZ,shape_ices_EEZ$Eco_EEZ %in% Region_ID)
   s_scen11_prev <- st_intersection(st_make_valid(scen11_prev),s_reg)
   s_scen12_prev <- st_intersection(st_make_valid(scen12_prev),s_reg)
   s_scen21_prev <- st_intersection(st_make_valid(scen21_prev),s_reg)
@@ -34,12 +34,10 @@ editor_options:
   s_Elements    <- st_intersection(Elements,s_reg)
   s_Reg_depth   <- st_intersection(Reg_depth,s_reg)
   
-  textreg   <- openxlsx::read.xlsx(paste(pathdir,"Output/Text_EUVME.xlsx",sep="/"),Region_ID_Excel)
-
 ```
 
 
-## Ecoregion Overview {.tabset } 
+### Ecoregion Overview {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Overview")
 for(i in 1:nrow(tt)){
@@ -61,10 +59,10 @@ cat(datacallyear)
 ```
 VME data call). This information has been collected through various gear types and survey methods. 
 
-## New VME data {.tabset } 
+### New VME data {.tabset } 
 Previously, 
 ```{r, results='asis'}
-  reg  <- subset(table1,table1$EEZ %in% Region_ID)  
+  reg  <- subset(table1,table1$Ecoregion %in% Region_ID)  
   cat(sum(reg$Exist_VMEs ==3, na.rm = TRUE))
 ```
 VME habitat c-squares and
@@ -77,33 +75,7 @@ VME Index c-squares were identified
 if (length(!is.na(reg$New_VMEs))==0){
   cat("This latest assesment has not identified additional VME Habitat or Index c-squares.")
   } else {
-  cat("New VME habitat and indicator records were submitted and quality checked. This resulted in ")
-  cat(sum(reg$New_VMEs==3, na.rm = TRUE))
-  
-  cat(" new VME Habitat c-squares and ")
-  cat(sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE))
-  
-  cat(" new VME Index c-squares; ")
-  cat(sum(reg$New_VMEs %in% 2, na.rm = TRUE))
-  
-  cat(" index High, ")
-  cat(sum(reg$New_VMEs %in% 1, na.rm = TRUE))
-  
-  cat(" index Medium and ")
-  cat(sum(reg$New_VMEs %in% 0, na.rm = TRUE))
-  
-  cat(" index Low.")
-  
-  glue("
-  New VME habitat and indicator records were submitted and quality checked.",
-  "This resulted in ",
-  "{sum(reg$New_VMEs==3, na.rm = TRUE)} new VME Habitat c-squares and ",
-  "{sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE)} new VME Index c-squares; ",
-  "{sum(reg$New_VMEs %in% 2, na.rm = TRUE)} index High, ",
-  "{sum(reg$New_VMEs %in% 1, na.rm = TRUE)} index Medium and ",
-  "{sum(reg$New_VMEs %in% 0, na.rm = TRUE)} index Low."
-  )
-  glue("
+    glue("
   New VME habitat and indicator records were submitted and quality checked. This resulted in \\
   {sum(reg$New_VMEs==3, na.rm = TRUE)} new VME Habitat c-squares and \\
   {sum(reg$New_VMEs %in% c(0:2), na.rm = TRUE)} new VME Index c-squares; \\
@@ -124,7 +96,7 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-### Map of VMEs
+#### Map of VMEs
 Information on VME Habitat and Index C-squares and the spatial distribution of static and mobile bottom-fishing
 <br> 
 ```{r Build option map, include=FALSE}
@@ -156,8 +128,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
    # boundaries
     addPolygons(data = s_reg, group = nam[1],
                 stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-    addPolygons(data = s_Reg_depth, group = nam[2],
-                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    #addPolygons(data = s_Reg_depth, group = nam[2],
+    #            stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
     
     # VME c-sqs
     addPolygons(data = s_VMEgrid_old, group = nam[3],
@@ -175,8 +147,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
     addPolygons(data = s_New_comb, group = nam[6],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
     
-    addPolygons(data = s_Ref_static, group = nam[7],
-                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    #addPolygons(data = s_Ref_static, group = nam[7],
+    #            stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
     addPolygons(data = s_New_static, group = nam[8],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
@@ -212,7 +184,7 @@ mfs
 
 ```
 
-### Key to map layers
+#### Key to map layers
 
 ```{r map1 key}
 map1layers <- map1layers[-c(1,14:16),] 
@@ -227,25 +199,25 @@ map1layers[,-2] %>%
 ```
 
 
-### Overlap VME c-sqs and fishing 
+#### Overlap VME c-sqs and fishing 
 Summary table of overlap between fishing activities and new and cumulative VME evidence at the scale of C-squares. 
 <br>
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
 
   # Subset data to region
-  reg  <- subset(table1,table1$EEZ %in% Region_ID)  
+  reg  <- subset(table1,table1$Ecoregion %in% Region_ID)  
   
   #sum(table(reg$cat)) # get total assessed area - add to the table text
   source(paste(pathdir,"Utilities/Compile_table1.R",sep="/"))
 
   tab1[is.na(tab1)] <- ""
   tab1 %>% 
-    filter(across(1, ~. %in% -c("200-400m", ">800m"))) %>% 
+    filter(!if_any(1, ~. %in% c("200-400m", ">800m"))) %>% 
     kable('html',escape = FALSE, align=c('l',rep('c',11)),row.names = FALSE,col.names = c('','All','Mobile gears','Static gears',' M + S gears',' ','All', 'Mobile gears','Static gears',' M + S gears',' ', 'All')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
-    row_spec(c(1,5,9,13),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
-    row_spec(c(2:4,6:8,10:12,14:nrow(tab1)), extra_css = 'padding: 1.5px;vertical-align:top;') %>%
+    row_spec(c(1,3,5,7),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
+    row_spec(c(2,4,6,8:11), extra_css = 'padding: 1.5px;vertical-align:top;') %>%
     column_spec(1, width = "6cm") %>%
     column_spec(3:10, width = "2.5cm") %>%
     column_spec(c(2,7,12), width = "3cm") %>%
@@ -254,20 +226,20 @@ Summary table of overlap between fishing activities and new and cumulative VME e
     add_header_above(c(" " = 1,'Existing' = 4," "=1, 'New/updated in 2021'=4, " "=1, 'Total'=1),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
     add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 ```
-### Overlap between new and previously defined VME c-sqs    
+#### Overlap between new and previously defined VME c-sqs    
 Summary table of overlap between new and updated VME C-squares and already defined VME closures???
 <br>
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
   
   tab1b[is.na(tab1b)] <- ""
   
-  tab1 %>% 
-    filter(across(1, ~. %in% -c("200-400m", ">800m"))) %>% 
+  tab1b %>% 
+    filter(!if_any(1, ~. %in% c("200-400m", ">800m"))) %>%
     kable('html',escape = FALSE, align=c('l',rep('c',6)),row.names = FALSE,col.names = c('','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
-    row_spec(c(1,5,9,13),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
-    row_spec(c(2:4,6:8,10:12,14:nrow(tab1)), extra_css = 'padding: 1.5px;vertical-align:top;') %>%
+    row_spec(c(1,3,5,7),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
+    row_spec(c(2,4,6,8:11), extra_css = 'padding: 1.5px;vertical-align:top;') %>%
     column_spec(1, width = "6cm") %>%
     column_spec(2, width = "3cm") %>%
     column_spec(3:6, width = "2.5cm") %>%
@@ -275,13 +247,9 @@ Summary table of overlap between new and updated VME C-squares and already defin
     add_header_above(c(" " = 1,'New/updated in 2021'=6),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
     add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 6),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 
-  tab1_alt <- tab1 %>% 
-    select(c("V1","V2", "V3", "V4", "V5", "V6", "V7")) %>% 
-             bind_cols(tab1_new_vme)
-
 ```
 
-## VME polygon options {.tabset } 
+### VME polygon options {.tabset } 
 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "VME polygons")
@@ -290,7 +258,7 @@ for(i in 1:nrow(tt)){
   }
 ```
 
-### Map of updated VME polygons
+#### Map of updated VME polygons
 Update of the VME polygons following the scenarios/options.
 <br>
 ```{r Build option map2, include=FALSE}
@@ -435,7 +403,7 @@ mfs2
 
 ```
 
-### Key to map layers
+#### Key to map layers
 
 ```{r map2 key}
 map2layers <- map2layers[-c(1,4,15,16),] 
@@ -449,7 +417,7 @@ map2layers[,-2] %>%
 
 ```
 
-### Scenario options
+#### Scenario options
 ```{r }
 
 scenop %>%
@@ -466,7 +434,7 @@ scenop %>%
 
 ```
 
-### Scenario outcomes and risks
+#### Scenario outcomes and risks
 
 Summary table of scenario outcomes and associated risk to VMEs.
 ```{r echo=FALSE, message=FALSE, out.width='70%',fig.align = 'center', fig.cap="** **"}
@@ -494,7 +462,7 @@ Summary table of scenario outcomes and associated risk to VMEs.
 \* Risks to VMEs are not currently quantifiable due to no agreed metrics. <br>
 
 
-## Interpretation of results {.tabset } 
+### Interpretation of results {.tabset } 
 ```{r , results = 'asis'}
 tt <- subset(textreg,textreg$Tab == "Interpretation")
 for(i in 1:nrow(tt)){
