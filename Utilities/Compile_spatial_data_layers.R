@@ -94,7 +94,8 @@
   
 #-------------------------------------------------------------------------------------
 # load VME database summary used for the popup tables in the rmarkdown
- source(paste(pathdir,"Utilities/VME Database summary.R",sep="/"))  # (warnings are okay)
+ #source(paste(pathdir,"Utilities/VME Database summary.R",sep="/"))  # (warnings are okay)
+ source(paste(pathdir,"Utilities/VME Database summary EU VME List.R",sep="/"))  # (warnings are okay)
  
  
 #-------------------------------------------------------------------------------------
