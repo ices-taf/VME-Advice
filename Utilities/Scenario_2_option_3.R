@@ -148,7 +148,7 @@
   
   # get vms data
   #vmsreg <- readRDS(paste("C:/Users/neilm/Documents/VME-advice_noGIT",paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
-  #vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
+  vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
   nam <- c(paste("SAR_total",refyear,sep="_"))
   indexcol <- which(names(vmsreg) %in% nam) 
   vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
