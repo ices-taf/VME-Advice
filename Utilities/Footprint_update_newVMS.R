@@ -49,7 +49,7 @@
 # calculate mobile footprint  
   
   # calculate adjacent squares to apply footprint scenario
-  dat      <- Reg_w[Reg_w$mob == 1,]
+  dat      <- Reg_w[!is.na(Reg_w$mob == 1),]
   dat$long <- round(dat$long,3)
   dat$lat  <- round(dat$lat,3)
   lonlats  <- paste(dat$long, dat$lat, sep=":")
@@ -78,7 +78,7 @@
 # calculate static footprint  
   
   # calculate adjacent squares to apply footprint scenario
-  dat      <- Reg_w[Reg_w$stat == 1,]
+  dat      <- Reg_w[!is.na(Reg_w$stat == 1),]
   dat$long <- round(dat$long,3)
   dat$lat  <- round(dat$lat,3)
   lonlats  <- paste(dat$long, dat$lat, sep=":")
@@ -107,7 +107,7 @@
 # calculate combined footprint  
   
   # calculate adjacent squares to apply footprint scenario
-  dat      <- Reg_w[Reg_w$comb == 1,]
+  dat      <- Reg_w[!is.na(Reg_w$comb == 1),]
   dat$long <- round(dat$long,3)
   dat$lat  <- round(dat$lat,3)
   lonlats  <- paste(dat$long, dat$lat, sep=":")
@@ -160,7 +160,7 @@
   Footprint_both <- gUnaryUnion(Freg)
   Footprint_both   <- st_as_sf(Footprint_both)
   Footprint_both <-  st_transform(Footprint_both, "EPSG:4326")  
-  write_sf(Footprint_both, paste0(paste(pathdir,"2-Data processing/",sep="/"),"Footprint_all_2022.shp"))
+  write_sf(Footprint_both, paste0(paste(pathdir,"1-Input Data/EU_fishingareas/",sep="/"),"Footprint_all_2022.shp"))
   
   # and clean
   rm(list=setdiff(ls(), c("pathdir" , "pathdir_nogit","NEAFCFootp",
