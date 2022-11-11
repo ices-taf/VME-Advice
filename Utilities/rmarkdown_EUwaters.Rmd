@@ -29,6 +29,8 @@ editor_options:
   s_NEAFCFootp  <- st_intersection(NEAFCFootp,s_reg)
   s_NEAFCReg    <- st_intersection(NEAFCReg,s_reg)
   s_clos_neafc  <- st_intersection(clos_neafc,s_reg)
+  s_clos_eu  <- st_intersection(clos_eu,s_reg)
+  
   s_VMEgrid_new <- st_intersection(VMEgrid_new,s_reg)
   s_VMEgrid_old <- st_intersection(VMEgrid_old,s_reg)
   s_Elements    <- st_intersection(Elements,s_reg)
@@ -112,7 +114,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
            "Existing VME C-sq.","New VME C-sq.","EU fishable domain (prelim.)",
            "Fished area (S+M)","Reference fished area (S)","Fished area (S)",
            "Reference fished area (M)","Fished area (M)",
-           "Existing VME physical elements","Updated VME physical elements (prelim.)")
+           "Existing VME physical elements","Updated VME physical elements (prelim.)",
+           "EU Closures")
 
 # Create colour palette for VMEs
   VMEcolours <- c("#2E8AC6","#F40000","#F67E11","#FDF100")
@@ -128,8 +131,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
    # boundaries
     addPolygons(data = s_reg, group = nam[1],
                 stroke = TRUE, fillOpacity = 0, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "white") %>%
-    #addPolygons(data = s_Reg_depth, group = nam[2],
-    #            stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
+    addPolygons(data = s_Reg_depth, group = nam[2],
+               stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
     
     # VME c-sqs
     addPolygons(data = s_VMEgrid_old, group = nam[3],
@@ -147,8 +150,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
     addPolygons(data = s_New_comb, group = nam[6],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
     
-    #addPolygons(data = s_Ref_static, group = nam[7],
-    #            stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
+    addPolygons(data = s_Ref_static, group = nam[7],
+               stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "white") %>%
     
     addPolygons(data = s_New_static, group = nam[8],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "red") %>%
@@ -170,6 +173,10 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
               position = "bottomright",
               colors = VMEcolours, labels= levels(s_VMEgrid_old$VME_Class_Lab)) %>%
     
+    # Closures
+    addPolygons(data = s_Clos_eu, group = nam[13],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "black")
+  
     # Layers control
     addLayersControl(
       overlayGroups = nam)%>%
@@ -271,7 +278,7 @@ nam <- c("EEZ boundaries",
            "Existing VME polygon S2 O1","New VME polygon S2 O1",
            "Existing VME polygon S2 O2","New VME polygon S2 O2",
            "Exist. VME pol. S1O2 + S2O1","New VME pol. S1O2 + S2O1",
-           "EU fishable domain (prelim.)")
+           "EU fishable domain (prelim.)", "EU Closures")
 
 # Colourpalette for options
 optpalOld <- c('#ffe599','#ffc4c4','#9fc5e8','#eeeeee','#b4a7d6')
@@ -388,6 +395,9 @@ mfs2 <- leaflet() %>%
                 stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
                 color = ~VMEpal(VME_Class_Lab)) %>%
     
+   # Closures
+    addPolygons(data = s_Clos_eu, group = nam[16],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "black") %>% 
    # Layers control
     addLayersControl(
       overlayGroups = nam)%>%

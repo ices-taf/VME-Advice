@@ -102,7 +102,7 @@
 # load current NEAFC VME closures (EU not available)
  source(paste(pathdir,"Utilities/Obtain_NEAFC_closures.R",sep="/"))  # NEAFC closures (warnings are okay)
 
- EU_closures <- st_read("/Documents and Settings/neilm/Documents/projects/VME-Advice/1-Input data/EU_closures/COORD sc2opt1_ImplementingAct DSAR.shp")
+ clos_eu <- st_read("/Documents and Settings/neilm/Documents/projects/VME-Advice/1-Input data/EU_closures/COORD sc2opt1_ImplementingAct DSAR.shp")
 #-------------------------------------------------------------------------------------
 # obtain polygons for geographic areas
  
