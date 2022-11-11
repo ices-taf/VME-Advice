@@ -99,38 +99,60 @@
 # overlap between mobile fishing effort and vme polygons
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce11_quarter_csq_grid.RData",sep="/"))
   sce11 <- subset(sce11,sce11@data$csquares %in% Regiontab1$csquares)
+  if(nrow(sce11)!=0){
   sce11@data$area_sqkm <- area(sce11)/10^6
   sce11 <- cbind(sce11, Regiontab1[match(sce11$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce11@data)[ncol(sce11@data)] <- "mobeff"
   tab2[13,2] <- round(sum(sce11@data$area_sqkm * sce11@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  } else {
+    tab2[13,2] <- "NA"
+  }
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce12_quarter_csq_grid.RData",sep="/"))
   sce12 <- subset(sce12,sce12@data$csquares %in% Regiontab1$csquares)
+  if(nrow(sce12)!=0){
   sce12@data$area_sqkm <- area(sce12)/10^6
   sce12 <- cbind(sce12, Regiontab1[match(sce12$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce12@data)[ncol(sce12@data)] <- "mobeff"
   tab2[13,3] <- round(sum(sce12@data$area_sqkm * sce12@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  } else {
+    tab2[13,3] <- "NA"
+  }
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce21_quarter_csq_grid.RData",sep="/"))
   sce21 <- subset(sce21,sce21@data$csquares %in% Regiontab1$csquares)
+  if(nrow(sce21)!=0){
   sce21@data$area_sqkm <- area(sce21)/10^6
   sce21 <- cbind(sce21, Regiontab1[match(sce21$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce21@data)[ncol(sce21@data)] <- "mobeff"
   tab2[13,4] <- round(sum(sce21@data$area_sqkm * sce21@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  } else {
+    tab2[13,4] <- "NA"
+  }
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce22_quarter_csq_grid.RData",sep="/"))
   sce22 <- subset(sce22,sce22@data$csquares %in% Regiontab1$csquares)
+  if(nrow(sce22)!=0){
   sce22@data$area_sqkm <- area(sce22)/10^6
   sce22 <- cbind(sce22, Regiontab1[match(sce22$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce22@data)[ncol(sce22@data)] <- "mobeff"
   tab2[13,5] <- round(sum(sce22@data$area_sqkm * sce22@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  } else {
+    tab2[13,5] <- "NA"
+  }
+  
   
   load(paste(pathdir,paste("2-Data processing/VME_polygons",datacallyear,sep="_"),"sce23_quarter_csq_grid.RData",sep="/"))
   sce23 <- subset(sce23,sce23@data$csquares %in% Regiontab1$csquares)
-  sce23@data$area_sqkm <- area(sce23)/10^6
+  if(nrow(sce23)!=0){
+  sce23@data$area_sqkm <- try(area(sce23)/10^6)
   sce23 <- cbind(sce23, Regiontab1[match(sce23$csquares,Regiontab1$csquares), c("mobeff")])
   colnames(sce23@data)[ncol(sce23@data)] <- "mobeff"
   tab2[13,6] <- round(sum(sce23@data$area_sqkm * sce23@data$mobeff,na.rm=T) / sum(Regiontab1$area_sqkm * Regiontab1$mobeff,na.rm=T) * 100,digits =1)
+  } else {
+    tab2[13,6] <- "NA"
+  }
+  
   
 # overlap between mobile fishing area and vme polygons
   SF_scen11 <- st_intersection(s_scen11,Mobile_fish); SF_scen11 <- st_make_valid(SF_scen11)
