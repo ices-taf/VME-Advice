@@ -65,7 +65,7 @@
   grid_over    <- st_intersects(bargrid_sf,Elements)
   idx          <- as.data.frame(grid_over)
   idx$csquare  <- bargrid_sf$csquares[idx$row.id]
-  idx$element  <- Elements$Name[idx$col.id]
+  idx$element  <- Elements$type[idx$col.id]
   dat          <- data.frame(csquare = unique(idx$csquare))
   banks        <- subset(idx,idx$element %in% c("bk","sedBk", "bank"))
   dat$banks[dat$csquare %in% unique(banks$csquare)] <- 1
