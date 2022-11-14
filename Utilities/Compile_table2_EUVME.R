@@ -26,7 +26,7 @@
 # make the table
   tab2 <- as.data.frame(matrix(data=NA,nrow = 14, ncol= 6))
 
-# calculate overlap with fishable domain
+# calculate percentage overlap with fishable domain
   FD_scen11 <- st_intersection(s_scen11,Fishdom); FD_scen11 <- st_make_valid(FD_scen11)
   tab2[4,2] <- round(sum(st_area(FD_scen11))/sum(st_area(Fishdom)) * 100,digits = 1)
   
@@ -42,6 +42,23 @@
   FD_scen23 <- st_intersection(s_scen23,Fishdom); FD_scen23 <- st_make_valid(FD_scen23)
   tab2[4,6] <- round(sum(st_area(FD_scen23))/sum(st_area(Fishdom)) * 100,digits = 1)
 
+# calculate percentage overlap with fishing closures
+  closure_overlap_scen11 <- st_intersection(s_scen11, s_clos_eu) %>% st_make_valid()
+  tab2[5,2] <- round(sum(st_area(closure_overlap_scen11))/sum(st_area(s_scen11)) * 100,digits = 1)
+    
+  closure_overlap_scen12 <- st_intersection(s_scen11, s_clos_eu) %>% st_make_valid()
+  tab2[5,3] <- round(sum(st_area(closure_overlap_scen12))/sum(st_area(s_scen11)) * 100,digits = 1)
+  
+  closure_overlap_scen21 <- st_intersection(s_scen21, s_clos_eu) %>% st_make_valid()
+  tab2[5,4] <- round(sum(st_area(closure_overlap_scen21))/sum(st_area(s_scen11)) * 100,digits = 1)
+  
+  closure_overlap_scen22 <- st_intersection(s_scen22, s_clos_eu) %>% st_make_valid()
+  tab2[5,5] <- round(sum(st_area(closure_overlap_scen22))/sum(st_area(s_scen11)) * 100,digits = 1)
+  
+  closure_overlap_scen23 <- st_intersection(s_scen23, s_clos_eu) %>% st_make_valid()
+  tab2[5,6] <- round(sum(st_area(closure_overlap_scen23))/sum(st_area(s_scen11)) * 100,digits = 1)
+  
+    
 # Number of VME polygons and their average areal extent (size)
   tab2[6,2] <- paste(nrow(s_scen11)," (",round(mean(st_area(s_scen11)/10^6),digits=1)," km<sup>2</sup>)",sep="")
   tab2[6,3] <- paste(nrow(s_scen12)," (",round(mean(st_area(s_scen12)/10^6),digits=1)," km<sup>2</sup>)",sep="")

@@ -53,7 +53,7 @@
   FD_scen23 <- st_intersection(scen23_R,Fishdom); FD_scen23 <- st_make_valid(FD_scen23)
   tab2[4,6] <- round(sum(st_area(FD_scen23))/sum(st_area(Fishdom)) * 100,digits = 1)
 
-# calculate for NEAFC only the overlap with closures (no information available for EU)
+# calculate for NEAFC only the overlap with closures 
   if (FishD == "NEAFC"){
     cl_scen11 <- st_intersection(scen11_R,s_clos_neafc); cl_scen11 <- st_make_valid(cl_scen11)
     tab2[5,2] <- round(sum(st_area(cl_scen11))/sum(st_area(scen11_R)) * 100,digits = 1)
