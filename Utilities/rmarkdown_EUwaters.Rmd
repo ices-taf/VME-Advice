@@ -174,8 +174,8 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
               colors = VMEcolours, labels= levels(s_VMEgrid_old$VME_Class_Lab)) %>%
     
     # Closures
-    addPolygons(data = s_Clos_eu, group = nam[13],
-                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "black")
+    addPolygons(data = s_clos_eu, group = nam[13],
+                stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "black") %>% 
   
     # Layers control
     addLayersControl(
@@ -234,7 +234,7 @@ Summary table of overlap between fishing activities and new and cumulative VME e
     add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 11),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 ```
 #### Overlap between new and previously defined VME c-sqs    
-Summary table of overlap between new and updated VME C-squares and already defined VME closures???
+Summary table of overlap between new and updated VME C-squares and already defined VME closures.
 <br>
 ```{r, echo=FALSE, message=FALSE, out.width='80%',fig.align = 'center', fig.cap="** **"}
   
@@ -396,7 +396,7 @@ mfs2 <- leaflet() %>%
                 color = ~VMEpal(VME_Class_Lab)) %>%
     
    # Closures
-    addPolygons(data = s_Clos_eu, group = nam[16],
+    addPolygons(data = s_clos_eu, group = nam[16],
                 stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, fillColor =  "black") %>% 
    # Layers control
     addLayersControl(
