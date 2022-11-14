@@ -42,6 +42,7 @@ knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 options(knitr.duplicate.label = "allow")
+sf::sf_use_s2(FALSE)
 
   pathdir       <- "C:/Users/neilm/Documents/projects/VME-Advice"
   pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT/EU" # stores the VMS and VME data from sharepoint
@@ -101,14 +102,6 @@ options(knitr.duplicate.label = "allow")
 ```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
 ```
 
-
-## Azores {.tabset}
-```{r Az,include=FALSE}
-  Region_ID <- "Azores"
-  Region_ID_Excel <- "Azores"
-  # define fishable domain - either EU or NEAFC 
-  FishD <- "EU"
-```
 
 ```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
 ```
