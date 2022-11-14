@@ -124,11 +124,11 @@ if (1 %in% reg$scen11){
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen12)))
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen21)))
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen22)))
-  tt <- cbind(tt,rep(0,nrow(tt))) #cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen23)))
-  tt <- rbind(tt[1:3,1:5],tt[4:6,1:5] + tt[7:9,1:5],tt[10:12,1:5])
+  tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen23)))
   
-  tab1b[2:4,3:7]   <- tt[1:3,]
-  tab1b[6:8,3:7]   <- tt[4:6,]
-  tab1b[10:12,3:7] <- tt[7:9,]
-  tab1b[14:17,3:7] <- 0
+  tab1b[2:4,3:7]   <- tt[10:12,1:5]
+  tab1b[6:8,3:7]   <- tt[4:6,1:5] + tt[7:9,1:5]
+  tab1b[10:12,3:7] <- tt[1:3,1:5]
+  tab1b[14:17,3:7] <- NA
+  
 }
