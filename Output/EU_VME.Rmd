@@ -93,7 +93,7 @@ sf::sf_use_s2(FALSE)
 
 ## Bay of Biscay and the Iberian Coast {.tabset}
 ```{r BoBIC,include=FALSE}
-  Region_ID <- "Bay of Biscay & Iberian Coast"
+  Region_ID <- "Bay of Biscay and the Iberian Coast"
   Region_ID_Excel <- "BoBIC"
   # define fishable domain - either EU or NEAFC 
   FishD <- "EU"
@@ -101,10 +101,5 @@ sf::sf_use_s2(FALSE)
 
 ```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
 ```
-
-
-```{r add-to-main, child = 'C:/Users/neilm/Documents/projects/VME-Advice/Utilities/rmarkdown_EUwaters.Rmd'}
-```
-
 
 # {-}
