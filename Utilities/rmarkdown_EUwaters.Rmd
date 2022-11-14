@@ -14,9 +14,9 @@ editor_options:
   s_scen22_prev <- st_intersection(st_make_valid(scen22_prev),s_reg)
   s_scen23_prev <- st_intersection(st_make_valid(scen23_prev),s_reg)
   s_scen11      <- st_intersection(st_make_valid(scen11),s_reg)
-  s_scen12      <- st_intersection(scen12,s_reg)
-  s_scen21      <- st_intersection(scen21,s_reg)
-  s_scen22      <- st_intersection(scen22,s_reg)
+  s_scen12      <- st_intersection(st_make_valid(scen12),s_reg)
+  s_scen21      <- st_intersection(st_make_valid(scen21),s_reg)
+  s_scen22      <- st_intersection(st_make_valid(scen22),s_reg)
   s_scen23      <- st_intersection(st_make_valid(scen23),s_reg)
   s_shapeEEZ    <- s_reg
   s_EUFootp     <- st_intersection(EUFootp,s_reg)
@@ -455,13 +455,13 @@ Summary table of scenario outcomes and associated risk to VMEs.
   tab2[c(8,10,11),2:6] <- NA
   #tab2[10,2:6] <- NA
 
-  tab2  %>%
+  tab2[-11,]  %>%
     kable('html',escape = FALSE, align='l',row.names = FALSE) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
     row_spec(1, extra_css = 'padding: 5px;vertical-align:top;border-bottom: 1px solid black;') %>%
     row_spec(c(3,9),bold = T, background = icespal[['lg']], extra_css = 'padding: 5px;vertical-align:top;') %>%
-    row_spec(c(4:8,10:nrow(tab2)), extra_css = 'padding: 5px;vertical-align:top;') %>%
+    row_spec(c(4:8,10,11), extra_css = 'padding: 5px;vertical-align:top;') %>%
     column_spec(1, width = "10cm",extra_css = 'padding-right: 10px;vertical-align:top;') %>%
     column_spec(2:ncol(tab2), width = "4.5cm")
   
