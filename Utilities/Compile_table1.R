@@ -129,6 +129,9 @@ if (1 %in% reg$scen11){
   tab1b[2:4,3:7]   <- tt[10:12,1:5]
   tab1b[6:8,3:7]   <- tt[4:6,1:5] + tt[7:9,1:5]
   tab1b[10:12,3:7] <- tt[1:3,1:5]
-  tab1b[14:17,3:7] <- NA
+  
+  
+  tab1b[14:17,3:7] <- overlap_all_elements_all_scenarios(reg, elements = list("seaMt", "banks", "corMd", "mudVolc"), scenarios = list("scen12","scen22", "scen22","scen22", "scen23"))
   
 }
+
