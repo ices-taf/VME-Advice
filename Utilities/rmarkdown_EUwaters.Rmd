@@ -242,17 +242,16 @@ Summary table of overlap between new and updated VME C-squares and already defin
   
   tab1b %>% 
     filter(!if_any(1, ~. %in% c("200-400m", ">800m"))) %>%
-    kable('html',escape = FALSE, align=c('l',rep('c',6)),row.names = FALSE,col.names = c('','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1')) %>%
+    kable('html',escape = FALSE, align=c('l',rep('c',7)),row.names = FALSE,col.names = c('','All', 'S1O1',' S1O2', 'S2O1','S2O2','S1O2+S2O1', 'All')) %>%
     kable_classic(full_width = F, position = "center",fixed_thead = T,font_size = 10,html_font = "Times") %>%
     row_spec(0, bold = T, extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
     row_spec(c(1,3,5,7),bold = T, background = icespal[['lg']], extra_css = 'padding: 3px;vertical-align:top;') %>%
     row_spec(c(2,4,6,8:11), extra_css = 'padding: 1.5px;vertical-align:top;') %>%
     column_spec(1, width = "6cm") %>%
-    column_spec(2, width = "3cm") %>%
-    column_spec(3:6, width = "3cm") %>%
-    add_header_above(c(" " = 1, "Assessed area" = 1, "In defined VME polygons" = 5),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,'New/updated in 2021'=6),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
-    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 6),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
+    column_spec(2:7, width = "2.5cm") %>%
+    add_header_above(c(" " = 1, "Assessed area" = 1, "In defined VME polygons" = 5, "EU closures" = 1),bold = TRUE,line_sep = 4,line = TRUE, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,'New/updated in 2021'=7),bold = TRUE,line_sep = 10, extra_css = 'padding: 3px;vertical-align:top;') %>%
+    add_header_above(c(" " = 1,"Number of VME/VME element c-squares" = 7),bold = TRUE, extra_css = 'padding: 3px;vertical-align:top;')
 
 ```
 

@@ -125,6 +125,12 @@
   bargrid@data$scen23[bargrid@data$csquares %in% unique(tt$csquares)] <- 1
   #bargrid@data$scen23 <- NA
   
+  tt <- st_intersection(VMEgrid_new,st_make_valid(clos_eu))
+  tt$area <- st_area(st_make_valid(tt))/10^6
+  tt$frac <- as.numeric(tt$area/tt$area_sqkm)
+  tt <- subset(tt,tt$frac> 0.9)
+  bargrid@data$clos_eu[bargrid@data$csquares %in% unique(tt$csquares)] <- 1
+  
   table1 <- bargrid@data 
   save(table1,file = paste(pathdir,"2-Data processing/Table1_underlyingdata.RData",sep="/"))
   

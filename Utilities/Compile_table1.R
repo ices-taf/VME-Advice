@@ -115,7 +115,7 @@ tab1[17,12]    <- reg %>% filter(!is.na(Tot_VMEs)) %>% select(mudVolc) %>% sum(n
 
 
 # now get per VME polygon option the new VME c-squares that are inside
-tab1b <- as.data.frame(matrix(data=NA,nrow = 17, ncol= 7))
+tab1b <- as.data.frame(matrix(data=NA,nrow = 17, ncol= 8))
 tab1b[,1] <- tab1[,1]
 tab1b[,2] <- tab1[,7]
 
@@ -125,13 +125,14 @@ if (1 %in% reg$scen11){
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen21)))
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen22)))
   tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$scen23)))
+  tt <- cbind(tt,matrix(table(reg$cat,reg$New_VMEs,reg$clos_eu)))
   
-  tab1b[2:4,3:7]   <- tt[10:12,1:5]
-  tab1b[6:8,3:7]   <- tt[4:6,1:5] + tt[7:9,1:5]
-  tab1b[10:12,3:7] <- tt[1:3,1:5]
+  tab1b[2:4,3:8]   <- tt[10:12,1:6]
+  tab1b[6:8,3:8]   <- tt[4:6,1:6] + tt[7:9,1:6]
+  tab1b[10:12,3:8] <- tt[1:3,1:6]
   
   
-  tab1b[14:17,3:7] <- overlap_all_elements_all_scenarios(reg, elements = list("seaMt", "banks", "corMd", "mudVolc"), scenarios = list("scen12","scen22", "scen22","scen22", "scen23"))
+  tab1b[14:17,3:8] <- overlap_all_elements_all_scenarios(reg, elements = list("seaMt", "banks", "corMd", "mudVolc"), scenarios = list("scen12","scen22", "scen22","scen22", "scen23", "clos_eu"))
   
 }
 
