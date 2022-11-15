@@ -88,13 +88,14 @@
   
 # Total area closed
   
-  tab2[8,2] <- paste(round(sum(st_area(s_scen11)),digits=1)," km<sup>2</sup>)",sep="")
-  tab2[8,3] <- paste(round(sum(st_area(s_scen12)),digits=1)," km<sup>2</sup>)",sep="")
-  tab2[8,4] <- paste(round(sum(st_area(s_scen21)),digits=1)," km<sup>2</sup>)",sep="")
-  tab2[8,5] <- paste(round(sum(st_area(s_scen22)),digits=1)," km<sup>2</sup>)",sep="")
-  tab2[8,6] <- paste(round(sum(st_area(s_scen23)),digits=1)," km<sup>2</sup>)",sep="")
+  tab2[8,2] <- paste(round(sum(st_area(s_scen11)/10^6),digits=1)," km<sup>2</sup>",sep="")
+  tab2[8,3] <- paste(round(sum(st_area(s_scen12)/10^6),digits=1)," km<sup>2</sup>",sep="")
+  tab2[8,4] <- paste(round(sum(st_area(s_scen21)/10^6),digits=1)," km<sup>2</sup>",sep="")
+  tab2[8,5] <- paste(round(sum(st_area(s_scen22)/10^6),digits=1)," km<sup>2</sup>",sep="")
+  tab2[8,6] <- paste(round(sum(st_area(s_scen23)/10^6),digits=1)," km<sup>2</sup>",sep="")
   
-# overlap between static fishing effort and vme polygons
+
+  # overlap between static fishing effort and vme polygons
 # not available
 
 # overlap between static fishing area and vme polygons
@@ -191,7 +192,7 @@ tab2[,1] <- c("VME polygon description","","VME polygon outcomes","% of fishable
               "% of VME polygon protected by existing VME fishery closures",
               "Number of VME polygons and their average areal extent (size)",
               "Number (and average size) of large VME polygons in upper 25<sup>th</sup> percentile of the size distribution",
-              "Total area closed", "Risk to VME*","Fishery consequences",
+              "Total area identified under scenario", "Risk to VME*","Fishery consequences",
               "% of effort per year by static gear (400-800m depth) overlapping with VME polygons (average annual effort between 2018 to 2020)",
               "% of fished area (400-800m depth) by static gear overlapping with VME polygons between 2018 to 2020",
               "% of SAR  by mobile gear (400-800m depth) overlapping with VME polygons (average annual SAR between 2018 to 2020)",

@@ -451,7 +451,7 @@ Summary table of scenario outcomes and associated risk to VMEs.
   source(paste(pathdir,"Utilities/Compile_table2_EUVME.R",sep="/")) # warnings okay
   tab2[is.na(tab2)] <- "" 
   
-  tab2[c(8,10,11),2:6] <- NA
+  tab2[c(10,11),2:6] <- NA
   #tab2[10,2:6] <- NA
 
   tab2[-11,]  %>%
