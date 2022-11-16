@@ -15,10 +15,13 @@ bioTblBase <- rbind(data.frame(VMEclass='VME Habitat',Name=VMEhabs),
                     data.frame(VMEclass='VME Indicators',Name=VMEindic))
 
 # load the VME database extraction
-vmedb <-  read.csv(paste(pathdir_nogit,paste(
+vmedb <- read.csv(paste(pathdir_nogit,paste(
                        "VME data repository/VME observations and csquares/VME_observations_datacall_",
                         datacallyear,"_eu.csv",sep=""),sep="/"), header=T,sep=",",row.names = NULL)
+colnames(vmedb)[1] <- "Sample"
+
 source(paste(pathdir,"Utilities/coords_to_csquare_VMStools.R",sep="/"))
+
 vmedb$CSquare <- CSquare(vmedb$MiddleLongitude,vmedb$MiddleLatitude,0.05)  
 
 # Point datalayer of vme database records for the named list of VME indicators and habitats
@@ -26,7 +29,21 @@ vmedb_sf <- vmedb %>%
               select(Sample:HabitatType,InsDateTime,MiddleLatitude,MiddleLongitude) %>%
               filter(VME_Indicator %in% VMEindic | HabitatType %in% VMEhabs) %>%
               mutate(InputYear=as.numeric(substr(InsDateTime,1,4))) %>%
-              st_as_sf(coords=c('MiddleLongitude','MiddleLatitude'))
+              st_as_sf(coords=c('MiddleLongitude','MiddleLatitude')) 
+
+st_crs(vmedb_sf) <- st_crs(VMEgrid_new)
+vmedb_sf <- vmedb_sf %>% 
+              mutate(scen11ol=case_when(lengths(st_intersects(vmedb_sf, scen11)) > 0 ~ 1,
+                                        TRUE ~0),
+                     scen12ol=case_when(lengths(st_intersects(vmedb_sf, scen12)) > 0 ~ 1,
+                                        TRUE ~0),
+                     scen21ol=case_when(lengths(st_intersects(vmedb_sf, scen21)) > 0 ~ 1,
+                                        TRUE ~0),
+                     scen22ol=case_when(lengths(st_intersects(vmedb_sf, scen22)) > 0 ~ 1,
+                                        TRUE ~0),
+                     scen23ol=case_when(lengths(st_intersects(vmedb_sf, scen23)) > 0 ~ 1,
+                                        TRUE ~0))
+
 
 #### --------------------------------------------------------------------------------------------------- ####
 
@@ -203,7 +220,7 @@ scenLabs <- data.frame(Scen=c('scen11','scen12','scen21','scen22','scen23'
                                      'Scenario: 1, Option: 2 with Scenario: 2, Option: 1'))
 
 
-
+sf::sf_use_s2(FALSE)
 
 # Loop through all scenario feature sets to add needed columns
 for (i in scens) {

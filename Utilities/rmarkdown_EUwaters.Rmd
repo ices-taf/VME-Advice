@@ -26,15 +26,16 @@ editor_options:
   s_New_comb    <- st_intersection(New_comb,s_reg)
   s_New_mobile  <- st_make_valid(st_intersection(New_mobile,s_reg))
   s_New_static  <- st_intersection(New_static,s_reg)
-  s_NEAFCFootp  <- st_intersection(NEAFCFootp,s_reg)
-  s_NEAFCReg    <- st_intersection(NEAFCReg,s_reg)
-  s_clos_neafc  <- st_intersection(clos_neafc,s_reg)
+  #s_NEAFCFootp  <- st_intersection(NEAFCFootp,s_reg)
+  #s_NEAFCReg    <- st_intersection(NEAFCReg,s_reg)
+  #s_clos_neafc  <- st_intersection(clos_neafc,s_reg)
   s_clos_eu  <- st_intersection(clos_eu,s_reg) %>% st_make_valid()
   
   s_VMEgrid_new <- st_intersection(VMEgrid_new,s_reg)
   s_VMEgrid_old <- st_intersection(VMEgrid_old,s_reg)
   s_Elements    <- st_intersection(Elements,s_reg)
   s_Reg_depth   <- st_intersection(Reg_depth,s_reg)
+  s_vmedb_sf <- st_intersection(st_make_valid(vmedb_sf),st_make_valid(s_Reg_depth))
   
 ```
 
@@ -468,6 +469,23 @@ Summary table of scenario outcomes and associated risk to VMEs.
 
 ```
 \* Risks to VMEs are not currently quantifiable due to no agreed metrics. <br>
+
+#### VME Habitat and Indicator consequences
+```{r, biological table}
+
+source(paste(pathdir,"Utilities/Compile_table4.R",sep="/"))
+tab4  %>%
+  kable('html',escape = FALSE, align='l',row.names = FALSE) %>%
+  kable_classic(full_width = F, position = "center",
+                fixed_thead = T,font_size = 10,
+                html_font = "Times") %>%
+  row_spec(0, bold = T, 
+           extra_css = 'padding: 3.5px;vertical-align:top;')  %>%
+  row_spec(c(1,nhab+2),bold = T, background = icespal[['lg']], extra_css = 'padding: 5px;vertical-align:top;') %>%
+  column_spec(1, width = "5cm",extra_css = 'padding-right: 10px;vertical-align:top;') %>%
+  add_header_above(c(" " = 1, "Percent of total observations included in VME polygons" = 5),bold = TRUE)
+
+```
 
 
 ### Interpretation of results {.tabset } 
