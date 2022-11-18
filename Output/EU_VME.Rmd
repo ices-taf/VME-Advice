@@ -53,7 +53,8 @@ sf::sf_use_s2(FALSE)
 
   # load all data layers for rmarkdown (including the datacall year)
   load(paste(pathdir,"2-Data processing/Map_layers_workspace.RData",sep="/")) 
-  
+  shape_ices_EEZ <- st_read(paste(pathdir,"1-Input data/eco_bathymetry_v2/ICES_Ecoregions_EEZext_Bob_CS_AZ_diss_noUK_single_export.shp",sep="/")) %>% 
+   st_make_valid()
   # set the most recent fishing years
   newyear_fished <- (datacallyear_VMS-1):(datacallyear_VMS-3)
 

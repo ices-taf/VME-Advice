@@ -136,20 +136,18 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
                stroke = TRUE, fillOpacity = 0.1, smoothFactor = 0.5, opacity = 0.5, weight = 1, color = "yellow") %>%
     
     # VME c-sqs
-    addPolygons(data = s_VMEgrid_old,
-                group = nam[3],
+    
+    addPolygons(data = s_VMEgrid_old, group = nam[3],
+                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
+                fillColor = ~VMEpal(VME_Class_Lab),
                 layerId = s_VMEgrid_old$csquares,
-                stroke = FALSE, 
-                fillOpacity = 0.7,
-                #fillColor =  "white",
-                fillColor =  ~VMEpal(VME_Class_Lab),
+                popup = s_VMEgrid_old$popTbl,
                 color = "transparent",
                 highlightOptions = highlightOptions(stroke='white',
                                                     color = "white",
                                                     fillOpacity = 1,
-                                                    weight = 2,),
-                popup = s_VMEgrid_old$popTbl,
-                options = pathOptions(pane = "scens")) %>%
+                                                    weight = 2,)) %>%
+    
     
       addPolygons(data =  s_VMEgrid_new,
                 group = nam[4],
@@ -163,15 +161,7 @@ Information on VME Habitat and Index C-squares and the spatial distribution of s
                                                     color = "white",
                                                     fillOpacity = 1,
                                                     weight = 2,),
-                popup =  s_VMEgrid_new$popTbl,
-                options = pathOptions(pane = "scens")) %>%
-    # addPolygons(data = s_VMEgrid_old, group = nam[3],
-    #             stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
-    #             color = ~VMEpal(VME_Class_Lab)) %>%
-    
-    addPolygons(data = s_VMEgrid_new, group = nam[4],
-                stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5,
-                color = ~VMEpal(VME_Class_Lab)) %>%
+                popup =  s_VMEgrid_new$popTbl) %>% 
     
     # EU footprint and fishing areas
     addPolygons(data = s_EUFootp, group = nam[5],
