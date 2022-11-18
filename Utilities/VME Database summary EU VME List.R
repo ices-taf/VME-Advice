@@ -6,6 +6,7 @@
 
 #### --- Base data for database summaries in pop-ups and bio tab table in compilation Markdowns -------- ####
 
+
 # Current lists of VME indicators and VME habitats in Annex III of EU deepwater access regulations
 VMEindic <- c('Black coral','Cup coral','Gorgonian','Soft coral','Sponge','Sea-pen','Stylasterids','Stony coral')
 VMEhabs <- c('Bryozoan patches','Cold-water coral reef','Coral garden','Deep-sea sponge aggregations','Mud and sand emergent fauna','Sea-pen fields','Tube-dwelling anemone aggregations')
@@ -18,7 +19,7 @@ bioTblBase <- rbind(data.frame(VMEclass='VME Habitat',Name=VMEhabs),
 vmedb <- read.csv(paste(pathdir_nogit,paste(
                        "VME data repository/VME observations and csquares/VME_observations_datacall_",
                         datacallyear,"_eu.csv",sep=""),sep="/"), header=T,sep=",",row.names = NULL)
-colnames(vmedb)[1] <- "Sample"
+#colnames(vmedb)[1] <- "Sample"
 
 source(paste(pathdir,"Utilities/coords_to_csquare_VMStools.R",sep="/"))
 
@@ -81,6 +82,8 @@ VMECounts <- rbind(habCounts %>%
                      mutate(VMET='Indic'))
 
 #### --------------------------------------------------------------------------------------------------- ####
+
+sf::sf_use_s2(FALSE)
 
 
 #### --- Summarise by VME Grid ------------------------------------------------------------------------- ####
@@ -220,7 +223,6 @@ scenLabs <- data.frame(Scen=c('scen11','scen12','scen21','scen22','scen23'
                                      'Scenario: 1, Option: 2 with Scenario: 2, Option: 1'))
 
 
-sf::sf_use_s2(FALSE)
 
 # Loop through all scenario feature sets to add needed columns
 for (i in scens) {
