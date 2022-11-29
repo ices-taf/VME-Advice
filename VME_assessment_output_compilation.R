@@ -27,10 +27,10 @@
   datacallyear_VMS <- 2022   # VMS data call year with latest data
   
   # set path to the VME advice folder
-  pathdir <- "C:/Users/neilm/Documents/projects/VME-Advice"
+  pathdir <- "C:/Work/VME-Advice"
   
   # set path to the folder with VMS and VME data (restricted data - outside github)
-  pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT/EU" 
+  pathdir_nogit <- "C:/Work/VME-advice_noGIT/EU" 
   
   # R libraries used
   source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
@@ -55,7 +55,7 @@
   
   
   refyear       <- 2009:(datacallyear-1)   # specify years to estimate sar threshold
-  SAR_threshold <- 0.43                  # SAR threshold value
+  SAR_threshold <- 0.43                    # SAR threshold value
   source(paste(pathdir,"Utilities/Scenario_2_option_1.R",sep="/")) 
   source(paste(pathdir,"Utilities/Scenario_2_option_2.R",sep="/"))
   

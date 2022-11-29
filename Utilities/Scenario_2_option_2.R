@@ -45,7 +45,7 @@
   vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
   
   # add to grid
-  VMEgrid <- cbind(VMEgrid, vmsreg[match(VMEgrid@data$csquares,vmsreg$c_square), c("SAR")])
+  VMEgrid <- cbind(VMEgrid, vmsreg[match(VMEgrid@data$csquares,vmsreg$c.square), c("SAR")])
   colnames(VMEgrid@data)[ncol(VMEgrid@data)] <- "SAR" 
   VMEgrid@data$SAR[is.na(VMEgrid@data$SAR)] <- 0
   VMEgrid@data$VME_Class[VMEgrid@data$SAR < SAR_threshold] <- 5     # low SAR
