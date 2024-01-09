@@ -10,22 +10,21 @@ vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar
   if(scenario == "A"){
   
     vme_index <- dplyr::select(vme_index, c(lon, lat, csquares, VME_Class)) # select the columns we need to work with
-    low_index <- dplyr::filter(vme_index, VME_Class == 0) # index low
-    habitat_plus_high_medium_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
-        
     
-    #create buffer around habitat csquares and high+medium index squares to get the identity of adjacent c-squares
-    adjacent_csquares <- point_to_csquare(lon = c(habitat_plus_high_medium_index$lon + 0.05, habitat_plus_high_medium_index$lon + 0.05,habitat_plus_high_medium_index$lon + 0.05,
-                                                  habitat_plus_high_medium_index$lon, habitat_plus_high_medium_index$lon - 0.05, habitat_plus_high_medium_index$lon - 0.05, 
-                                                  habitat_plus_high_medium_index$lon - 0.05, habitat_plus_high_medium_index$lon),
-                                          lat = c(habitat_plus_high_medium_index$lat - 0.05, habitat_plus_high_medium_index$lat, habitat_plus_high_medium_index$lat + 0.05,
-                                                  habitat_plus_high_medium_index$lat + 0.05, habitat_plus_high_medium_index$lat + 0.05, habitat_plus_high_medium_index$lat,
-                                                  habitat_plus_high_medium_index$lat - 0.05, habitat_plus_high_medium_index$lat - 0.05), 0.05)
+    low_index <- dplyr::filter(vme_index, VME_Class == 0) # index low
+    
+    habitat_plus_high_medium_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
+    
+    adjacent_csquares <- get_adjacent_csquares(habitat_plus_high_medium_index, diagonals = T, degrees = 0,05)
     ## I have assumed "adjacent" means diagonally as well as above/below/left/right. If not, change this bit.
+    
     adjacent_low_index <- dplyr::filter(low_index, csquares %in% adjacent_csquares)
     
-    scenario_csquares <- rbind(habitat_plus_high_medium_index, adjacent_low_index) ## bring them back together again
-  
+    ## bring them back together again and select unique
+    scenario_csquares <- dplyr::bind_rows(habitat_plus_high_medium_index, adjacent_low_index) %>% 
+      st_drop_geometry() %>% 
+      dplyr::pull(csquares) %>% 
+      unique() 
   }
   
   if(scenario == "B"){
@@ -45,12 +44,7 @@ vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar
     low_index <- dplyr::filter(vme_index, VME_Class == 0) # index low
     high_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
     
-    adjacent_csquares <- point_to_csquare(lon = c(high_index$lon + 0.05, high_index$lon + 0.05,high_index$lon + 0.05,
-                                                  high_index$lon, high_index$lon - 0.05, high_index$lon - 0.05, 
-                                                  high_index$lon - 0.05, high_index$lon),
-                                          lat = c(high_index$lat - 0.05, high_index$lat, high_index$lat + 0.05,
-                                                  high_index$lat + 0.05, high_index$lat + 0.05, high_index$lat,
-                                                  high_index$lat - 0.05, high_index$lat - 0.05), 0.05)
+    adjacent_csquares <- get_adjacent_csquares(high_index, degrees = 0.05, diagonals = T)
     ## this gives us the c-square address of all the squares adjacent to medium and high index c-squares
     ## I have assumed "adjacent" means diagonally as well as above/below/left/right. If not, change this bit.
     
@@ -74,17 +68,32 @@ vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar
     
     index <- rbind(high_index, low_index_filtered) ## bring them back together again
     
-    output <- unique(c(vme$csquare, index$csquare))
+    #output <- unique(c(vme$csquare, index$csquare))
   }  
 
   if(scenario == "D"){
-    ## should be easy as just filtering the habitat layer to exclude c-squares above SAR threshold, 
-    output <- unique(c(vme$csquare, index$csquare))
+    
+    #This step could potentially be extracted to data.R 
+    VMEgrid <- cbind(VMEgrid, "SAR" = vmsreg[match(VMEgrid$csquares,vmsreg$c.square), "SAR"])
+    VMEgrid$SAR[is.na(VMEgrid$SAR)] <- 0
+
+    VME_below_SAR_thresh <- VMEgrid[VMEgrid$SAR < SAR_threshold,]  # select all below SAR threshold
+    
+    adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh, degrees = 0.05, diagonals = T)
+    
+    adjacent_low_index <- dplyr::filter(vme_index, VME_Class == 0) %>% 
+      dplyr::filter(csquares %in% adjacent_csquares)
+    
+    ## bring them back together again and select unique
+    scenario_csquares <- dplyr::bind_rows(VME_below_SAR_thresh, adjacent_low_index) %>% 
+      st_drop_geometry() %>% 
+      dplyr::pull(csquares) %>% 
+      unique() 
   }
   if(scenario == "E") {
     ## as scenario C, but also including the elements, as per scenario B
   }
 
-  return(output)
+  return(scenario_csquares)
   
 }
