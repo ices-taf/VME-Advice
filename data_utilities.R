@@ -132,3 +132,31 @@ point_to_csquare <- function (lon, lat, degrees)
                                                          "code", ], sep = "")
   return(CSquareCodes)
 }
+
+
+csquare_buffer <- function(vme.tab){
+  
+  if("sf" %in% is(vme.tab) == FALSE){print("To run, this function needs to be provided with a table of c-squares in an 'sf' object.") 
+    next
+  }
+  
+  bboxes <- lapply(st_geometry(vme.tab), st_bbox)
+  
+  # Create a new rectangle buffered by 0.025 degrees for each original rectangle
+  buffered_rects <- lapply(bboxes, function(bbox) {
+    st_bbox(c(xmin = bbox[["xmin"]] - 0.025, 
+              ymin = bbox[["ymin"]] - 0.025, 
+              xmax = bbox[["xmax"]] + 0.025, 
+              ymax = bbox[["ymax"]] + 0.025), 
+            crs = st_crs(vme.tab))
+  })
+  
+  # Convert the bboxes to rectangular polygons
+  buffered_rects <- lapply(buffered_rects, st_as_sfc)
+  
+  out.tab <- vme.tab
+  out.tab$geometry <- buffered_rects$geometry
+  
+  return(out.tab)
+  
+}
