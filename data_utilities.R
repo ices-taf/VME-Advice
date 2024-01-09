@@ -126,10 +126,10 @@ csquare_buffer <- function(vme.tab){
   
   # Create a new rectangle buffered by 0.025 degrees for each original rectangle
   buffered_rects <- lapply(bboxes, function(bbox) {
-    st_bbox(c(xmin = bbox[["xmin"]] - 0.025, 
-              ymin = bbox[["ymin"]] - 0.025, 
-              xmax = bbox[["xmax"]] + 0.025, 
-              ymax = bbox[["ymax"]] + 0.025), 
+    st_bbox(c(xmin = bbox[["xmin"]] - 0.02501, 
+              ymin = bbox[["ymin"]] - 0.02501, 
+              xmax = bbox[["xmax"]] + 0.02501, 
+              ymax = bbox[["ymax"]] + 0.02501), 
             crs = st_crs(vme.tab))
   })
   
