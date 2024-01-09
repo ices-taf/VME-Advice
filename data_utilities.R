@@ -115,6 +115,31 @@ point_to_csquare <- function (lon, lat, degrees)
   return(CSquareCodes)
 }
 
+get_adjacent_csquares <- function(input_points, degrees, diagonals = T) {
+  
+  
+  if (diagonals == T ){
+    
+    adjacent_points <- data.frame(lon = c(input_points$lon + degrees, input_points$lon + degrees,input_points$lon + degrees,
+                                          input_points$lon, input_points$lon - degrees, input_points$lon - degrees, 
+                                          input_points$lon - degrees, input_points$lon),
+                                  lat = c(input_points$lat - degrees, input_points$lat, input_points$lat + degrees,
+                                          input_points$lat + degrees, input_points$lat + degrees, input_points$lat,
+                                          input_points$lat - degrees, input_points$lat - degrees))
+  } else if (diagonals ==F){
+    
+    adjacent_points <- data.frame(lon = c(input_points$lon + degrees,
+                                          input_points$lon, input_points$lon - degrees, 
+                                          input_points$lon),
+                                  lat = c(input_points$lat, 
+                                          input_points$lat + degrees, input_points$lat,
+                                          input_points$lat - degrees))
+  }
+  
+  point_to_csquare(lon = adjacent_points$lon,
+                   lat = adjacent_points$lat, 
+                   degrees = degrees)
+}
 
 csquare_buffer <- function(vme.tab){
   
