@@ -123,6 +123,8 @@ vme_scenario_csquares(vme_index = VMEgrid,
 vme_scenario_csquares(vme_index = VMEgrid, 
                       vme_observations = VMEobs_points,
                       vme_elements = vme_elements, 
+                      sar_layer = vmsreg, 
+                      sar.threshold = SAR_threshold,
                       scenario = "C" 
                         )
 #Scenario 2.2 / D
