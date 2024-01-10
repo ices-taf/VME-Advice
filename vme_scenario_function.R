@@ -81,13 +81,10 @@ vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar
     
     adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh, degrees = 0.05, diagonals = T)
     
-    adjacent_low_index <- dplyr::filter(vme_index, VME_Class == 0) %>% 
-      dplyr::filter(csquares %in% adjacent_csquares)
-    
     ## bring them back together again and select unique
-    scenario_csquares <- dplyr::bind_rows(VME_below_SAR_thresh, adjacent_low_index) %>% 
-      st_drop_geometry() %>% 
+    scenario_csquares <- st_drop_geometry(VME_below_SAR_thresh) %>% 
       dplyr::pull(csquares) %>% 
+      c( adjacent_csquares) %>%
       unique() 
   }
   if(scenario == "E") {
