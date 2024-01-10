@@ -10,6 +10,8 @@ st_over <- function (x, y)
   })
 }
 
+########################################################################################
+
 point_to_csquare <- function (lon, lat, degrees) 
 {
   if (length(lon) != length(lat)) 
@@ -115,35 +117,46 @@ point_to_csquare <- function (lon, lat, degrees)
   return(CSquareCodes)
 }
 
-get_adjacent_csquares <- function(input_points, degrees, diagonals = T) {
+##########################################################################################
+
+get_adjacent_csquares <- function(input_csquares, csq_degrees = 0.05, diagonals = T) {
   
+    input_points <- vmstools::CSquare2LonLat(input_csquares, degrees= csq_degrees)
+    names(input_points) <- c("lat", "lon")
   
-  if (diagonals == T ){
+    if (diagonals == T ){
     
-    adjacent_points <- data.frame(lon = c(input_points$lon + degrees, input_points$lon + degrees,input_points$lon + degrees,
-                                          input_points$lon, input_points$lon - degrees, input_points$lon - degrees, 
-                                          input_points$lon - degrees, input_points$lon),
-                                  lat = c(input_points$lat - degrees, input_points$lat, input_points$lat + degrees,
-                                          input_points$lat + degrees, input_points$lat + degrees, input_points$lat,
-                                          input_points$lat - degrees, input_points$lat - degrees))
+    adjacent_points <- data.frame(lon = c(input_points$lon + csq_degrees, input_points$lon + csq_degrees,input_points$lon + csq_degrees,
+                                          input_points$lon, input_points$lon - csq_degrees, input_points$lon - csq_degrees, 
+                                          input_points$lon - csq_degrees, input_points$lon),
+                                  lat = c(input_points$lat - csq_degrees, input_points$lat, input_points$lat + csq_degrees,
+                                          input_points$lat + csq_degrees, input_points$lat + csq_degrees, input_points$lat,
+                                          input_points$lat - csq_degrees, input_points$lat - csq_degrees))
   } else if (diagonals ==F){
     
-    adjacent_points <- data.frame(lon = c(input_points$lon + degrees,
-                                          input_points$lon, input_points$lon - degrees, 
+    adjacent_points <- data.frame(lon = c(input_points$lon + csq_degrees,
+                                          input_points$lon, input_points$lon - csq_degrees, 
                                           input_points$lon),
                                   lat = c(input_points$lat, 
-                                          input_points$lat + degrees, input_points$lat,
-                                          input_points$lat - degrees))
+                                          input_points$lat + csq_degrees, input_points$lat,
+                                          input_points$lat - csq_degrees))
   }
   
-  point_to_csquare(lon = adjacent_points$lon,
-                   lat = adjacent_points$lat, 
-                   degrees = degrees)
+  output <- point_to_csquare(lon = adjacent_points$lon,
+               lat = adjacent_points$lat, 
+               degrees = csq_degrees)
+  
+  output <- output[output %in% input_csquares == FALSE]
+  
+  return(output)
+  
 }
+
+######################################################################################
 
 csquare_buffer <- function(vme.tab){
   
-  if("sf" %in% is(vme.tab) == FALSE){print("To run, this function needs to be provided with a table of c-squares in an 'sf' object.") 
+  if("sf" %in% is(vme.tab) == FALSE){print("To run, this function needs to be provided with a table of c-squares in an 'sf' object") 
     next
   }
   

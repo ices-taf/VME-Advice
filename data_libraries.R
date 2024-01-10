@@ -14,8 +14,9 @@ library(knitr)
 library(kableExtra)
 library(htmlTable)
 library(glue)
+
 library(icesTAF)
-
 library(data.table)
-
-
+library(nngeo)
+library(vmstools)
+library(icesVMS)
