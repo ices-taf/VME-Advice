@@ -96,17 +96,52 @@ element_close@data$elementclose <- 1
 vme_elements <- st_as_sf(element_close)
 
 
-#Scenario 1.1
+
+# VMS
+vmsreg <- readRDS(paste(pathdir_nogit,paste("VMS data repository/All_VMS_datacall",datacallyear_VMS,".rds",sep=""),sep="/"))  
+refyear       <- 2009:(datacallyear-1)   # specify years to estimate sar threshold
+SAR_threshold <- 0.43                    # SAR threshold value
+nam <- c(paste("SAR_total",refyear,sep="_"))
+indexcol <- which(names(vmsreg) %in% nam) 
+vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
+
+
+#Scenario 1.1 / A
 vme_scenario_csquares(vme_index = VMEgrid, 
                       vme_observations = VMEobs_points,
                       vme_elements = vme_elements, 
                       scenario = "A" 
                         )
-#Scenario 1.2
+#Scenario 1.2 / B
 vme_scenario_csquares(vme_index = VMEgrid, 
                       vme_observations = VMEobs_points,
                       vme_elements = vme_elements, 
                       scenario = "B" 
+                        )
+
+#Scenario 2.1 / C
+vme_scenario_csquares(vme_index = VMEgrid, 
+                      vme_observations = VMEobs_points,
+                      vme_elements = vme_elements, 
+                      sar_layer = vmsreg, 
+                      sar.threshold = SAR_threshold,
+                      scenario = "C" 
+                        )
+#Scenario 2.2 / D
+vme_scenario_csquares(vme_index = VMEgrid, 
+                      vme_observations = VMEobs_points,
+                      vme_elements = vme_elements, 
+                      sar_layer = vmsreg, 
+                      sar.threshold = SAR_threshold,
+                      scenario = "D" 
+                        )
+#Scenario 2.3 / E
+vme_scenario_csquares(vme_index = VMEgrid, 
+                      vme_observations = VMEobs_points,
+                      vme_elements = vme_elements, 
+                      sar_layer = vmsreg, 
+                      sar.threshold = SAR_threshold,
+                      scenario = "E" 
                         )
 
 
