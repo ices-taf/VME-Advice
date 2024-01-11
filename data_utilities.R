@@ -12,110 +12,113 @@ st_over <- function (x, y)
 
 ########################################################################################
 
-point_to_csquare <- function (lon, lat, degrees) 
-{
-  if (length(lon) != length(lat)) 
-    stop("length of longitude not equal to length of latitude")
-  if (!degrees %in% c(10, 5, 1, 0.5, 0.1, 0.05, 0.01)) 
-    stop("degrees specified not in range: c(10,5,1,0.5,0.1,0.05,0.01)")
-  dims <- length(lon)
-  quadrants <- array(NA, dim = c(4, 6, dims), dimnames = list(c("globalQuadrant", 
-                                                                "intmQuadrant1", "intmQuadrant2", "intmQuadrant3"), c("quadrantDigit", 
-                                                                                                                      "latDigit", "lonDigit", "latRemain", "lonRemain", "code"), 
-                                                              seq(1, dims, 1)))
-  quadrants["globalQuadrant", "quadrantDigit", ] <- 4 - (((2 * 
-                                                             floor(1 + (lon/200))) - 1) * ((2 * floor(1 + (lat/200))) + 
-                                                                                             1))
-  quadrants["globalQuadrant", "latDigit", ] <- floor(abs(lat)/10)
-  quadrants["globalQuadrant", "lonDigit", ] <- floor(abs(lon)/10)
-  quadrants["globalQuadrant", "latRemain", ] <- round(abs(lat) - 
-                                                        (quadrants["globalQuadrant", "latDigit", ] * 10), 7)
-  quadrants["globalQuadrant", "lonRemain", ] <- round(abs(lon) - 
-                                                        (quadrants["globalQuadrant", "lonDigit", ] * 10), 7)
-  quadrants["globalQuadrant", "code", ] <- quadrants["globalQuadrant", 
-                                                     "quadrantDigit", ] * 1000 + quadrants["globalQuadrant", 
-                                                                                           "latDigit", ] * 100 + quadrants["globalQuadrant", "lonDigit", 
-                                                                                           ]
-  quadrants["intmQuadrant1", "quadrantDigit", ] <- (2 * floor(quadrants["globalQuadrant", 
-                                                                        "latRemain", ] * 0.2)) + floor(quadrants["globalQuadrant", 
-                                                                                                                 "lonRemain", ] * 0.2) + 1
-  quadrants["intmQuadrant1", "latDigit", ] <- floor(quadrants["globalQuadrant", 
-                                                              "latRemain", ])
-  quadrants["intmQuadrant1", "lonDigit", ] <- floor(quadrants["globalQuadrant", 
-                                                              "lonRemain", ])
-  quadrants["intmQuadrant1", "latRemain", ] <- round((quadrants["globalQuadrant", 
-                                                                "latRemain", ] - quadrants["intmQuadrant1", "latDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant1", "lonRemain", ] <- round((quadrants["globalQuadrant", 
-                                                                "lonRemain", ] - quadrants["intmQuadrant1", "lonDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant1", "code", ] <- quadrants["intmQuadrant1", 
-                                                    "quadrantDigit", ] * 100 + quadrants["intmQuadrant1", 
-                                                                                         "latDigit", ] * 10 + quadrants["intmQuadrant1", "lonDigit", 
-                                                                                         ]
-  quadrants["intmQuadrant2", "quadrantDigit", ] <- (2 * floor(quadrants["intmQuadrant1", 
-                                                                        "latRemain", ] * 0.2)) + floor(quadrants["intmQuadrant1", 
-                                                                                                                 "lonRemain", ] * 0.2) + 1
-  quadrants["intmQuadrant2", "latDigit", ] <- floor(quadrants["intmQuadrant1", 
-                                                              "latRemain", ])
-  quadrants["intmQuadrant2", "lonDigit", ] <- floor(quadrants["intmQuadrant1", 
-                                                              "lonRemain", ])
-  quadrants["intmQuadrant2", "latRemain", ] <- round((quadrants["intmQuadrant1", 
-                                                                "latRemain", ] - quadrants["intmQuadrant2", "latDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant2", "lonRemain", ] <- round((quadrants["intmQuadrant1", 
-                                                                "lonRemain", ] - quadrants["intmQuadrant2", "lonDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant2", "code", ] <- quadrants["intmQuadrant2", 
-                                                    "quadrantDigit", ] * 100 + quadrants["intmQuadrant2", 
-                                                                                         "latDigit", ] * 10 + quadrants["intmQuadrant2", "lonDigit", 
-                                                                                         ]
-  quadrants["intmQuadrant3", "quadrantDigit", ] <- (2 * floor(quadrants["intmQuadrant2", 
-                                                                        "latRemain", ] * 0.2)) + floor(quadrants["intmQuadrant2", 
-                                                                                                                 "lonRemain", ] * 0.2) + 1
-  quadrants["intmQuadrant3", "latDigit", ] <- floor(quadrants["intmQuadrant2", 
-                                                              "latRemain", ])
-  quadrants["intmQuadrant3", "lonDigit", ] <- floor(quadrants["intmQuadrant2", 
-                                                              "lonRemain", ])
-  quadrants["intmQuadrant3", "latRemain", ] <- round((quadrants["intmQuadrant2", 
-                                                                "latRemain", ] - quadrants["intmQuadrant3", "latDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant3", "lonRemain", ] <- round((quadrants["intmQuadrant2", 
-                                                                "lonRemain", ] - quadrants["intmQuadrant3", "lonDigit", 
-                                                                ]) * 10, 7)
-  quadrants["intmQuadrant3", "code", ] <- quadrants["intmQuadrant3", 
-                                                    "quadrantDigit", ] * 100 + quadrants["intmQuadrant3", 
-                                                                                         "latDigit", ] * 10 + quadrants["intmQuadrant3", "lonDigit", 
-                                                                                         ]
-  if (degrees == 10) 
-    CSquareCodes <- quadrants["globalQuadrant", "code", ]
-  if (degrees == 5) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "quadrantDigit", 
-    ], sep = "")
-  if (degrees == 1) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "code", ], sep = "")
-  if (degrees == 0.5) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "code", ], ":", 
-    quadrants["intmQuadrant2", "quadrantDigit", ], sep = "")
-  if (degrees == 0.1) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "code", ], ":", 
-    quadrants["intmQuadrant2", "code", ], sep = "")
-  if (degrees == 0.05) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "code", ], ":", 
-    quadrants["intmQuadrant2", "code", ], ":", quadrants["intmQuadrant3", 
-                                                         "quadrantDigit", ], sep = "")
-  if (degrees == 0.01) 
-    CSquareCodes <- paste(quadrants["globalQuadrant", "code", 
-    ], ":", quadrants["intmQuadrant1", "code", ], ":", 
-    quadrants["intmQuadrant2", "code", ], ":", quadrants["intmQuadrant3", 
-                                                         "code", ], sep = "")
-  return(CSquareCodes)
+getCSquare <- function(lat, lon, res) {
+  Q <- 100000
+  MAXLON <- 17999999
+  MAXLAT <- 8999999
+  OUTLON <- 18000000
+  OUTLAT <- 9000000
+  
+  getX <- function(ilat, ilon) {
+    if (ilat >= 0) {
+      return(ifelse(ilon >= 0, '1', '7'))
+    }
+    return(ifelse(ilon >= 0, '3', '5'))
+  }
+  
+  getY <- function(latdigit, londigit) {
+    if (latdigit < 5) {
+      return(ifelse(londigit < 5, '1', '2'))
+    }
+    return(ifelse(londigit < 5, '3', '4'))
+  }
+  
+  res <- as.integer(res * Q)
+  if (res < 1) {
+    res <- 1
+  }
+  
+  result <- sapply(1:length(lat), function(i) {
+    ilat <- as.integer(lat[i]*Q)
+    ilon <- as.integer(lon[i]*Q)
+    sb <- c(getX(ilat, ilon))
+    llat <- abs(ilat)
+    llon <- abs(ilon)
+    
+    if (llat >= OUTLAT) {
+      llat <- MAXLAT
+    }
+    
+    if (llon >= OUTLON) {
+      llon <- MAXLON
+    }
+    
+    q <- 10*Q
+    i <- llat %/% q
+    j <- llon %/% q
+    sb <- c(sb, as.character(i), sprintf("%02d", j))
+    
+    curr <- 10*Q
+    
+    while (curr > res) {
+      llat <- llat - i*q
+      llon <- llon - j*q
+      q <- q / 10
+      i <- llat %/% q
+      j <- llon %/% q
+      curr <- curr / 2
+      
+      sb <- c(sb, ':', getY(i,j))
+      if (curr > res) {
+        sb <- c(sb, as.character(i), as.character(j))
+        curr <- curr / 5
+      }
+    }
+    
+    return(paste(sb, collapse = ""))
+  })
+  
+  return(result)
 }
+
+
+##########################################################################################
+
+getCoordinates <- function (cSquare, degrees = 0.05) {
+  
+  csq.len <- nchar(cSquare)
+  gq <- as.numeric(substr(cSquare, 1, 1))
+  res <- 10^(1-floor((csq.len-4)/4)) - ((round((csq.len-4)/4, 1) - floor((csq.len-4)/4)) * 10^(1-floor((csq.len-4)/4)))
+  glbl.qd.lt <- (round(abs(gq-4)*2, digits = -1)/5) - 1
+  glbl.qd.lg <- ((2 * (round(gq, digits = -1)/10)) - 1) * -1
+  
+  if(degrees == 0.05){
+    
+    t2 <- as.numeric(substr(cSquare, 2, 2))
+    t7 <- as.numeric(substr(cSquare, 7, 7))
+    t11 <- as.numeric(substr(cSquare, 11, 11))
+    t14 <- as.numeric(substr(cSquare, 14, 14))
+    
+    m1 <- round(t14 * 2, digits = -1) / 10
+    
+    
+    centre.lat <- ((t2 * 10) + t7 + (t11 * 0.1) + (m1 * 0.05) + 0.025) * glbl.qd.lt
+    
+    r3 <- as.numeric(substr(cSquare, 3, 4))
+    r8 <- as.numeric(substr(cSquare, 8, 8))
+    r12 <- as.numeric(substr(cSquare, 12, 12))
+    
+    m2 <- (round((t14 - 1) / 2, digits = 1) - floor((t14 - 1) / 2)) * 2
+    
+    centre.lon <- ((r3 * 10) + r8 + (r12 *0.1) + (m2 * 0.05) + 0.025) * glbl.qd.lg
+    
+  }
+  
+  return(data.frame("lat" = centre.lat, "lon" = centre.lon))
+  
+}
+
+
 
 ##########################################################################################
 
