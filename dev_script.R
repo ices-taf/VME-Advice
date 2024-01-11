@@ -15,7 +15,7 @@ pathdir <- "C:/Users/neilm/Documents/projects/VME-Advice/"
 pathdir_nogit <- "C:/Users/neilm/Documents/VME-advice_noGIT/EU" 
 
 # R libraries used
-#source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
+source(paste(pathdir,"Utilities/Libraries_VMEadvice.R",sep="/"))  
 source("data_utilities.R")  
 
 
@@ -106,6 +106,8 @@ indexcol <- which(names(vmsreg) %in% nam)
 vmsreg$SAR <- rowMeans(vmsreg[indexcol],na.rm=T)
 
 
+
+
 #Scenario 1.1 / A
 vme_scenario_csquares(vme_index = VMEgrid, 
                       vme_observations = VMEobs_points,
@@ -145,9 +147,3 @@ vme_scenario_csquares(vme_index = VMEgrid,
                         )
 
 
-
-#### 
-VMEobs <- read.csv(paste(pathdir_nogit,paste(
-"VME data repository/VME observations and csquares/VME_observations_datacall_",
-datacallyear,"_eu.csv",sep=""),sep="/"),
-header=T,sep=",",row.names = NULL)

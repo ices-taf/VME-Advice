@@ -210,7 +210,7 @@ vme_scenario_A <- function(vme_index) {
   
   habitat_plus_high_medium_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
   
-  adjacent_csquares <- get_adjacent_csquares(habitat_plus_high_medium_index, diagonals = T, csq_degrees = 0,05)
+  adjacent_csquares <- get_adjacent_csquares(habitat_plus_high_medium_index$csquares, diagonals = T, csq_degrees = 0.05)
   ## I have assumed "adjacent" means diagonally as well as above/below/left/right. If not, change this bit.
   
   adjacent_low_index <- dplyr::filter(low_index, csquares %in% adjacent_csquares)
@@ -228,7 +228,7 @@ vme_scenario_B <- function(vme_index, vme_elements) {
   #identify isolated elements with records
   isolated_csquares <- get_isolated_csquares(csq_elements_w_records)
   isolated_vme <- dplyr::filter(vme_index, csquares %in% isolated_csquares)
-  vme_outside_elements <- dplyr::filter(vme_index, !csquares %in% elements_w_records)
+  vme_outside_elements <- dplyr::filter(vme_index, !csquares %in% csq_elements_w_records)
   
   scenario_B_input <- dplyr::bind_rows(isolated_vme, vme_outside_elements)
 
@@ -250,7 +250,7 @@ vme_scenario_C <- function(vme_index, sar_layer) {
   candidate_vmes <- dplyr::bind_rows(habitat_plus_high_medium_index, low_index_low_fishing)
   
   
-  adjacent_csquares <- get_adjacent_csquares(candidate_vmes, csq_degrees = 0.05, diagonals = T)
+  adjacent_csquares <- get_adjacent_csquares(candidate_vmes$csquares, csq_degrees = 0.05, diagonals = T)
   adjacent_low_index_high_fishing <- dplyr::filter(low_index_high_fishing, csquares %in% adjacent_csquares)
   
   ## then bind together unique csquares into output
@@ -267,11 +267,55 @@ vme_scenario_D <- function(vme_index, sar_layer) {
   
   VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
   
-  adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh, csq_degrees = 0.05, diagonals = T)
+  adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$csquares, csq_degrees = 0.05, diagonals = T)
   
   ## bring them back together again and select unique
   scenario_csquares <- VME_below_SAR_thresh %>% 
     dplyr::pull(csquares) %>% 
     c(adjacent_csquares) %>%
     unique() 
+}
+
+vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar_layer, sar.threshold = 0.43, scenario = "A"){
+  # stopifnot(vme_index)
+  if(scenario %in% c("A", "B", "C", "D", "E") == FALSE){print("Error: Scenario must be A - E")}
+  ## etc etc. for the other scenarios
+  
+  stopifnot(sum(c("lon", "long") %in% colnames(vme_index)) == 1)
+  vme_index <- dplyr::rename(vme_index, lon = long)
+  vme_index <- dplyr::select(vme_index, c(lon, lat, csquares, VME_Class)) # select the columns we need to work with
+  
+  if(scenario == "A"){
+    
+    scenario_csquares <- vme_scenario_A(vme_index)
+    
   }
+  
+  if(scenario == "B"){
+    if(missing(vme_elements) == TRUE){print("Error: Scenario B requires a VME elements object") }
+    
+    scenario_csquares <- vme_scenario_B(vme_index, vme_elements) 
+  }  
+  
+  if(scenario == "C"){
+    
+    scenario_csquares <- vme_scenario_C(vme_index, sar_layer) 
+  }  
+  
+  if(scenario == "D"){
+    
+    scenario_csquares <- vme_scenario_D(vme_index, sar_layer) 
+  }
+  
+  if(scenario == "E") {
+    ## as scenario C, but also including the elements, as per scenario B
+    scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
+    scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer)
+    
+    scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+      unique()
+  }
+  
+  return(scenario_csquares)
+  
+}
