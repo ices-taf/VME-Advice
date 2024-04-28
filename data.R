@@ -11,9 +11,10 @@ mkdir("data")
 source("data_parameters.R")
 source("data_libraries.R")
 source("data_utilities.R")
+
+# load and process required data layers
 source("data_VMEelements.R")
+source("data_vmes.R")
+source("data_vme_csquares.R") # this is the combined VME observation and modelled habitat layer
+source("data_other_layers.R") # contact neil.campbell@ices.dk for access
 
-
-source(paste(pathdir,"Utilities/Scenario_1_option_1.R",sep="/"))  
-
-source(paste(pathdir,"Utilities/ADGVME2022_Scenario_1_option_2.R",sep="/")) 

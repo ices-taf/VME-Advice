@@ -1,22 +1,5 @@
-library(sf)
-library(rgdal)
-library(sp)
-library(rgeos)
-library(maptools)
-library(leaflet)
-library(htmlwidgets)
-library(smoothr)
-library(raster)
-library(tmap)
-library(dplyr)
-library(tidyr)
-library(knitr)
-library(kableExtra)
-library(htmlTable)
-library(glue)
-
-library(icesTAF)
-library(data.table)
-library(nngeo)
-library(vmstools)
-library(icesVMS)
+# Install and load required packages using pacman
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(sf, rgdal, rgeos, maptools, leaflet, htmlwidgets, smoothr, 
+raster, tmap, dplyr, tidyr, knitr, kableExtra, htmlTable, glue, icesTAF,
+data.table, nngeo, vmstools, icesVMS)

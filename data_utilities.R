@@ -1,3 +1,8 @@
+## Utility functions for the VME analysis
+
+
+######################################################################################
+
 st_over <- function (x, y) 
 {
   require(sf)
@@ -204,6 +209,8 @@ csquare_buffer <- function(vme.tab){
   
 }
 
+######################################################################################
+
 vme_scenario_A <- function(vme_index) {
   
   low_index <- dplyr::filter(vme_index, VME_Class == 0) # index low
@@ -221,6 +228,8 @@ vme_scenario_A <- function(vme_index) {
     unique() 
 }
 
+######################################################################################
+
 vme_scenario_B <- function(vme_index, vme_elements) {
   
   csq_elements_w_records <- dplyr::pull(vme_elements, csquares)
@@ -234,6 +243,8 @@ vme_scenario_B <- function(vme_index, vme_elements) {
 
   vme_scenario_A(scenario_B_input)
 }
+
+######################################################################################
 
 vme_scenario_C <- function(vme_index, sar_layer) {
   
@@ -259,6 +270,8 @@ vme_scenario_C <- function(vme_index, sar_layer) {
     unique()
 }
 
+######################################################################################
+
 vme_scenario_D <- function(vme_index, sar_layer) {
   
   #This step could potentially be extracted to data.R 
@@ -275,6 +288,8 @@ vme_scenario_D <- function(vme_index, sar_layer) {
     c(adjacent_csquares) %>%
     unique() 
 }
+
+######################################################################################
 
 vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar_layer, sar.threshold = 0.43, scenario = "A"){
   # stopifnot(vme_index)
