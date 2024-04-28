@@ -161,21 +161,22 @@ get_adjacent_csquares <- function(input_csquares, csq_degrees = 0.05, diagonals 
   
 }
 
+##########################################################################################
+
 get_isolated_csquares <- function(csquares) {
-  
-  if(class(csquares) == "character"){
+  if (class(csquares) == "character") {
     ids <- csquares
-  } else if(class(csquares) == "data.frame") {
+  } else if (class(csquares) == "data.frame") {
     stopifnot("csquares" %in% colnames(csquares), "Column with name 'csquares' must be present")
     ids <- csquares$csquares
   }
-
-  list_adjacents <- purrr::pmap(vme_elements, ~ get_adjacent_csquares(.x, csq_degrees = 0.05, diagonals = T))
+  
+  list_adjacents <- purrr::map(ids, ~ get_adjacent_csquares(.x, csq_degrees = 0.05, diagonals = T))
   list_neighbours_within_input <- purrr::map(list_adjacents, ~ .x[.x %in% ids])
-  isolated <- purrr::map_lgl(list_neighbours_within_input, ~is.null(.x)) 
+  isolated <- purrr::map_lgl(list_neighbours_within_input, ~ length(.x) == 0)
+  
   ids[isolated]
 }
-
 ######################################################################################
 
 csquare_buffer <- function(vme.tab){
@@ -217,15 +218,16 @@ vme_scenario_A <- function(vme_index) {
   
   habitat_plus_high_medium_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
   
-  adjacent_csquares <- get_adjacent_csquares(habitat_plus_high_medium_index$csquares, diagonals = T, csq_degrees = 0.05)
+  adjacent_csquares <- get_adjacent_csquares(habitat_plus_high_medium_index$CSquare, diagonals = T, csq_degrees = 0.05)
   ## I have assumed "adjacent" means diagonally as well as above/below/left/right. If not, change this bit.
   
-  adjacent_low_index <- dplyr::filter(low_index, csquares %in% adjacent_csquares)
+  adjacent_low_index <- dplyr::filter(low_index, CSquare %in% adjacent_csquares)
   
   ## bring them back together again and select unique
   scenario_csquares <- dplyr::bind_rows(habitat_plus_high_medium_index, adjacent_low_index) %>% 
-    dplyr::pull(csquares) %>% 
+    dplyr::pull(CSquare) %>% 
     unique() 
+  return(scenario_csquares)
 }
 
 ######################################################################################
@@ -236,20 +238,26 @@ vme_scenario_B <- function(vme_index, vme_elements) {
   
   #identify isolated elements with records
   isolated_csquares <- get_isolated_csquares(csq_elements_w_records)
-  isolated_vme <- dplyr::filter(vme_index, csquares %in% isolated_csquares)
-  vme_outside_elements <- dplyr::filter(vme_index, !csquares %in% csq_elements_w_records)
+  isolated_vme <- dplyr::filter(vme_index, CSquare %in% isolated_csquares)
+  vme_outside_elements <- dplyr::filter(vme_index, !CSquare %in% csq_elements_w_records)
   
   scenario_B_input <- dplyr::bind_rows(isolated_vme, vme_outside_elements)
 
-  vme_scenario_A(scenario_B_input)
-}
+  scenario_csquares <-  vme_scenario_A(scenario_B_input)
+  return(scenario_csquares)
+  }
 
 ######################################################################################
 
-vme_scenario_C <- function(vme_index, sar_layer) {
+vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
   
   #This step could potentially be extracted to data.R 
-  vme_index <- cbind(vme_index, "SAR" = sar_layer[match(vme_index$csquares,sar_layer$c.square), "SAR"])
+  temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
+            st_drop_geometry()
+    
+  vme_index <- vme_index %>%
+    left_join(temp, by = c("CSquare" = "c_square"))
+  
   vme_index$SAR[is.na(vme_index$SAR)] <- 0
   
   habitat_plus_high_medium_index <- dplyr::filter(vme_index, VME_Class %in% c(3,2,1)) #Habitat, Index high, index medium
@@ -261,76 +269,114 @@ vme_scenario_C <- function(vme_index, sar_layer) {
   candidate_vmes <- dplyr::bind_rows(habitat_plus_high_medium_index, low_index_low_fishing)
   
   
-  adjacent_csquares <- get_adjacent_csquares(candidate_vmes$csquares, csq_degrees = 0.05, diagonals = T)
-  adjacent_low_index_high_fishing <- dplyr::filter(low_index_high_fishing, csquares %in% adjacent_csquares)
+  adjacent_csquares <- get_adjacent_csquares(candidate_vmes$CSquare, csq_degrees = 0.05, diagonals = T)
+  adjacent_low_index_high_fishing <- dplyr::filter(low_index_high_fishing, CSquare %in% adjacent_csquares)
   
   ## then bind together unique csquares into output
   scenario_csquares <- dplyr::bind_rows(candidate_vmes, adjacent_low_index_high_fishing) %>% 
-    dplyr::pull(csquares) %>% 
+    dplyr::pull(CSquare) %>% 
     unique()
-}
+  return(scenario_csquares)
+  }
 
 ######################################################################################
 
-vme_scenario_D <- function(vme_index, sar_layer) {
+vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
   
-  #This step could potentially be extracted to data.R 
-  vme_index <- cbind(vme_index, "SAR" = sar_layer[match(vme_index$csquares,sar_layer$c.square), "SAR"])
+  temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
+    st_drop_geometry()
+  
+  vme_index <- vme_index %>%
+    left_join(temp, by = c("CSquare" = "c_square"))
+  
   vme_index$SAR[is.na(vme_index$SAR)] <- 0
   
   VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
   
-  adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$csquares, csq_degrees = 0.05, diagonals = T)
+  adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
   
   ## bring them back together again and select unique
   scenario_csquares <- VME_below_SAR_thresh %>% 
-    dplyr::pull(csquares) %>% 
+    dplyr::pull(CSquare) %>% 
     c(adjacent_csquares) %>%
     unique() 
+  return(scenario_csquares)
+  }
+
+######################################################################################
+
+vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.44) {
+## as scenario C, but also including the elements, as per scenario B
+scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
+scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+
+scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+  unique()
+
+return(scenario_csquares)
 }
 
 ######################################################################################
 
-vme_scenario_csquares <- function(vme_index, vme_observations, vme_elements, sar_layer, sar.threshold = 0.43, scenario = "A"){
-  # stopifnot(vme_index)
-  if(scenario %in% c("A", "B", "C", "D", "E") == FALSE){print("Error: Scenario must be A - E")}
-  ## etc etc. for the other scenarios
+scenario_outputs <- function(scenario_csquares, scenario_name) {
   
-  stopifnot(sum(c("lon", "long") %in% colnames(vme_index)) == 1)
-  vme_index <- dplyr::rename(vme_index, lon = long)
-  vme_index <- dplyr::select(vme_index, c(lon, lat, csquares, VME_Class)) # select the columns we need to work with
-  
-  if(scenario == "A"){
-    
-    scenario_csquares <- vme_scenario_A(vme_index)
-    
+  if(missing(scenario_name)){
+    print("Please supply a scenario name to use when saving files. e.g Scenario_A")
+    break
   }
   
-  if(scenario == "B"){
-    if(missing(vme_elements) == TRUE){print("Error: Scenario B requires a VME elements object") }
-    
-    scenario_csquares <- vme_scenario_B(vme_index, vme_elements) 
-  }  
+  # scenario_csquares  <- vme.scenario.a.csquares
   
-  if(scenario == "C"){
-    
-    scenario_csquares <- vme_scenario_C(vme_index, sar_layer) 
-  }  
+  joined_data <- cbind(scenario_csquares, getCoordinates(scenario_csquares, 0.05))
+  joined_data <- cbind(joined_data, wkt = wkt_csquare(joined_data$lat, joined_data$lon))
+  joined_data <- st_as_sf(joined_data, wkt = "wkt")
+  joined_data <-  joined_data %>% 
+    st_set_crs(4326)
   
-  if(scenario == "D"){
-    
-    scenario_csquares <- vme_scenario_D(vme_index, sar_layer) 
-  }
+  buffered_data <- csquare_buffer(joined_data) ## generates a 0.025 degree buffer around each c-square
+  unioned_rects <- st_union(buffered_data, by_feature = F) ## merges them into a single polygon
   
-  if(scenario == "E") {
-    ## as scenario C, but also including the elements, as per scenario B
-    scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
-    scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer)
-    
-    scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
-      unique()
-  }
+  # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
+  polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]
   
-  return(scenario_csquares)
+  # Apply st_remove_holes() to the filtered geometry
+  no_holes_poly <- nngeo::st_remove_holes(polygon_geoms) ## fills in any holes within the area
   
+  no_holes_poly <- st_cast(no_holes_poly, "POLYGON") ## converts back from a single multipolygon to individual polgyons, 
+  ## so we can summarise what each contains
+  
+  no_holes_poly <- st_make_valid(no_holes_poly)
+  
+  ## Clip results to loaded shapefiles
+  ###  ecoregion
+  poly_in_ecoregion <- st_intersection(no_holes_poly, assessment_area) %>%
+    st_make_valid
+  
+  ###  bathymetry
+  poly_in_depth <- st_intersection(poly_in_ecoregion, bathymetry) %>%
+    st_make_valid
+  
+  
+  ###  fishing footprint
+  poly_in_footprint <- st_intersection(poly_in_depth, fishing_footprint) %>%
+    st_make_valid() %>%
+    st_as_sf() 
+  
+  vme_records <- st_as_sf(vme_records)
+  
+  # Perform a spatial join between poly_in_footprint and vme_records
+  poly_records <- st_join(poly_in_footprint, vme_records)
+  
+  # Group by polygon geometry and count the number of each VME_Indicator type
+  poly_counts <- poly_records %>%
+    group_by(geometry, VME_Indicator) %>%
+    summarise(count = n(), .groups = "drop") %>%
+    pivot_wider(names_from = VME_Indicator, values_from = count, values_fill = 0)
+  
+  # Perform a spatial join between poly_in_footprint and poly_counts
+  poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
+  
+  st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""))
+  
+  return(poly_in_footprint_counts)
 }
