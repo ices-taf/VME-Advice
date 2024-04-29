@@ -318,7 +318,7 @@ return(scenario_csquares)
 
 ######################################################################################
 
-scenario_outputs <- function(scenario_csquares, scenario_name) {
+scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   
   if(missing(scenario_name)){
     print("Please supply a scenario name to use when saving files. e.g Scenario_A")
@@ -361,8 +361,6 @@ scenario_outputs <- function(scenario_csquares, scenario_name) {
   poly_in_footprint <- st_intersection(poly_in_depth, fishing_footprint) %>%
     st_make_valid() %>%
     st_as_sf() 
-  
-  vme_records <- st_as_sf(vme_records)
   
   # Perform a spatial join between poly_in_footprint and vme_records
   poly_records <- st_join(poly_in_footprint, vme_records)
