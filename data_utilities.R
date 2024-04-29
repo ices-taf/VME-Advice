@@ -374,7 +374,7 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   # Perform a spatial join between poly_in_footprint and poly_counts
   poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
   
-  st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""))
+  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""), append = FALSE))
   
   return(poly_in_footprint_counts)
 }

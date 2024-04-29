@@ -16,5 +16,8 @@ vme_csquare <- vme %>%
 st_write(vme_csquare, "vme_csquares.shp", append = FALSE)
 
 vme_records <- st_as_sf(vme_observations, coords = c("MiddleLongitude", "MiddleLatitude"), crs = 4326) %>%
+  dplyr::select(VME_Indicator, geometry) %>%
       st_make_valid()
-  
+
+vme_records <- vme_records[vme_records$VME_Indicator != "", ]
+
