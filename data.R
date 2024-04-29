@@ -3,6 +3,8 @@
 ## Before:
 ## After:
 
+rm(list=ls())
+
 library(icesTAF)
 
 mkdir("data")
