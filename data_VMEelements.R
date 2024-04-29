@@ -90,3 +90,11 @@ merged_sf <- st_set_crs(merged_sf, 4326)
 # Write the data frame to a shapefile
 st_write(merged_sf, "elementscsquare.shp", append = FALSE)
 
+# Remove specific objects created in the script
+rm(elements, res, r, unique_types, type_results, type, type_elements, poly_ras, 
+   poly_multilines, poly_lines, lines_ras, combined_ras, r_polygons, r_polygons_sf,
+   centroids, coords, df, df_regular, merged_df, merged_sf)
+
+# Reload the shapefile
+vme_elements <- read_sf("elementscsquare.shp")
+
