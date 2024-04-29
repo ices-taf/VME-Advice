@@ -374,7 +374,11 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   # Perform a spatial join between poly_in_footprint and poly_counts
   poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
   
-  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""), append = FALSE))
   
+  # Calculate the area in square kilometers
+  poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
+  
+  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""), append = FALSE))
+  print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_footprint_counts)
 }
