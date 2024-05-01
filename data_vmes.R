@@ -1,5 +1,5 @@
 # read the VME data file
-vme_observations <- read.csv("VME_observations_datacall_2022_eu.csv", header=T)
+vme_observations <- read.csv(taf.data.path("VME_observations_datacall_2022_eu.csv"), header=T)
 
 # process the VME data
 vme <- getCSquare(vme_observations$MiddleLatitude, vme_observations$MiddleLongitude, 0.05)
@@ -12,8 +12,6 @@ vme_csquare <- vme %>%
   st_as_sf(wkt = "wkt") %>%
   st_set_crs(4326)
 
-# Write the data frame to a shapefile
-st_write(vme_csquare, "vme_csquares.shp", append = FALSE)
 
 vme_records <- st_as_sf(vme_observations, coords = c("MiddleLongitude", "MiddleLatitude"), crs = 4326) %>%
   dplyr::select(VME_Indicator, geometry) %>%
@@ -21,3 +19,7 @@ vme_records <- st_as_sf(vme_observations, coords = c("MiddleLongitude", "MiddleL
 
 vme_records <- vme_records[vme_records$VME_Indicator != "", ]
 
+# Write the data frame to data/.... as .rds or .rdata
+
+saveRDS(vme_csquare, file = "data/vme_csquares")
+saveRDS(vme_records, file = "data/vme_records")

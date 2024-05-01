@@ -1,4 +1,4 @@
-elements <- st_read("physical_VME_elements(fixed).shp")
+elements <- st_read(taf.data.path("physical_VME_elements(fixed)"))
 
 elements$type <- as.factor(paste(elements$type))
 
@@ -86,15 +86,14 @@ merged_df[is.na(merged_df)] <- 0
 merged_df$wkt <- wkt_csquare(merged_df$Latitude, merged_df$Longitude)
 merged_sf <- st_as_sf(merged_df, wkt = "wkt")
 merged_sf <- st_set_crs(merged_sf, 4326)
+names(merged_sf)[3] <- "csquares"
 
-# Write the data frame to a shapefile
-st_write(merged_sf, "elementscsquare.shp", append = FALSE)
+# Write the data frame 
+# st_write(merged_sf, "data/elementscsquare.shp", append = FALSE)
+saveRDS(merged_sf, file = "data/vme_elements")
 
 # Remove specific objects created in the script
 rm(elements, res, r, unique_types, type_results, type, type_elements, poly_ras, 
    poly_multilines, poly_lines, lines_ras, combined_ras, r_polygons, r_polygons_sf,
    centroids, coords, df, df_regular, merged_df, merged_sf)
-
-# Reload the shapefile
-vme_elements <- read_sf("elementscsquare.shp")
 

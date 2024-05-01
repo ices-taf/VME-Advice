@@ -378,7 +378,8 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   # Calculate the area in square kilometers
   poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
   
-  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("Output/", scenario_name, ".shp", sep=""), append = FALSE))
+  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("output/", scenario_name, ".shp", sep=""), append = FALSE))
+  suppressWarnings(saveRDS(poly_in_footprint_counts, file = paste0("output/", scenario_name)))
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_footprint_counts)
 }
