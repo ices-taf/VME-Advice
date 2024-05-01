@@ -1,8 +1,8 @@
 ## Run the various VME scenarios, based on the loaded data, using the scenario functions
 
-vme_data     <- readRDS("data/vme_data")
-vme_elements <- readRDS("data/vme_elements")
-sar_layer <- readRDS("data/sar_layer")
+vme_data     <- readRDS("data/vme_data.rds")
+vme_elements <- readRDS("data/vme_elements.rds")
+sar_layer <- readRDS("data/sar_layer.rds")
 
 
 ## Scenario A

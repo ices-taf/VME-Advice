@@ -90,7 +90,7 @@ names(merged_sf)[3] <- "csquares"
 
 # Write the data frame 
 # st_write(merged_sf, "data/elementscsquare.shp", append = FALSE)
-saveRDS(merged_sf, file = "data/vme_elements")
+saveRDS(merged_sf, file = "data/vme_elements.rds")
 
 # Remove specific objects created in the script
 rm(elements, res, r, unique_types, type_results, type, type_elements, poly_ras, 

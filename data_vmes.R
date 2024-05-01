@@ -21,5 +21,5 @@ vme_records <- vme_records[vme_records$VME_Indicator != "", ]
 
 # Write the data frame to data/.... as .rds or .rdata
 
-saveRDS(vme_csquare, file = "data/vme_csquares")
-saveRDS(vme_records, file = "data/vme_records")
+saveRDS(vme_csquare, file = "data/vme_csquares.rds")
+saveRDS(vme_records, file = "data/vme_records.rds")
