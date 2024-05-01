@@ -4,6 +4,9 @@
 ## After:
 
 library(icesTAF)
+source("utilities.R")
+source("utilities_libraries.R")
+
 
 mkdir("output")
 
