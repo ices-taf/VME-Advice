@@ -373,12 +373,15 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, asse
   # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
   polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]
   
-  # Apply st_remove_holes() to the filtered geometry
-  no_holes_poly <- nngeo::st_remove_holes(polygon_geoms) ## fills in any holes within the area
+  #trial
+  no_holes_poly <- polygon_geoms %>% st_cast("POLYGON") %>% st_make_valid() %>% nngeo::st_remove_holes(max_area = (0.05*0.1))
   
-  no_holes_poly <- st_cast(no_holes_poly, "POLYGON") ## converts back from a single multipolygon to individual polgyons, 
+  # # Apply st_remove_holes() to the filtered geometry
+  # no_holes_poly <- nngeo::st_remove_holes(polygon_geoms, max_area = (0.05*0.1)) ## fills in any holes within the area
+  # 
+  # no_holes_poly <- st_cast(no_holes_poly, "POLYGON") ## converts back from a single multipolygon to individual polgyons, 
   ## so we can summarise what each contains
-  
+
   no_holes_poly <- st_make_valid(no_holes_poly)
   
   ## Clip results to loaded shapefiles
