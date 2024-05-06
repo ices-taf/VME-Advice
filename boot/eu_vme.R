@@ -18,7 +18,7 @@ saveRDS(fishing_footprint, file = "fishing_footprint.rds")
 # load the bathymetry layer
 bathymetry <- st_read(gpkg_file, layer = "EU_Depth_400_800") %>%
   st_make_valid()
-saveRDS("bathymetry", file = "bathymetry.rds")
+saveRDS(bathymetry, file = "bathymetry.rds")
 
 
 

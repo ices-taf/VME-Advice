@@ -17,6 +17,21 @@ st_over <- function (x, y)
 
 ########################################################################################
 
+#' Gets the csquare of lat-lon point data at a given resolution
+#'
+#' @param lat 
+#' @param lon 
+#' @param res 
+#'
+#' @return
+#' @export
+#'
+#' @examples 
+#' getCSquare(c(0,0), c(0, 10), 10)
+#' getCSquare(c(0,0), c(0, 10), 1)
+#' getCSquare(c(0,0.1), c(0, 0.1), 1)
+#' getCSquare(c(0,0.1), c(0, 0.1), 0.1)
+
 getCSquare <- function(lat, lon, res) {
   Q <- 100000
   MAXLON <- 17999999
@@ -89,6 +104,16 @@ getCSquare <- function(lat, lon, res) {
 
 ##########################################################################################
 
+#' Get the centroid coordinates of a csquare to a specific resolution
+#'
+#' @param cSquare character or character vector in csquare format
+#' @param degrees numeric vector defining the resoluion of returned lat lon data
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' getCoordinates("1000:100:100", 0.05)
 getCoordinates <- function (cSquare, degrees = 0.05) {
   
   csq.len <- nchar(cSquare)
@@ -127,9 +152,18 @@ getCoordinates <- function (cSquare, degrees = 0.05) {
 
 ##########################################################################################
 
+#' Title
+#'
+#' @param input_csquares 
+#' @param csq_degrees 
+#' @param diagonals 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_adjacent_csquares <- function(input_csquares, csq_degrees = 0.05, diagonals = T) {
   
-    # input_points <- vmstools::CSquare2LonLat(input_csquares, degrees= csq_degrees)
     input_points <- getCoordinates(input_csquares, degrees = csq_degrees)
     names(input_points) <- c("lat", "lon")
   
@@ -318,7 +352,7 @@ return(scenario_csquares)
 
 ######################################################################################
 
-scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
+scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, assessment_area, bathymetry, fishing_footprint) {
   
   if(missing(scenario_name)){
     print("Please supply a scenario name to use when saving files. e.g Scenario_A")
@@ -377,9 +411,7 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   
   # Calculate the area in square kilometers
   poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
-  
-  suppressWarnings(st_write(poly_in_footprint_counts, dsn=paste("output/", scenario_name, ".shp", sep=""), append = FALSE))
-  suppressWarnings(saveRDS(poly_in_footprint_counts, file = paste0("output/", scenario_name)))
+  suppressWarnings(saveRDS(poly_in_footprint_counts, file = paste0("model/", scenario_name, ".rds")))
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_footprint_counts)
 }
