@@ -20,5 +20,9 @@ bathymetry <- st_read(gpkg_file, layer = "EU_Depth_400_800") %>%
   st_make_valid()
 saveRDS(bathymetry, file = "bathymetry.rds")
 
+vme_elements_raw <- st_read(gpkg_file, layer = "VME_elements") %>%
+  st_make_valid()
+saveRDS(vme_elements_raw, file = "vme_elements_raw.rds")
+
 
 
