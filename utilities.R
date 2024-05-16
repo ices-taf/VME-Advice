@@ -284,20 +284,20 @@ vme_scenario_B <- function(vme_index, vme_elements) {
   }
 ######################################################################################
 
-alt_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scen_a_csquares) {
+alt_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scenario_A_csquares) {
   
   vme_record_coordinates <- st_coordinates(vme_records)
   vme_records_csquares <- getCSquare(lon = vme_record_coordinates[,1], lat = vme_record_coordinates[,2], res = 0.05)
   csq_elements_w_records <- dplyr::filter(vme_elements, csquares %in% vme_records_csquares) %>% dplyr::pull(csquares)
   
-  scenario_csquares <- c(scen_a_csquares, csq_elements_w_records) %>% 
+  scenario_csquares <- c(scenario_A_csquares, csq_elements_w_records) %>% 
     unique()
   return(scenario_csquares)
 }
 #this version returns the same outcome - vme_element csquares with records are not unique
 
 ######################################################################################
-alt2_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scen_a_csquares) {
+alt2_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scenario_A_csquares) {
 
   # vme_record_coordinates <- st_coordinates(vme_records)
   # vme_records_csquares <- getCSquare(lon = vme_record_coordinates[,1], lat = vme_record_coordinates[,2], res = 0.05)
@@ -306,32 +306,32 @@ alt2_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scen_a_csq
   intersects_sparse <- vme_elements %>% st_intersects(vme_records)
   rows_with_points <- unique(as.data.frame(contains_sparse)$row)
   csq_elements_w_records <- elements_with_records <- vme_elements[rows_with_points,] %>% pull(csquares)
-  browser()
-  scenario_csquares <- c(scen_a_csquares, csq_elements_w_records) %>%
+
+  scenario_csquares <- c(scenario_A_csquares, csq_elements_w_records) %>%
     unique()
   return(scenario_csquares)
   #This version does not return the entire vme_element, just those csquares with records
 }
 ######################################################################################
-alt3_vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares, scen_a_csquares) {
+alt3_vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares, scenario_A_csquares) {
   
   intersects_sparse <- vme_elements_raw %>% st_intersects(vme_records)
   rows_with_points <- unique(as.data.frame(intersects_sparse)$row)
-  browser()
+
   csq_vme_record_elements <- vme_elements_raw[rows_with_points,] %>% 
     st_join(vme_elements_csquares) %>% 
     dplyr::pull(csquares)
   
-  scenario_csquares <- c(scen_a_csquares, csq_vme_record_elements) %>% 
+  scenario_csquares <- c(scenario_A_csquares, csq_vme_record_elements) %>% 
     unique()
   return(scenario_csquares)
 }
-# This is also not quite right -> or it is, but csq_vme_record_elements should not go through the 0.25 csquare buffering process, so the following function needs to change 
+# This is also not quite right -> or it is, but in the original assessment csq_vme_record_elements do not go through the 0.25 csquare buffering process, so the following function needs to change 
 # consider changing the scenario functions to return a list (csquares_for_buffering, csquares_not_for_buffering)
 
 ######################################################################################
 
-vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
+vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   
   #This step could potentially be extracted to data.R 
   temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
@@ -367,7 +367,7 @@ vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
 # The original assessment does not appear to do so.
 
 ######################################################################################
-alt_vme_scenario_C <- function(vme_index, scen_a_csquares, sar_layer, SAR_threshold = 0.44) {
+alt_vme_scenario_C <- function(vme_index, scenario_A_csquares, sar_layer, SAR_threshold = 0.43) {
   
   #This step could potentially be extracted to data.R 
   temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
@@ -381,9 +381,9 @@ alt_vme_scenario_C <- function(vme_index, scen_a_csquares, sar_layer, SAR_thresh
     dplyr::pull(CSquare)
 
   ## then bind together unique csquares into output
-  scenario_csquares <- c(scen_a_csquares, low_index_low_fishing) %>% 
+  scenario_csquares <- c(scenario_A_csquares, low_index_low_fishing) %>% 
     unique()
-  browser()
+
   return(scenario_csquares)
   }
 # This approach has a different interpretation of the inclusion of low-index csquares, where these are only included in a buffer when they are low-fished
@@ -391,7 +391,7 @@ alt_vme_scenario_C <- function(vme_index, scen_a_csquares, sar_layer, SAR_thresh
 
 ######################################################################################
 
-vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
+vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   
   temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
     st_drop_geometry()
@@ -411,14 +411,58 @@ vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.44) {
     c(adjacent_csquares) %>%
     unique() 
   return(scenario_csquares)
+}
+
+######################################################################################
+
+alt_vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
+  
+  temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
+    st_drop_geometry()
+  
+  vme_index <- vme_index %>%
+    left_join(temp, by = c("CSquare" = "c_square"))
+  
+  vme_index$SAR[is.na(vme_index$SAR)] <- 0
+  
+  VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
+  
+  # adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
+  
+  ## bring them back together again and select unique
+  scenario_csquares <- VME_below_SAR_thresh %>% 
+    dplyr::pull(CSquare) 
+
+  return(scenario_csquares)
   }
 
 ######################################################################################
 
-vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.44) {
+vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
 ## as scenario C, but also including the elements, as per scenario B
 scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
 scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+
+scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+  unique()
+
+return(scenario_csquares)
+}
+
+######################################################################################
+alt_vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
+## as scenario C, but also including the elements, as per scenario B
+scenario_B_csquares <- alt3_vme_scenario_B(vme_index, vme_elements) 
+scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+
+scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+  unique()
+
+return(scenario_csquares)
+}
+######################################################################################
+alt2_vme_scenario_E <- function(scenario_B_csquares, scenario_C_csquares) {
+## as scenario C, but also including the elements, as per scenario B
 
 scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
   unique()
@@ -440,7 +484,6 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, asse
   joined_data <- st_as_sf(joined_data, wkt = "wkt")
   joined_data <-  joined_data %>% 
     st_set_crs(4326)
-  browser()
   
   buffered_data <- csquare_buffer(joined_data) ## generates a 0.025 degree buffer around each c-square
   unioned_rects <- st_union(buffered_data, by_feature = F) ## merges them into a single polygon
@@ -494,8 +537,8 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, asse
   poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
   
 
-  suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/", scenario_name, ".rds")))
-  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/", scenario_name, ".shp")))
+  suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/alt/", scenario_name, ".rds")))
+  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/alt/", scenario_name, ".shp")))
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_depth_counts)
 }
