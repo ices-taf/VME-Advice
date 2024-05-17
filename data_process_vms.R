@@ -48,14 +48,24 @@ out.tab <- rbind(out.tab, result)
 }
 
 ## reshapes the table to be "wide", with one column of SAR and one of static gear presence for each year
-result <- out.tab %>%
+result <- ass %>%
   pivot_wider(
     names_from = year,
     values_from = c(SAR, static),
     names_glue = "{.value}_{year}",
     values_fill = NA
   ) %>%
-  dplyr::select(c_square, everything(), wkt)
+  rename_with(
+    ~ gsub("^SAR_", "SAR_total_", .),
+    starts_with("SAR_")
+  ) %>%
+  rename_with(
+    ~ gsub("^static_", "Static_", .),
+    starts_with("static_")
+  ) %>%
+  relocate(wkt, .after = last_col()) %>%
+  rename(c.square = c_square)
+
 
 ## exports the result in the format expected in the rest of the original code.
 write.table(result, "All_VMS_datacall_2023(2009-2022).csv", sep = ";", )
