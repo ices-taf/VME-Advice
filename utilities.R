@@ -367,29 +367,6 @@ vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
 # The original assessment does not appear to do so.
 
 ######################################################################################
-alt_vme_scenario_C <- function(vme_index, scenario_A_csquares, sar_layer, SAR_threshold = 0.43) {
-  
-  #This step could potentially be extracted to data.R 
-  temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
-            st_drop_geometry()
-  vme_index <- vme_index %>%
-    left_join(temp, by = c("CSquare" = "c_square"))
-  vme_index$SAR[is.na(vme_index$SAR)] <- 0
-  
-  low_index <- dplyr::filter(vme_index, VME_Class == 0) # index low
-  low_index_low_fishing <- dplyr::filter(low_index, SAR < SAR_threshold) %>% 
-    dplyr::pull(CSquare)
-
-  ## then bind together unique csquares into output
-  scenario_csquares <- c(scenario_A_csquares, low_index_low_fishing) %>% 
-    unique()
-
-  return(scenario_csquares)
-  }
-# This approach has a different interpretation of the inclusion of low-index csquares, where these are only included in a buffer when they are low-fished
-# It's a 1-step inclusion rather than the 2-step above
-
-######################################################################################
 
 vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   
@@ -537,8 +514,8 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, asse
   poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
   
 
-  suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/alt/", scenario_name, ".rds")))
-  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/alt/", scenario_name, ".shp")))
+  #suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/alt/", scenario_name, ".rds")))
+  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/",Sys.Date(), "/", scenario_name, ".shp")))
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_depth_counts)
 }

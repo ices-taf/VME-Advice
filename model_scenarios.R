@@ -14,7 +14,7 @@ vme.scenario.a.csquares <- vme_scenario_A(vme_data)
 vme.scenario.b.csquares <- alt3_vme_scenario_B(vme_data, vme_records, vme_elements_raw = vme_elements_raw, vme_elements_csquares = vme_elements_csquares, scenario_A_csquares = vme.scenario.a.csquares)
 
 ## Scenario C
-vme.scenario.c.csquares <- alt_vme_scenario_C(vme_data, scenario_A_csquares = vme.scenario.a.csquares, sar_layer, 0.43)
+vme.scenario.c.csquares <- vme_scenario_C(vme_data, sar_layer, SAR_threshold = 0.43)
 
 ## Scenario D
 vme.scenario.d.csquares <- alt_vme_scenario_D(vme_data, sar_layer, 0.43)
