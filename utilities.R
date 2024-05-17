@@ -244,6 +244,16 @@ csquare_buffer <- function(vme.tab){
   
 }
 
+csquare_to_polygon <- function(scenario_csquares, degrees = 0.05) {
+  
+  csquare_w_coordinates <- cbind(scenario_csquares, getCoordinates(scenario_csquares, 0.05))
+  csquare_sf <- cbind(csquare_w_coordinates, wkt = wkt_csquare(csquare_w_coordinates$lat, csquare_w_coordinates$lon)) %>% 
+    st_as_sf( wkt = "wkt") %>%  
+    st_set_crs(4326)
+  
+  return(csquare_sf)
+}
+
 ######################################################################################
 
 vme_scenario_A <- function(vme_index) {
@@ -259,71 +269,28 @@ vme_scenario_A <- function(vme_index) {
   
   ## bring them back together again and select unique
   scenario_csquares <- dplyr::bind_rows(habitat_plus_high_medium_index, adjacent_low_index) %>% 
-    dplyr::pull(CSquare) %>% 
+    dplyr::select(CSquare) %>% 
     unique() 
+  scenario_csquares <- dplyr::mutate(scenario_csquares, VME = "Habitat and Index")
   return(scenario_csquares)
   
   #This works but only when clipping to the fishing layer is removed in the next step.
 }
 
 ######################################################################################
-
-vme_scenario_B <- function(vme_index, vme_elements) {
-  
-  csq_elements_w_records <- dplyr::pull(vme_elements, csquares)
-  
-  #identify isolated elements with records
-  isolated_csquares <- get_isolated_csquares(csq_elements_w_records)
-  isolated_vme <- dplyr::filter(vme_index, CSquare %in% isolated_csquares)
-  vme_outside_elements <- dplyr::filter(vme_index, !CSquare %in% csq_elements_w_records)
-  
-  scenario_B_input <- dplyr::bind_rows(isolated_vme, vme_outside_elements)
-
-  scenario_csquares <-  vme_scenario_A(scenario_B_input)
-  return(scenario_csquares)
-  }
-######################################################################################
-
-alt_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scenario_A_csquares) {
-  
-  vme_record_coordinates <- st_coordinates(vme_records)
-  vme_records_csquares <- getCSquare(lon = vme_record_coordinates[,1], lat = vme_record_coordinates[,2], res = 0.05)
-  csq_elements_w_records <- dplyr::filter(vme_elements, csquares %in% vme_records_csquares) %>% dplyr::pull(csquares)
-  
-  scenario_csquares <- c(scenario_A_csquares, csq_elements_w_records) %>% 
-    unique()
-  return(scenario_csquares)
-}
-#this version returns the same outcome - vme_element csquares with records are not unique
-
-######################################################################################
-alt2_vme_scenario_B <- function(vme_index, vme_records, vme_elements, scenario_A_csquares) {
-
-  # vme_record_coordinates <- st_coordinates(vme_records)
-  # vme_records_csquares <- getCSquare(lon = vme_record_coordinates[,1], lat = vme_record_coordinates[,2], res = 0.05)
-  # csq_elements_w_records <- dplyr::filter(vme_elements, csquares %in% vme_records_csquares) %>% dplyr::pull(csquares)
-
-  intersects_sparse <- vme_elements %>% st_intersects(vme_records)
-  rows_with_points <- unique(as.data.frame(contains_sparse)$row)
-  csq_elements_w_records <- elements_with_records <- vme_elements[rows_with_points,] %>% pull(csquares)
-
-  scenario_csquares <- c(scenario_A_csquares, csq_elements_w_records) %>%
-    unique()
-  return(scenario_csquares)
-  #This version does not return the entire vme_element, just those csquares with records
-}
-######################################################################################
-alt3_vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares, scenario_A_csquares) {
+vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares, scenario_A_csquares) {
   
   intersects_sparse <- vme_elements_raw %>% st_intersects(vme_records)
   rows_with_points <- unique(as.data.frame(intersects_sparse)$row)
 
   csq_vme_record_elements <- vme_elements_raw[rows_with_points,] %>% 
     st_join(vme_elements_csquares) %>% 
-    dplyr::pull(csquares)
+    dplyr::select(CSquare = csquares) %>% 
+    st_drop_geometry() %>% 
+    dplyr::mutate(VME = "Element")
   
-  scenario_csquares <- c(scenario_A_csquares, csq_vme_record_elements) %>% 
-    unique()
+  scenario_csquares <- dplyr::bind_rows(scenario_A_csquares, csq_vme_record_elements) 
+  
   return(scenario_csquares)
 }
 # This is also not quite right -> or it is, but in the original assessment csq_vme_record_elements do not go through the 0.25 csquare buffering process, so the following function needs to change 
@@ -356,8 +323,10 @@ vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   
   ## then bind together unique csquares into output
   scenario_csquares <- dplyr::bind_rows(candidate_vmes, adjacent_low_index_high_fishing) %>% 
-    dplyr::pull(CSquare) %>% 
+    dplyr::select(CSquare) %>% 
     unique()
+  scenario_csquares <- dplyr::mutate(scenario_csquares, VME = "Habitat and Index")
+  
   return(scenario_csquares)
 }
 
@@ -365,6 +334,30 @@ vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
 # A substantial difference results nonetheless:
 # the 'TAF workflow' considers all csquares in the first instance, before clipping to the fishing and depth footprints
 # The original assessment does not appear to do so.
+
+######################################################################################
+# 
+# vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
+#   
+#   temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
+#     st_drop_geometry()
+#   
+#   vme_index <- vme_index %>%
+#     left_join(temp, by = c("CSquare" = "c_square"))
+#   
+#   vme_index$SAR[is.na(vme_index$SAR)] <- 0
+#   
+#   VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
+#   
+#   adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
+#   
+#   ## bring them back together again and select unique
+#   scenario_csquares <- VME_below_SAR_thresh %>% 
+#     dplyr::pull(CSquare) %>% 
+#     c(adjacent_csquares) %>%
+#     unique() 
+#   return(scenario_csquares)
+# }
 
 ######################################################################################
 
@@ -380,69 +373,46 @@ vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   
   VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
   
-  adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
-  
-  ## bring them back together again and select unique
-  scenario_csquares <- VME_below_SAR_thresh %>% 
-    dplyr::pull(CSquare) %>% 
-    c(adjacent_csquares) %>%
-    unique() 
-  return(scenario_csquares)
-}
-
-######################################################################################
-
-alt_vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
-  
-  temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
-    st_drop_geometry()
-  
-  vme_index <- vme_index %>%
-    left_join(temp, by = c("CSquare" = "c_square"))
-  
-  vme_index$SAR[is.na(vme_index$SAR)] <- 0
-  
-  VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
-  
   # adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
   
   ## bring them back together again and select unique
   scenario_csquares <- VME_below_SAR_thresh %>% 
-    dplyr::pull(CSquare) 
+    dplyr::select(CSquare) %>% 
+    dplyr::mutate(VME = "Habitat and Index")
 
   return(scenario_csquares)
   }
 
 ######################################################################################
-
-vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
-## as scenario C, but also including the elements, as per scenario B
-scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
-scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
-
-scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
-  unique()
-
-return(scenario_csquares)
-}
-
+# 
+# vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
+# ## as scenario C, but also including the elements, as per scenario B
+# scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
+# scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+# 
+# scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+#   unique()
+# 
+# return(scenario_csquares)
+# }
+# 
+# ######################################################################################
+# alt_vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
+# ## as scenario C, but also including the elements, as per scenario B
+# scenario_B_csquares <- alt3_vme_scenario_B(vme_index, vme_elements) 
+# scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+# 
+# scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+#   unique()
+# 
+# return(scenario_csquares)
+# }
 ######################################################################################
-alt_vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
-## as scenario C, but also including the elements, as per scenario B
-scenario_B_csquares <- alt3_vme_scenario_B(vme_index, vme_elements) 
-scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
+vme_scenario_E <- function(scenario_B_csquares, scenario_C_csquares) {
 
-scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
+scenario_csquares <- dplyr::bind_rows(scenario_B_csquares, scenario_C_csquares) %>% 
   unique()
 
-return(scenario_csquares)
-}
-######################################################################################
-alt2_vme_scenario_E <- function(scenario_B_csquares, scenario_C_csquares) {
-## as scenario C, but also including the elements, as per scenario B
-
-scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
-  unique()
 
 return(scenario_csquares)
 }
@@ -455,15 +425,54 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, asse
     print("Please supply a scenario name to use when saving files. e.g Scenario_A")
     break
   }
+
+  if("Element" %in% scenario_csquares$VME) {
+    vme_elements <- dplyr::filter(scenario_csquares, VME == "Element") %>% 
+      dplyr::pull(CSquare) %>% 
+      csquare_to_polygon() 
+    # %>% 
+    #   st_union(by_feature = F) %>%
+    #   st_cast("POLYGON") %>% 
+    #   st_sf() %>%
+    #   mutate(group = 1) %>%
+    #   group_by(group) %>%
+    #   summarize(do_union = TRUE) %>%
+    #   st_cast("MULTIPOLYGON") %>%
+    #   st_sf()
+    # 
+    # 
+    vme_habitat_and_index <- dplyr::filter(scenario_csquares, VME == "Habitat and Index") %>% 
+      dplyr::pull(CSquare) %>% 
+      csquare_to_polygon() %>% 
+      csquare_buffer() 
+    # >% 
+    #   st_union(by_feature = F) %>% 
+    #   %>%
+    #   st_cast("POLYGON") %>% 
+    #   st_sf() %>%
+    #   mutate(group = 1) %>%
+    #   group_by(group) %>%
+    #   summarize(do_union = TRUE) %>%
+    #   st_cast("MULTIPOLYGON") %>%
+    #   st_sf()
+    
+    unioned_rects <- st_union(vme_elements, vme_habitat_and_index) %>% 
+      st_cast("POLYGON") %>% 
+        st_sf() %>%
+        mutate(group = 1) %>%
+        group_by(group) %>%
+        summarize(do_union = TRUE) %>%
+        st_cast("MULTIPOLYGON") %>%
+        st_sf()
+    
+  } else {
+    vme_habitat_and_index <- dplyr::pull(scenario_csquares, CSquare) %>% 
+      csquare_to_polygon() %>% 
+      csquare_buffer()
+    
+    unioned_rects <- st_union(vme_habitat_and_index, by_feature = F)
+  }
   
-  joined_data <- cbind(scenario_csquares, getCoordinates(scenario_csquares, 0.05))
-  joined_data <- cbind(joined_data, wkt = wkt_csquare(joined_data$lat, joined_data$lon))
-  joined_data <- st_as_sf(joined_data, wkt = "wkt")
-  joined_data <-  joined_data %>% 
-    st_set_crs(4326)
-  
-  buffered_data <- csquare_buffer(joined_data) ## generates a 0.025 degree buffer around each c-square
-  unioned_rects <- st_union(buffered_data, by_feature = F) ## merges them into a single polygon
   
   # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
   polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]

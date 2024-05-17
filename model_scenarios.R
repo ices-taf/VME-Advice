@@ -11,16 +11,16 @@ sar_layer <- readRDS("boot/data/eu_vme/sar_layer.rds")
 vme.scenario.a.csquares <- vme_scenario_A(vme_data)
 
 ## Scenario B
-vme.scenario.b.csquares <- alt3_vme_scenario_B(vme_data, vme_records, vme_elements_raw = vme_elements_raw, vme_elements_csquares = vme_elements_csquares, scenario_A_csquares = vme.scenario.a.csquares)
+vme.scenario.b.csquares <- vme_scenario_B(vme_data, vme_records, vme_elements_raw = vme_elements_raw, vme_elements_csquares = vme_elements_csquares, scenario_A_csquares = vme.scenario.a.csquares)
 
 ## Scenario C
 vme.scenario.c.csquares <- vme_scenario_C(vme_data, sar_layer, SAR_threshold = 0.43)
 
 ## Scenario D
-vme.scenario.d.csquares <- alt_vme_scenario_D(vme_data, sar_layer, 0.43)
+vme.scenario.d.csquares <- vme_scenario_D(vme_data, sar_layer, 0.43)
 
 ## Scenario E
-vme.scenario.e.csquares <- alt2_vme_scenario_E(scenario_B_csquares = vme.scenario.b.csquares, scenario_C_csquares = vme.scenario.c.csquares)
+vme.scenario.e.csquares <- vme_scenario_E(scenario_B_csquares = vme.scenario.b.csquares, scenario_C_csquares = vme.scenario.c.csquares)
 
 save(list = c("vme.scenario.a.csquares", "vme.scenario.b.csquares", "vme.scenario.c.csquares",
              "vme.scenario.d.csquares", "vme.scenario.e.csquares"), file= "model/alt/vme_scenario_cquares.RData")
