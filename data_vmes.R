@@ -1,5 +1,6 @@
 # read the VME data file
-vme_observations <- read.csv(taf.data.path("VME_observations_datacall_2022_eu.csv"), header=T)
+#vme_observations <- read.csv(taf.data.path("VME_observations_datacall_2022_eu.csv"), header=T)
+vme_observations <- read.csv("../../VME-advice_noGIT/EU/VME data repository/VME observations and csquares/VME_observations_datacall_2022_eu_AD.csv", header=T)
 
 # process the VME data
 vme <- getCSquare(vme_observations$MiddleLatitude, vme_observations$MiddleLongitude, 0.05)
