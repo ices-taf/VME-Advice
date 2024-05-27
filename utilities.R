@@ -306,8 +306,34 @@ vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_element
   
   return(scenario_csquares)
 }
-# This is also not quite right -> or it is, but in the original assessment csq_vme_record_elements do not go through the 0.25 csquare buffering process, so the following function needs to change 
-# consider changing the scenario functions to return a list (csquares_for_buffering, csquares_not_for_buffering)
+######################################################################################
+alt_vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares) {
+  
+  intersects_sparse <- vme_elements_raw %>% st_intersects(vme_records)
+  rows_with_points <- unique(as.data.frame(intersects_sparse)$row)
+
+  csq_vme_record_elements <- vme_elements_raw[rows_with_points,] %>% 
+    st_join(vme_elements_csquares) %>% 
+    dplyr::select(CSquare = csquares) %>% 
+    st_drop_geometry() %>% 
+    dplyr::mutate(VME = "Element")
+  
+  #identify isolated csq_vme_record_elements also not adjacent to vme_index cells
+  # use to identify not_isolated_csq_vme_record_elements
+  element_csquares <- csq_vme_record_elements %>% pull(CSquare)
+  element_adjacent_csquares <- element_csquares %>%  purrr::map(get_adjacent_csquares)
+  isolated_vme_record_elements_logical <- element_adjacent_csquares %>% purrr::map(~ .x[.x %in% c(element_csquares, pull(vme_index, CSquare))]) %>% purrr::map_lgl(~length(.x) ==0)
+  isolated_vme_record_elements <- element_csquares[isolated_vme_record_elements_logical]
+  not_isolated_vme_record_elements <- element_csquares[!isolated_vme_record_elements_logical]
+
+  #subset vme_index based on those not in not_isolated_csq_vme_record_elements
+  # run scenario a with subset vme_index_not_protected_VME_elements
+  subset_scenario_a <- vme_index %>% filter(!CSquare %in% not_isolated_vme_record_elements) %>% vme_scenario_A
+  
+  scenario_csquares <- dplyr::bind_rows(subset_scenario_a, csq_vme_record_elements) 
+  
+  return(scenario_csquares)
+}
 
 ######################################################################################
 

@@ -11,7 +11,7 @@ sar_layer <- readRDS("data/sar_layer.rds")
 vme.scenario.a.csquares <- vme_scenario_A(vme_data)
 
 ## Scenario B
-vme.scenario.b.csquares <- vme_scenario_B(vme_data, vme_records, vme_elements_raw = vme_elements_raw, vme_elements_csquares = vme_elements_csquares)
+vme.scenario.b.csquares <- alt_vme_scenario_B(vme_data, vme_records, vme_elements_raw = vme_elements_raw, vme_elements_csquares = vme_elements_csquares)
 
 ## Scenario C
 vme.scenario.c.csquares <- vme_scenario_C(vme_data, sar_layer, SAR_threshold = 0.43)

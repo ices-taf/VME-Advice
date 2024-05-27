@@ -15,10 +15,18 @@ vme_csquare <- vme %>%
 
 
 vme_records <- st_as_sf(vme_observations, coords = c("MiddleLongitude", "MiddleLatitude"), crs = 4326) %>%
-  dplyr::select(VME_Indicator, geometry) %>%
+  dplyr::select(VME_Indicator, HabitatType, geometry) %>%
       st_make_valid()
 
-vme_records <- vme_records[vme_records$VME_Indicator != "", ]
+
+# THESE LINES ONLY FOR EU ASSESSMENT
+if(eu_assessment ==T) {
+  
+  VMEindic <- c('Black coral','Cup coral','Gorgonian','Soft coral','Sponge','Sea-pen','Stylasterids','Stony coral')
+  VMEhabs <- c('Bryozoan patches','Cold-water coral reef','Coral garden','Deep-sea sponge aggregations','Mud and sand emergent fauna','Sea-pen fields','Tube-dwelling anemone aggregations')
+  vme_records <- subset(vme_records,(vme_records$VME_Indicator %in% VMEindic | vme_records$HabitatType %in% VMEhabs))
+}
+#vme_records <- vme_records[vme_records$VME_Indicator != "", ]
 
 # Write the data frame to data/.... as .rds or .rdata
 
