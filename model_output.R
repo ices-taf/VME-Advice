@@ -6,7 +6,10 @@ sar_layer <- readRDS("data/sar_layer.rds")
 assessment_area <- readRDS("boot/data/eu_vme/assessment_area.rds")
 fishing_footprint <- readRDS("boot/data/eu_vme/fishing_footprint.rds")
 bathymetry <- readRDS("boot/data/eu_vme/bathymetry.rds")
+source("utilities_libraries.R")
+source("utilities.R")
 
+#load csquare areas
 
 scen.a <- alt2_scenario_outputs(vme.scenario.a.csquares, "Scenario_A", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 

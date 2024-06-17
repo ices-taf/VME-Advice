@@ -223,10 +223,10 @@ csquare_buffer <- function(vme.tab){
   
   # Create a new rectangle buffered by 0.025 degrees for each original rectangle
   buffered_rects <- lapply(bboxes, function(bbox) {
-    st_bbox(c(xmin = bbox[["xmin"]] - 0.02501, 
-              ymin = bbox[["ymin"]] - 0.02501, 
-              xmax = bbox[["xmax"]] + 0.02501, 
-              ymax = bbox[["ymax"]] + 0.02501), 
+    st_bbox(c(xmin = bbox[["xmin"]] - 0.025, 
+              ymin = bbox[["ymin"]] - 0.025, 
+              xmax = bbox[["xmax"]] + 0.025, 
+              ymax = bbox[["ymax"]] + 0.025), 
             crs = st_crs(vme.tab))
   })
   
@@ -701,7 +701,9 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
       dplyr::pull(CSquare) %>% 
       csquare_to_polygon() 
     
-    unioned_vme_elements <- st_union(vme_elements, by_feature = F) %>% st_make_valid() %>% 
+    unioned_vme_elements <- st_union(vme_elements, by_feature = F) %>%
+      filter_polygon_geometry %>% 
+      st_make_valid() %>% 
       st_as_sf()
     
     vme_habitat_and_index <- dplyr::filter(scenario_csquares, VME == "Habitat and Index") %>% 
@@ -722,7 +724,7 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
       bind_rows(adjacent_vme) %>% 
       csquare_buffer() %>% 
       rename(x = wkt) %>% 
-      st_union(by_feature = F) %>% 
+      st_union(by_feature = F)%>%
       st_make_valid %>% 
       st_as_sf
     
@@ -730,9 +732,11 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
     poly_in_depth <- bind_rows(unioned_vme_elements, non_intersecting_vme_habitat_and_index) %>% 
       mutate(df=1:nrow(.)) %>% 
       select(df) %>% 
+      st_make_valid() %>% 
       st_union(by_feature = F) %>% 
       st_make_valid() %>% 
-      fill_holes() %>% 
+      alt_fill_holes() %>% 
+      filter_polygon_geometry %>% 
       clip_2_layers(assessment_area, bathymetry)
 
 
@@ -746,9 +750,8 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
       fill_clip_2_layers(assessment_area, bathymetry)
   }
   
-
   # Perform a spatial join between poly_in_footprint and vme_records
-  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() %>% rename(geometry = x)
+  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() #%>% rename(geometry = x)
   # poly_records <- st_join(poly_in_footprint, vme_records)
   
   # Group by polygon geometry and count the number of each VME_Indicator type
@@ -762,7 +765,21 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
   poly_in_depth_counts <- st_join(poly_in_depth, poly_counts, join = st_equals) %>% 
     st_make_valid()
   
-  
+  #buffer to dissolve internal slivers, snap to original object to avoid changing polygon areas
+  sf_use_s2(F)
+  poly_in_depth_counts_tmp <- poly_in_depth_counts %>% 
+     st_buffer(dist = 0.0001, endCapStyle = "FLAT") %>% 
+     st_buffer(dist = -0.0001, endCapStyle = "FLAT") 
+   sf_use_s2(T)
+   
+   north_atlantic_crs <- st_crs(
+     "+proj=laea +lat_0=45 +lon_0=-30 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+   )
+   poly_in_depth_counts <- st_snap(st_transform(poly_in_depth_counts_tmp, north_atlantic_crs),
+                                       st_transform(poly_in_depth_counts, north_atlantic_crs), 
+                                   tolerance = 0.01) %>% 
+     st_transform(crs = st_crs(poly_in_depth_counts))
+   
   # Calculate the area in square kilometers
   # poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
   poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
@@ -779,21 +796,61 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
 fill_clip_2_layers <- function(unioned_rects, assessment_area, bathymetry) {
   
     # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
-    polygon_geoms <- fill_holes(unioned_rects)
+    polygon_geoms <- alt_fill_holes(unioned_rects)
     
-   
     ## Clip results to loaded shapefiles
     ###  ecoregion &  bathymetry
     poly_in_depth <- clip_2_layers(polygon_geoms, assessment_area, bathymetry) %>%
       st_make_valid %>% st_as_sf()
 }
 
+filter_polygon_geometry <- function(sf_object) {
+  
+  if(isClass("data.frame")){
+    sf_object[st_is(sf_object, "POLYGON") | st_is(sf_object, "MULTIPOLYGON"),]
+  } else {
+    sf_object[st_is(sf_object, "POLYGON") | st_is(sf_object, "MULTIPOLYGON")]
+  }
+}
+
+cast_as_polygon <- function(unioned_rects) {
+  
+  polygon_geoms <- filter_polygon_geometry(unioned_rects) %>% 
+    st_cast("POLYGON") %>% 
+    st_make_valid()
+}
+
 fill_holes <- function(unioned_rects) {
-  # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
-  polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]
   
   # fill with 2 times the area of the largest csquare
-  no_holes_poly <- polygon_geoms %>% st_cast("POLYGON") %>% st_make_valid() %>% nngeo::st_remove_holes(max_area = 30910874*2) %>% 
+  no_holes_poly <- cast_as_polygon(unioned_rects) %>% 
+    nngeo::st_remove_holes(max_area = 30910874*2) %>% 
+    st_make_valid()
+}
+
+alt_fill_holes <- function(unioned_rects, csquare_area_df) {
+  
+  polygons <- cast_as_polygon(unioned_rects)
+  
+  #get centroid per polygon
+  polygon_centroids <- st_centroid(polygons) %>% st_coordinates() %>% as.data.frame()
+  
+  #look up csquare and get area
+  central_csquare_area <- getCSquare(lon = polygon_centroids$X, lat = polygon_centroids$Y, res = 0.05) %>% csquare_to_polygon() %>% mutate(area = st_area(.))
+    central_csquare_area$area <- as.numeric(central_csquare_area$area)
+  
+  # Initialize an empty list to store the geometries
+  result_geometries <- vector("list", length(polygons))
+  
+  
+  #Fill holes to 2.2x the area of the central csquare in the polygon. 2.2 to match original analysis
+  for (i in seq_along(polygons)) {
+    result_geometries[[i]] <- nngeo::st_remove_holes(polygons[i,], max_area = 2.2*central_csquare_area$area[i])
+
+  }
+  
+  # Combine the results into a single sf object
+  filled_polygons <- do.call(rbind, lapply(result_geometries, function(x) st_sf(geometry = st_sfc(x)))) %>% 
     st_make_valid()
 }
 
