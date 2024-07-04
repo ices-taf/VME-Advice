@@ -383,3 +383,37 @@ scenario_outputs <- function(scenario_csquares, scenario_name, vme_records) {
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
   return(poly_in_footprint_counts)
 }
+################################################
+
+ ## Added a function to calculate area of any WGS84 polygon in square km
+         
+calculate_area_km2 <- function(polygon, utm_zone = 27) {
+  # Load required libraries
+  if (!require(sf)) stop("Package 'sf' is required but not installed.")
+  if (!require(units)) stop("Package 'units' is required but not installed.")
+  
+  # Check if the input is already an sf object
+  if (!inherits(polygon, "sf")) {
+    polygon <- st_as_sf(polygon)
+  }
+  
+  # Ensure the CRS is WGS84
+  if (st_crs(polygon) != 4326) {
+    stop("Input polygon must be in WGS84 projection (EPSG:4326)")
+  }
+  
+  # Construct UTM zone string
+  utm_string <- sprintf("+proj=utm +zone=%dN +datum=WGS84 +units=m +no_defs", utm_zone)
+  
+  # Reproject to specified UTM zone
+  polygon_utm <- st_transform(polygon, utm_string)
+  
+  # Calculate area in square meters
+  area_m2 <- st_area(polygon_utm)
+  
+  # Convert to square kilometers
+  area_km2 <- units::set_units(area_m2, km^2)
+  
+  # Drop units for numeric result
+  return(as.numeric(area_km2))
+}
