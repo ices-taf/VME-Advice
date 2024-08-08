@@ -289,35 +289,6 @@ vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_element
     st_drop_geometry() %>% 
     dplyr::mutate(VME = "Element")
   
-
-  #identify isolated csq_vme_record_elements 
-  # use to identify not_isolated_csq_vme_record_elements
-  element_csquares <- csq_vme_record_elements %>% pull(CSquare)
-  element_adjacent_csquares <- element_csquares %>%  purrr::map(get_adjacent_csquares)
-  isolated_vme_record_elements_logical <- element_adjacent_csquares %>% purrr::map(~ .x[.x %in% element_csquares]) %>% purrr::map_lgl(~length(.x) ==0)
-  isolated_vme_record_elements <- element_csquares[isolated_vme_record_elements_logical]
-  not_isolated_vme_record_elements <- element_csquares[!isolated_vme_record_elements_logical]
-
-  #subset vme_index based on those not in not_isolated_csq_vme_record_elements
-  # run scenario a with subset vme_index_not_protected_VME_elements
-  subset_scenario_a <- vme_index %>% filter(!CSquare %in% not_isolated_vme_record_elements) %>% vme_scenario_A
-  
-  scenario_csquares <- dplyr::bind_rows(subset_scenario_a, csq_vme_record_elements) 
-  
-  return(scenario_csquares)
-}
-######################################################################################
-alt_vme_scenario_B <- function(vme_index, vme_records, vme_elements_raw, vme_elements_csquares) {
-  
-  intersects_sparse <- vme_elements_raw %>% st_intersects(vme_records)
-  rows_with_points <- unique(as.data.frame(intersects_sparse)$row)
-
-  csq_vme_record_elements <- vme_elements_raw[rows_with_points,] %>% 
-    st_join(vme_elements_csquares) %>% 
-    dplyr::select(CSquare = csquares) %>% 
-    st_drop_geometry() %>% 
-    dplyr::mutate(VME = "Element")
-  
   #identify isolated csq_vme_record_elements also not adjacent to vme_index cells
   # use to identify not_isolated_csq_vme_record_elements
   element_csquares <- csq_vme_record_elements %>% pull(CSquare)
@@ -374,29 +345,6 @@ vme_scenario_C <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
 # the 'TAF workflow' considers all csquares in the first instance, before clipping to the fishing and depth footprints
 # The original assessment does not appear to do so.
 
-######################################################################################
-# 
-# vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
-#   
-#   temp <- sar_layer %>% dplyr::select(c_square, SAR) %>%
-#     st_drop_geometry()
-#   
-#   vme_index <- vme_index %>%
-#     left_join(temp, by = c("CSquare" = "c_square"))
-#   
-#   vme_index$SAR[is.na(vme_index$SAR)] <- 0
-#   
-#   VME_below_SAR_thresh <- vme_index[vme_index$SAR < SAR_threshold,]  # select all below SAR threshold
-#   
-#   adjacent_csquares <- get_adjacent_csquares(VME_below_SAR_thresh$CSquare, csq_degrees = 0.05, diagonals = T)
-#   
-#   ## bring them back together again and select unique
-#   scenario_csquares <- VME_below_SAR_thresh %>% 
-#     dplyr::pull(CSquare) %>% 
-#     c(adjacent_csquares) %>%
-#     unique() 
-#   return(scenario_csquares)
-# }
 
 ######################################################################################
 
@@ -422,30 +370,7 @@ vme_scenario_D <- function(vme_index, sar_layer, SAR_threshold = 0.43) {
   return(scenario_csquares)
   }
 
-######################################################################################
-# 
-# vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
-# ## as scenario C, but also including the elements, as per scenario B
-# scenario_B_csquares <- vme_scenario_B(vme_index, vme_elements) 
-# scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
-# 
-# scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
-#   unique()
-# 
-# return(scenario_csquares)
-# }
-# 
-# ######################################################################################
-# alt_vme_scenario_E <- function(vme_index, vme_elements, sar_layer, SAR_threshold = 0.43) {
-# ## as scenario C, but also including the elements, as per scenario B
-# scenario_B_csquares <- alt3_vme_scenario_B(vme_index, vme_elements) 
-# scenario_C_csquares <- vme_scenario_C(vme_index, sar_layer, SAR_threshold)
-# 
-# scenario_csquares <- c(scenario_B_csquares, scenario_C_csquares) %>% 
-#   unique()
-# 
-# return(scenario_csquares)
-# }
+
 ######################################################################################
 vme_scenario_E <- function(scenario_B_csquares, scenario_C_csquares) {
 
@@ -456,240 +381,10 @@ scenario_csquares <- dplyr::bind_rows(scenario_B_csquares, scenario_C_csquares) 
 return(scenario_csquares)
 }
 
-######################################################################################
-
-scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, assessment_area, fishing_footprint, bathymetry) {
-  
-  if(missing(scenario_name)){
-    print("Please supply a scenario name to use when saving files. e.g Scenario_A")
-    break
-  }
-browser()
-  if("Element" %in% scenario_csquares$VME) {
-    vme_elements <- dplyr::filter(scenario_csquares, VME == "Element") %>% 
-      dplyr::pull(CSquare) %>% 
-      csquare_to_polygon() 
-    # %>% 
-    #   st_union(by_feature = F) %>%
-    #   st_cast("POLYGON") %>% 
-    #   st_sf() %>%
-    #   mutate(group = 1) %>%
-    #   group_by(group) %>%
-    #   summarize(do_union = TRUE) %>%
-    #   st_cast("MULTIPOLYGON") %>%
-    #   st_sf()
-    # 
-    # 
-    vme_habitat_and_index <- dplyr::filter(scenario_csquares, VME == "Habitat and Index") %>% 
-      dplyr::pull(CSquare) %>% 
-      csquare_to_polygon() %>% 
-      csquare_buffer() 
-    # >% 
-    #   st_union(by_feature = F) %>% 
-    #   %>%
-    #   st_cast("POLYGON") %>% 
-    #   st_sf() %>%
-    #   mutate(group = 1) %>%
-    #   group_by(group) %>%
-    #   summarize(do_union = TRUE) %>%
-    #   st_cast("MULTIPOLYGON") %>%
-    #   st_sf()
-    
-    unioned_rects <- st_union(vme_elements, vme_habitat_and_index, by_feature = F) %>% 
-      st_cast("POLYGON") %>% 
-        st_sf() %>%
-        mutate(group = 1) %>%
-        group_by(group) %>%
-        summarize(do_union = TRUE) %>%
-        st_cast("MULTIPOLYGON") %>%
-        st_sf()
-    
-  } else {
-    vme_habitat_and_index <- dplyr::pull(scenario_csquares, CSquare) %>% 
-      csquare_to_polygon() %>% 
-      csquare_buffer()
-    
-    unioned_rects <- st_union(vme_habitat_and_index, by_feature = F)
-  }
-  
-  
-  # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
-  polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]
-  
-  #trial
-  no_holes_poly <- polygon_geoms %>% st_cast("POLYGON") %>% st_make_valid() %>% nngeo::st_remove_holes(max_area = (0.05*0.1))
-  
-  # # Apply st_remove_holes() to the filtered geometry
-  # no_holes_poly <- nngeo::st_remove_holes(polygon_geoms, max_area = (0.05*0.1)) ## fills in any holes within the area
-  # 
-  # no_holes_poly <- st_cast(no_holes_poly, "POLYGON") ## converts back from a single multipolygon to individual polgyons,
-  ## so we can summarise what each contains
-
-  no_holes_poly <- st_make_valid(no_holes_poly)
-  
-  ## Clip results to loaded shapefiles
-  ###  ecoregion
-  poly_in_ecoregion <- st_intersection(no_holes_poly, assessment_area) %>%
-    st_make_valid
-  
-  ###  bathymetry
-  poly_in_depth <- st_intersection(poly_in_ecoregion, bathymetry) %>%
-    st_make_valid %>% st_as_sf()
-  
-  
-  ###  fishing footprint
-  # poly_in_footprint <- st_intersection(poly_in_depth, fishing_footprint) %>%
-  #   st_make_valid() %>%
-  #   st_as_sf() 
-  # 
-  # Perform a spatial join between poly_in_footprint and vme_records
-  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() %>% rename(geometry = x)
-  # poly_records <- st_join(poly_in_footprint, vme_records)
-  
-  # Group by polygon geometry and count the number of each VME_Indicator type
-  poly_counts <- poly_records %>%
-    group_by(geometry, VME_Indicator) %>%
-    summarise(count = n(), .groups = "drop") %>%
-    pivot_wider(names_from = VME_Indicator, values_from = count, values_fill = 0)
-  
-  # Perform a spatial join between poly_in_footprint and poly_counts
-  #poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
-  poly_in_depth_counts <- st_join(poly_in_depth, poly_counts, join = st_equals)
-  
-  
-  # Calculate the area in square kilometers
-  # poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
-  poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
-  browser()
-
-  #suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/alt/", scenario_name, ".rds")))
-  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/",Sys.Date(), "/", scenario_name, ".shp")))
-  print(paste("Complete for ", scenario_name, ".", sep = ""))  
-  return(poly_in_depth_counts)
-}
+#####################################################################################
 
 
-
-
-###############
-
-alt_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, assessment_area, fishing_footprint, bathymetry) {
-  
-  if(missing(scenario_name)){
-    print("Please supply a scenario name to use when saving files. e.g Scenario_A")
-    break
-  }
-  browser()
-  if("Element" %in% scenario_csquares$VME) {
-    vme_elements <- dplyr::filter(scenario_csquares, VME == "Element") %>% 
-      dplyr::pull(CSquare) %>% 
-      csquare_to_polygon() %>% 
-      st_intersection(assessment_area) %>%
-      st_make_valid()
-    # %>% 
-    #   st_union(by_feature = F) %>%
-    #   st_cast("POLYGON") %>% 
-    #   st_sf() %>%
-    #   mutate(group = 1) %>%
-    #   group_by(group) %>%
-    #   summarize(do_union = TRUE) %>%
-    #   st_cast("MULTIPOLYGON") %>%
-    #   st_sf()
-    # 
-    # 
-    vme_habitat_and_index <- dplyr::filter(scenario_csquares, VME == "Habitat and Index") %>% 
-      dplyr::pull(CSquare) %>% 
-      csquare_to_polygon() %>% 
-      csquare_buffer() %>% 
-      st_intersection(assessment_area) %>%
-      st_make_valid()
-    # >% 
-    #   st_union(by_feature = F) %>% 
-    #   %>%
-    #   st_cast("POLYGON") %>% 
-    #   st_sf() %>%
-    #   mutate(group = 1) %>%
-    #   group_by(group) %>%
-    #   summarize(do_union = TRUE) %>%
-    #   st_cast("MULTIPOLYGON") %>%
-    #   st_sf()
-    
-    unioned_rects <- st_union(vme_elements, vme_habitat_and_index) %>% 
-      st_cast("POLYGON") %>% 
-      st_sf() %>%
-      mutate(group = 1) %>%
-      group_by(group) %>%
-      summarize(do_union = TRUE) %>%
-      st_cast("MULTIPOLYGON") %>%
-      st_sf()
-    
-  } else {
-    vme_habitat_and_index <- dplyr::pull(scenario_csquares, CSquare) %>% 
-      csquare_to_polygon() %>% 
-      csquare_buffer()
-    
-    unioned_rects <- st_union(vme_habitat_and_index, by_feature = F)
-  }
-  
-  
-  # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
-  polygon_geoms <- unioned_rects[st_is(unioned_rects, "POLYGON") | st_is(unioned_rects, "MULTIPOLYGON")]
-  
-  #trial
-  no_holes_poly <- polygon_geoms %>% st_cast("POLYGON") %>% st_make_valid() %>% nngeo::st_remove_holes(max_area = (0.05*0.1))
-  
-  # # Apply st_remove_holes() to the filtered geometry
-  # no_holes_poly <- nngeo::st_remove_holes(polygon_geoms, max_area = (0.05*0.1)) ## fills in any holes within the area
-  # 
-  # no_holes_poly <- st_cast(no_holes_poly, "POLYGON") ## converts back from a single multipolygon to individual polgyons,
-  ## so we can summarise what each contains
-  
-  no_holes_poly <- st_make_valid(no_holes_poly)
-  
-  ## Clip results to loaded shapefiles
-  ###  ecoregion
-  poly_in_ecoregion <- st_intersection(no_holes_poly, assessment_area) %>%
-    st_make_valid
-  
-  ###  bathymetry
-  poly_in_depth <- st_intersection(poly_in_ecoregion, bathymetry) %>%
-    st_make_valid %>% st_as_sf()
-  
-  
-  ###  fishing footprint
-  # poly_in_footprint <- st_intersection(poly_in_depth, fishing_footprint) %>%
-  #   st_make_valid() %>%
-  #   st_as_sf() 
-  # 
-  # Perform a spatial join between poly_in_footprint and vme_records
-  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() %>% rename(geometry = x)
-  # poly_records <- st_join(poly_in_footprint, vme_records)
-  
-  # Group by polygon geometry and count the number of each VME_Indicator type
-  poly_counts <- poly_records %>%
-    group_by(geometry, VME_Indicator) %>%
-    summarise(count = n(), .groups = "drop") %>%
-    pivot_wider(names_from = VME_Indicator, values_from = count, values_fill = 0)
-  
-  # Perform a spatial join between poly_in_footprint and poly_counts
-  #poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
-  poly_in_depth_counts <- st_join(poly_in_depth, poly_counts, join = st_equals)
-  
-  
-  # Calculate the area in square kilometers
-  # poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
-  poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
-  
-  
-  #suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/alt/", scenario_name, ".rds")))
-  suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/",Sys.Date(), "/", scenario_name, ".shp")))
-  print(paste("Complete for ", scenario_name, ".", sep = ""))  
-  return(poly_in_depth_counts)
-}
-###############
-
-
-alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, assessment_area, fishing_footprint, bathymetry) {
+make_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records, assessment_area, fishing_footprint, bathymetry) {
   
   if(missing(scenario_name)){
     print("Please supply a scenario name to use when saving files. e.g Scenario_A")
@@ -735,7 +430,7 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
       st_make_valid() %>% 
       st_union(by_feature = F) %>% 
       st_make_valid() %>% 
-      alt_fill_holes() %>% 
+      fill_holes() %>% 
       filter_polygon_geometry %>% 
       clip_2_layers(assessment_area, bathymetry)
 
@@ -751,8 +446,7 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
   }
   
   # Perform a spatial join between poly_in_footprint and vme_records
-  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() #%>% rename(geometry = x)
-  # poly_records <- st_join(poly_in_footprint, vme_records)
+  poly_records <- poly_in_depth  %>% st_join(vme_records) %>% st_make_valid() 
   
   # Group by polygon geometry and count the number of each VME_Indicator type
   poly_counts <- poly_records %>%
@@ -761,7 +455,6 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
     pivot_wider(names_from = VME_Indicator, values_from = count, values_fill = 0)
   
   # Perform a spatial join between poly_in_footprint and poly_counts
-  #poly_in_footprint_counts <- st_join(poly_in_footprint, poly_counts, join = st_equals)
   poly_in_depth_counts <- st_join(poly_in_depth, poly_counts, join = st_equals) %>% 
     st_make_valid()
   
@@ -781,11 +474,10 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
      st_transform(crs = st_crs(poly_in_depth_counts))
    
   # Calculate the area in square kilometers
-  # poly_in_footprint_counts$area_sqkm <- round(as.numeric(st_area(poly_in_footprint_counts)) / 1e6, 1)
   poly_in_depth_counts$area_sqkm <- round(as.numeric(st_area(poly_in_depth_counts)) / 1e6, 1)
   poly_in_depth_counts <- poly_in_depth_counts[st_is(poly_in_depth_counts, "POLYGON") | st_is(poly_in_depth_counts, "MULTIPOLYGON"),]
   
-  # suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/", Sys.Date(), "/", scenario_name, ".rds")))
+  suppressWarnings(saveRDS(poly_in_depth_counts, file = paste0("model/", Sys.Date(), "/", scenario_name, ".rds")))
   suppressWarnings(write_sf(poly_in_depth_counts, dsn = paste0("model/",Sys.Date(), "/", scenario_name, ".shp")))
   
   print(paste("Complete for ", scenario_name, ".", sep = ""))  
@@ -796,7 +488,7 @@ alt2_scenario_outputs <- function(scenario_csquares, scenario_name, vme_records,
 fill_clip_2_layers <- function(unioned_rects, assessment_area, bathymetry) {
   
     # Filter unioned_rects to include only POLYGON and MULTIPOLYGON geometries
-    polygon_geoms <- alt_fill_holes(unioned_rects)
+    polygon_geoms <- fill_holes(unioned_rects)
     
     ## Clip results to loaded shapefiles
     ###  ecoregion &  bathymetry
@@ -820,15 +512,7 @@ cast_as_polygon <- function(unioned_rects) {
     st_make_valid()
 }
 
-fill_holes <- function(unioned_rects) {
-  
-  # fill with 2 times the area of the largest csquare
-  no_holes_poly <- cast_as_polygon(unioned_rects) %>% 
-    nngeo::st_remove_holes(max_area = 30910874*2) %>% 
-    st_make_valid()
-}
-
-alt_fill_holes <- function(unioned_rects, csquare_area_df) {
+fill_holes <- function(unioned_rects, csquare_area_df) {
   
   polygons <- cast_as_polygon(unioned_rects)
   

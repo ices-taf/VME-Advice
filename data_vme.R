@@ -20,7 +20,7 @@ vme_records <- st_as_sf(vme_observations, coords = c("MiddleLongitude", "MiddleL
 
 
 # THESE LINES ONLY FOR EU ASSESSMENT
-if(eu_assessment ==T) {
+if(eu_assessment == T) {
   
   VMEindic <- c('Black coral','Cup coral','Gorgonian','Soft coral','Sponge','Sea-pen','Stylasterids','Stony coral')
   VMEhabs <- c('Bryozoan patches','Cold-water coral reef','Coral garden','Deep-sea sponge aggregations','Mud and sand emergent fauna','Sea-pen fields','Tube-dwelling anemone aggregations')

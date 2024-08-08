@@ -11,15 +11,15 @@ source("utilities.R")
 
 #load csquare areas
 
-scen.a <- alt2_scenario_outputs(vme.scenario.a.csquares, "Scenario_A", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
+scen.a <- make_scenario_outputs(vme.scenario.a.csquares, "Scenario_A", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 
-scen.b <- alt2_scenario_outputs(vme.scenario.b.csquares, "Scenario_B", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
+scen.b <- make_scenario_outputs(vme.scenario.b.csquares, "Scenario_B", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 
-scen.c <- alt2_scenario_outputs(vme.scenario.c.csquares, "Scenario_C", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
+scen.c <- make_scenario_outputs(vme.scenario.c.csquares, "Scenario_C", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 
-scen.d <- alt2_scenario_outputs(vme.scenario.d.csquares, "Scenario_D", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
+scen.d <- make_scenario_outputs(vme.scenario.d.csquares, "Scenario_D", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 
-scen.e <- alt2_scenario_outputs(vme.scenario.e.csquares, "Scenario_E", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
+scen.e <- make_scenario_outputs(vme.scenario.e.csquares, "Scenario_E", vme_records = vme_records, assessment_area = assessment_area, fishing_footprint = fishing_footprint, bathymetry = bathymetry)
 
 save(list = c("vme.scenario.a.csquares", "vme.scenario.b.csquares", "vme.scenario.c.csquares",
               "vme.scenario.d.csquares", "vme.scenario.e.csquares"), file= "model/alt/vme_scenarios.RData")

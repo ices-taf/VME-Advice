@@ -18,9 +18,9 @@ source("utilities_libraries.R")
 
 
 sourceTAF("data_parameters.R")
-sourceTAF("data_VMS.R")
-sourceTAF("data_VMEelements.R")
-sourceTAF("data_vmes.R")
+sourceTAF("data_vms.R")
+sourceTAF("data_vme_elements.R")
+sourceTAF("data_vme.R")
 sourceTAF("data_vme_csquares.R") # this is the combined VME observation and modelled habitat layer
 
 
