@@ -16,6 +16,7 @@ source("utilities_libraries.R")
 
 # load and process required data layers
 
+sourceTAF("data_VME_observations.R")
 sourceTAF("data_VMEelements.R")
 sourceTAF("data_vmes.R")
 sourceTAF("data_vme_csquares.R") # this is the combined VME observation and modelled habitat layer
