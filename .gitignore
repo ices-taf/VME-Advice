@@ -5,6 +5,7 @@
 /boot/software/
 /boot/library/
 /boot/data/
+/boot/initial/data
 /data/
 /model/
 /output/
