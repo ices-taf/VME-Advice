@@ -9,11 +9,17 @@ library(icesTAF)
 
 mkdir("data")
 
-# set parameters and filenames, load required libraries, load utility functions
+# load required libraries, load utility functions
 
 source("utilities.R")
 source("utilities_libraries.R")
 
+# set filenames, 
+        elements_file <- "physical_VME_elements(fixed)"
+vme_observations_file <- "VME_observations_datacall_2024_eu_29082024.csv"
+    vme_csquares_file <- "VME_csquares_datacall_2022_eu.csv"
+
+    
 # load and process required data layers
 
 sourceTAF("data_VME_observations.R")

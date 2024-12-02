@@ -1,6 +1,6 @@
 ## read, process and export the VME Observations data file
 
-vmedb <- read.csv(taf.data.path("VME_observations_datacall_2024_eu_29082024.csv"), 
+vmedb <- read.csv(taf.data.path(vme_observations_file), 
             header=T,sep=";",row.names = NULL,stringsAsFactors = FALSE)
 
 ## Change the insert date of sample "SeaRover18_540"
