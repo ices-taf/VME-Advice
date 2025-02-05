@@ -2,3 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+/boot/software/
+/boot/library/
+/boot/data/
+/data/
+/model/
+/output/
+/report/

@@ -10,13 +10,17 @@ library(icesTAF)
 mkdir("data")
 
 # set parameters and filenames, load required libraries, load utility functions
-source("data_parameters.R")
-source("data_libraries.R")
-source("data_utilities.R")
+
+source("utilities.R")
+source("utilities_libraries.R")
 
 # load and process required data layers
-source("data_VMEelements.R")
-source("data_vmes.R")
-source("data_vme_csquares.R") # this is the combined VME observation and modelled habitat layer
-source("data_other_layers.R") # contact neil.campbell@ices.dk for access
+
+
+sourceTAF("data_parameters.R")
+sourceTAF("data_vms.R")
+sourceTAF("data_vme_elements.R")
+sourceTAF("data_vme.R")
+sourceTAF("data_vme_csquares.R") # this is the combined VME observation and modelled habitat layer
+
 
